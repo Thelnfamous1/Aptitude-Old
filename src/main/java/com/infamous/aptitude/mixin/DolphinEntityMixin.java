@@ -82,7 +82,7 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
         this.goalSelector.addGoal(1, new AptitudeBreedGoal<>(this, 1.25D, 60 * 10, 8.0D * 4, 3.0D));
         this.goalSelector.addGoal(3, new AptitudeTemptGoal(this, 1.25D, FOOD_PREDICATE, false));
         this.goalSelector.addGoal(4, new AptitudeFollowParentGoal<>(this, 1.25D, 8.0D, 3.0D));
-        this.targetSelector.addGoal(2, new HuntGoal<>(this, LivingEntity.class, 10, true, false, PREY_PREDICATE));
+        this.targetSelector.addGoal(2, new HuntGoal<>(this, LivingEntity.class, 10, false, false, PREY_PREDICATE));
     }
 
     @Inject(at = @At("RETURN"), method = "defineSynchedData")
@@ -345,6 +345,11 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
                 && !eatsFood.isAggressive()
                 && !eatsFood.isSleeping()
                 && this.getEatCooldown() <= 0;
+    }
+
+    @Override
+    public SoundEvent getEatingSound(ItemStack p_213353_1_) {
+        return SoundEvents.DOLPHIN_EAT;
     }
 
     @Override
