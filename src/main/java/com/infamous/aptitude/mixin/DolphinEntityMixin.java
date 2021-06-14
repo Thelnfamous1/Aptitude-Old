@@ -361,6 +361,7 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
     public void usePlayerItem(PlayerEntity player, ItemStack stack) {
         if(this.isFood(stack)){
             this.setEatCooldown(this.getEatInterval());
+            this.playSound(this.getEatingSound(stack), 1.0F, 1.0F);
         }
         IAnimal.super.usePlayerItem(player, stack);
     }
