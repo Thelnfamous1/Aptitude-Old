@@ -215,20 +215,17 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
 
     @Shadow public abstract boolean isFood(ItemStack p_70877_1_);
 
+    @Shadow @Nullable protected abstract SoundEvent getAngrySound();
+
     @Override
     public void playAngrySound() {
         if(this.getAngrySoundCooldown() <= 0){
-            SoundEvent angrySound = this.getAngrySoundRaw();
+            SoundEvent angrySound = this.getAngrySound();
             if (angrySound != null) {
                 this.playSound(angrySound, this.getSoundVolume(), this.getVoicePitch());
             }
             this.setAngrySoundCooldown(ANGRY_SOUND_INTERVAL);
         }
-    }
-
-    @Override
-    public SoundEvent getAngrySoundRaw() {
-        return null;
     }
 
     @Override

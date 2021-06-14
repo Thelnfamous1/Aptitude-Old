@@ -11,10 +11,7 @@
     "AbstractHorseEntityMixin",
     "BredAnimalsTriggerMixin",
     "DolphinEntityMixin",
-    "DonkeyEntityMixin",
-    "HorseEntityMixin",
-    "LlamaEntityMixin",
-    "MuleEntityMixin"
+    "LlamaEntityMixin"
   ],
   "client": [
     "LivingRendererMixin"

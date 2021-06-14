@@ -4,15 +4,13 @@ import net.minecraft.util.SoundEvent;
 
 public interface IRearable {
 
-    void stopRearing();
+    void startRearing();
 
-    SoundEvent getAngrySoundRaw();
+    void stopRearing();
 
     void playAngrySound();
 
     int getAngrySoundCooldown();
 
     void setAngrySoundCooldown(int angrySoundCooldown);
-
-    void startRearing();
 }

@@ -3,7 +3,8 @@ package com.infamous.aptitude.mixin;
 import com.infamous.aptitude.common.entity.IAptitudeLlama;
 import com.infamous.aptitude.common.entity.ISwitchCombatTask;
 import com.infamous.aptitude.common.util.AptitudeResources;
-import com.infamous.aptitude.server.goal.*;
+import com.infamous.aptitude.server.goal.AptitudePanicGoal;
+import com.infamous.aptitude.server.goal.SwitchableRangedAttackGoal;
 import com.infamous.aptitude.server.goal.horse.LlamaHurtByTargetGoal;
 import com.infamous.aptitude.server.goal.horse.SwitchableRearinglAttackGoal;
 import net.minecraft.entity.EntityType;
@@ -15,10 +16,7 @@ import net.minecraft.entity.passive.horse.LlamaEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -149,19 +147,6 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
         if(didSpit){
             this.setSpitCooldown(SPIT_INTERVAL);
         }
-    }
-
-    @Override
-    public void playAngrySound() {
-        SoundEvent soundevent = this.getAngrySoundRaw();
-        if (soundevent != null) {
-            this.playSound(soundevent, this.getSoundVolume(), this.getVoicePitch());
-        }
-    }
-
-    @Override
-    public SoundEvent getAngrySoundRaw() {
-        return SoundEvents.LLAMA_ANGRY;
     }
 
     @Override
