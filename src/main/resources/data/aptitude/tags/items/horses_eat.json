@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "#aptitude:wheat_equivalents",
+    "#aptitude:sugar_equivalents",
+    "#aptitude:hay_equivalents",
+    "#aptitude:apple_equivalents",
+    "#aptitude:golden_carrot_equivalents",
+    "#aptitude:golden_apple_equivalents"
+  ]
+}
