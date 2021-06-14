@@ -43,8 +43,10 @@ public interface IAgeable {
         return false;
     }
 
-    default void addAgeableData(CompoundNBT compoundNBT){
-        compoundNBT.putInt("Age", this.getAge());
+    default <T extends MobEntity & IAgeable> void addAgeableData(T ageable, CompoundNBT compoundNBT){
+        if(this != ageable) throw new IllegalArgumentException("Argument ageable " + ageable + " is not equal to this: " + this);
+
+        compoundNBT.putInt("Age", this.getAge(ageable));
         compoundNBT.putInt("ForcedAge", this.getForcedAge());
     }
 
@@ -68,12 +70,24 @@ public interface IAgeable {
 
     int getForcedAge();
 
-    int getAge();
+    default <T extends MobEntity & IAgeable> int getAge(T ageable){
+        if(this != ageable) throw new IllegalArgumentException("Argument ageable " + ageable + " is not equal to this: " + this);
+
+        if (ageable.level.isClientSide) {
+            return this.getBabyData() ? -1 : 1;
+        } else {
+            return this.getAgeRaw();
+        }
+    }
+
+    boolean getBabyData();
 
     int getAgeRaw();
 
-    default void ageUp(int ageIn, boolean forceAge) {
-        int age = this.getAge();
+    default <T extends MobEntity & IAgeable> void ageUp(T ageable, int ageIn, boolean forceAge) {
+        if(this != ageable) throw new IllegalArgumentException("Argument ageable " + ageable + " is not equal to this: " + this);
+
+        int age = this.getAge(ageable);
         age = age + ageIn * 20;
         if (age > ADULT_AGE) {
             age = ADULT_AGE;
@@ -88,7 +102,7 @@ public interface IAgeable {
             }
         }
 
-        if (this.getAge() == ADULT_AGE) {
+        if (this.getAge(ageable) == ADULT_AGE) {
             this.setAge(this.getForcedAge());
         }
 
@@ -98,12 +112,12 @@ public interface IAgeable {
 
     int getForcedAgeTimer();
 
-    default void ageUp(int ageIn) {
-        this.ageUp(ageIn, false);
+    default <T extends MobEntity & IAgeable> void ageUp(T ageable, int ageIn) {
+        this.ageUp(ageable, ageIn, false);
     }
 
-    default  <T extends MobEntity & IAgeable> void ageableAiStep(T ageable){
-        if(this != ageable) return;
+    default <T extends MobEntity & IAgeable> void ageableAiStep(T ageable){
+        if(this != ageable) throw new IllegalArgumentException("Argument ageable " + ageable + " is not equal to this: " + this);
 
         if (ageable.level.isClientSide) {
             if (this.getForcedAgeTimer() > 0) {
@@ -114,7 +128,7 @@ public interface IAgeable {
                 this.setForcedAgeTimer(this.getForcedAgeTimer() - 1);
             }
         } else if (ageable.isAlive()) {
-            int age = this.getAge();
+            int age = this.getAge(ageable);
             if (age < ADULT_AGE) {
                 ++age;
                 this.setAge(age);

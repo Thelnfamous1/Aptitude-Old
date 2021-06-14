@@ -11,7 +11,8 @@
     "AbstractHorseEntityMixin",
     "BredAnimalsTriggerMixin",
     "DolphinEntityMixin",
-    "LlamaEntityMixin"
+    "LlamaEntityMixin",
+    "PlayWithItemsGoalMixin"
   ],
   "client": [
     "LivingRendererMixin"

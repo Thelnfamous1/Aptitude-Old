@@ -1,5 +1,6 @@
 package com.infamous.aptitude.mixin;
 
+import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.entity.IAptitudeLlama;
 import com.infamous.aptitude.common.entity.ISwitchCombatTask;
 import com.infamous.aptitude.common.util.AptitudeResources;
@@ -26,9 +27,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.function.Predicate;
+
 @Mixin(LlamaEntity.class)
 public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implements IAptitudeLlama, ISwitchCombatTask, IRangedAttackMob {
     //private static final Ingredient LLAMA_FOOD_ITEMS = Ingredient.of(AptitudeResources.LLAMAS_EAT);
+    private static final Predicate<ItemStack> FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.LLAMAS_EAT);
 
     private static final int SPIT_INTERVAL = 40;
 
@@ -71,7 +75,7 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
 
     @Override
     protected void checkFoodTag(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(stack.getItem().is(AptitudeResources.LLAMAS_EAT));
+        cir.setReturnValue(FOOD_PREDICATE.test(stack));
     }
 
     @Override
@@ -124,6 +128,7 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
         }
 
         cir.setReturnValue(handled);
+        Aptitude.LOGGER.debug("Handled LlamaEntity#handlingEating for {}", this);
     }
 
     @Override

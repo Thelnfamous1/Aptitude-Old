@@ -16,6 +16,7 @@ public class AptitudeBreedGoal<T extends MobEntity & IAnimal> extends Goal {
    protected final T animal;
    private final Class<? extends MobEntity> partnerClass;
    protected final World level;
+   @Nullable
    protected T partner;
    private int loveTime;
    private final int maxLoveTime;
@@ -48,7 +49,7 @@ public class AptitudeBreedGoal<T extends MobEntity & IAnimal> extends Goal {
    }
 
    public boolean canContinueToUse() {
-      return this.partner.isAlive() && this.partner.isInLove() && this.loveTime < this.maxLoveTime;
+      return this.partner != null && this.partner.isAlive() && this.partner.isInLove() && this.loveTime < this.maxLoveTime;
    }
 
    public void stop() {
@@ -57,10 +58,12 @@ public class AptitudeBreedGoal<T extends MobEntity & IAnimal> extends Goal {
    }
 
    public void tick() {
-      this.animal.getLookControl().setLookAt(this.partner, 10.0F, (float)this.animal.getMaxHeadXRot());
-      this.animal.getNavigation().moveTo(this.partner, this.speedModifier);
+      if(this.partner != null){
+         this.animal.getLookControl().setLookAt(this.partner, 10.0F, (float)this.animal.getMaxHeadXRot());
+         this.animal.getNavigation().moveTo(this.partner, this.speedModifier);
+      }
       ++this.loveTime;
-      if (this.loveTime >= this.maxLoveTime && this.animal.distanceToSqr(this.partner) < breedDistSq) {
+      if (this.loveTime >= this.maxLoveTime && this.partner != null && this.animal.distanceToSqr(this.partner) < breedDistSq) {
          this.breed();
       }
 

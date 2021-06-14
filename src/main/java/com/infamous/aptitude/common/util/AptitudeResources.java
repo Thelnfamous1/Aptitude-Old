@@ -1,7 +1,9 @@
 package com.infamous.aptitude.common.util;
 
 import com.infamous.aptitude.Aptitude;
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.Tags;
@@ -18,4 +20,5 @@ public class AptitudeResources {
     public static final Tags.IOptionalNamedTag<Item> SUGAR_EQUIVALENTS = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "sugar_equivalents"));
     public static final Tags.IOptionalNamedTag<Item> WHEAT_EQUIVALENTS = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "wheat_equivalents"));
 
+    public static final Tags.IOptionalNamedTag<EntityType<?>> DOLPHINS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "dolphins_hunt"));
 }

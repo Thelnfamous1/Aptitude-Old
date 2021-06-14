@@ -23,12 +23,13 @@ public interface IAnimal extends IAgeable {
 
     int LOVE_ID = 18;
     double RIDING_OFFSET = 0.14D;
-    int AMBIENT_SOUND_INTERVAL = 120;
     int BREED_COOLDOWN = 6000;
     int LOVE_TICKS = 600;
 
-    default void animalCustomServerAiStep(){
-        if (this.getAge() != 0) {
+    default <T extends MobEntity & IAnimal> void animalCustomServerAiStep(T animal){
+        if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
+
+        if (this.getAge(animal) != 0) {
             this.setInLoveTime(0);
         }
     }
@@ -36,9 +37,9 @@ public interface IAnimal extends IAgeable {
     void setInLoveTime(int inLoveTicks);
 
     default  <T extends MobEntity & IAnimal> void animalAiStep(T animal){
-        if(this != animal) return;
+        if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
 
-        if (this.getAge() != ADULT_AGE) {
+        if (this.getAge(animal) != ADULT_AGE) {
             this.setInLoveTime(0);
         }
 
@@ -75,7 +76,7 @@ public interface IAnimal extends IAgeable {
     boolean isFood(ItemStack stack);
 
     default  <T extends MobEntity & IAnimal> void handleBreedEvent(T animal){
-        if(this != animal) return;
+        if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
 
         for(int i = 0; i < 7; ++i) {
             double d0 = animal.getRandom().nextGaussian() * 0.02D;
@@ -86,7 +87,7 @@ public interface IAnimal extends IAgeable {
     }
 
     default  <T extends MobEntity & IAnimal> void spawnChildFromBreeding(ServerWorld serverWorld, T parent, T partner) {
-        if(this != parent) return;
+        if(this != parent) throw new IllegalArgumentException("Argument parent " + parent + " is not equal to this: " + this);
 
         T child = this.getBreedOffspring(serverWorld, partner);
         /*
@@ -137,7 +138,7 @@ public interface IAnimal extends IAgeable {
 
     @Nullable
     default <T extends MobEntity & IAnimal> ServerPlayerEntity getLoveCausePlayer(T animal){
-        if(this != animal) return null;
+        if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
 
         if (this.getLoveCause() == null) {
             return null;
@@ -162,12 +163,14 @@ public interface IAnimal extends IAgeable {
     }
 
     default  <T extends MobEntity & IAnimal> ActionResultType animalInteract(T animal, PlayerEntity player, Hand hand){
-        if(this != animal) return ActionResultType.PASS;
+        if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
 
         ItemStack itemInHand = player.getItemInHand(hand);
-        if (this.isFood(itemInHand)) {
-            int age = this.getAge();
-            if (!animal.level.isClientSide && age == ADULT_AGE && this.canFallInLove()) {
+        if (this.isFood(itemInHand) && this.canAcceptFood(animal, itemInHand)) {
+            int age = this.getAge(animal);
+            if (!animal.level.isClientSide
+                    && age == ADULT_AGE
+                    && this.canFallInLove()) {
                 this.usePlayerItem(player, itemInHand);
                 this.setInLove(animal, player);
                 return ActionResultType.SUCCESS;
@@ -175,7 +178,7 @@ public interface IAnimal extends IAgeable {
 
             if (animal.isBaby()) {
                 this.usePlayerItem(player, itemInHand);
-                this.ageUp((int)((float)(-age / 20) * 0.1F), true);
+                this.ageUp(animal, (int)((float)(-age / 20) * 0.1F), true);
                 return ActionResultType.sidedSuccess(animal.level.isClientSide);
             }
 
@@ -184,6 +187,12 @@ public interface IAnimal extends IAgeable {
             }
         }
         return ActionResultType.PASS;
+    }
+
+    default <T extends MobEntity & IAnimal> boolean canAcceptFood(T animal, ItemStack stack){
+        if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
+
+        return !animal.isAggressive() && !animal.isSleeping();
     }
 
     default void usePlayerItem(PlayerEntity player, ItemStack stack) {
@@ -197,7 +206,7 @@ public interface IAnimal extends IAgeable {
     }
 
     default <T extends MobEntity & IAnimal> void setInLove(T animal, @Nullable PlayerEntity playerEntity) {
-        if(this != animal) return;
+        if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
 
         this.setInLoveTime(LOVE_TICKS);
         if (playerEntity != null) {

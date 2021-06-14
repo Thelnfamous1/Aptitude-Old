@@ -2,6 +2,8 @@ package com.infamous.aptitude.common;
 
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.entity.IAptitudeLlama;
+import com.infamous.aptitude.common.entity.IEatsFood;
+import com.infamous.aptitude.common.entity.IPredator;
 import com.infamous.aptitude.common.entity.IRearable;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -13,6 +15,22 @@ public class ForgeCommonEvents {
 
     @SubscribeEvent
     public static void onLivingUpdate(LivingEvent.LivingUpdateEvent event){
+        if(event.getEntityLiving() instanceof IEatsFood){
+            IEatsFood eatsFood = (IEatsFood) event.getEntityLiving();
+            if(eatsFood.getEatCooldown() > 0){
+                eatsFood.setEatCooldown(eatsFood.getEatCooldown() - 1);
+            } else{
+                eatsFood.setEatCooldown(0);
+            }
+        }
+        if(event.getEntityLiving() instanceof IPredator){
+            IPredator predator = (IPredator) event.getEntityLiving();
+            if(predator.getHuntCooldown() > 0){
+                predator.setHuntCooldown(predator.getHuntCooldown() - 1);
+            } else{
+                predator.setHuntCooldown(0);
+            }
+        }
         if(event.getEntityLiving() instanceof IRearable){
             IRearable rearable = (IRearable) event.getEntityLiving();
             if(rearable.getAngrySoundCooldown() > 0){

@@ -33,11 +33,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 @Mixin(AbstractHorseEntity.class)
 public abstract class AbstractHorseEntityMixin extends AnimalEntity implements IAptitudeHorse, IRearable {
 
     //private static final Ingredient HORSE_FOOD_ITEMS = Ingredient.of(AptitudeResources.HORSES_EAT);
+    private static final Predicate<ItemStack> FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.HORSES_EAT);
 
     @Shadow @Nullable public abstract UUID getOwnerUUID();
 
@@ -80,7 +82,7 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
 
     @Inject(at = @At("RETURN"), method = "isFood", cancellable = true)
     protected void checkFoodTag(ItemStack stack, CallbackInfoReturnable<Boolean> cir){
-        cir.setReturnValue(stack.getItem().is(AptitudeResources.HORSES_EAT));
+        cir.setReturnValue(FOOD_PREDICATE.test(stack));
     }
 
     @Inject(at = @At("HEAD"), method = "handleEating", cancellable = true)
@@ -148,7 +150,7 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
         }
 
         cir.setReturnValue(handled);
-        Aptitude.LOGGER.info("Handled eating for {}", this);
+        Aptitude.LOGGER.debug("Handled AbstractHorseEntity#handlingEating for {}", this);
     }
 
     @Shadow

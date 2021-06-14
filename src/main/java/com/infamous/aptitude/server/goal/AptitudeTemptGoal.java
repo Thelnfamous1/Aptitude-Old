@@ -1,6 +1,8 @@
 package com.infamous.aptitude.server.goal;
 
 import java.util.EnumSet;
+import java.util.function.Predicate;
+
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.ai.goal.Goal;
@@ -21,17 +23,17 @@ public class AptitudeTemptGoal extends Goal {
    protected PlayerEntity player;
    private int calmDown;
    private boolean isRunning;
-   private final Tags.IOptionalNamedTag<Item> temptItemTag;
+   private final Predicate<ItemStack> temptItemPredicate;
    private final boolean canScare;
 
-   public AptitudeTemptGoal(CreatureEntity creature, double p_i47822_2_, Tags.IOptionalNamedTag<Item> p_i47822_4_, boolean p_i47822_5_) {
+   public AptitudeTemptGoal(CreatureEntity creature, double p_i47822_2_, Predicate<ItemStack> p_i47822_4_, boolean p_i47822_5_) {
       this(creature, p_i47822_2_, p_i47822_5_, p_i47822_4_);
    }
 
-   public AptitudeTemptGoal(CreatureEntity creature, double p_i47823_2_, boolean p_i47823_4_, Tags.IOptionalNamedTag<Item> p_i47823_5_) {
+   public AptitudeTemptGoal(CreatureEntity creature, double p_i47823_2_, boolean p_i47823_4_, Predicate<ItemStack> p_i47823_5_) {
       this.mob = creature;
       this.speedModifier = p_i47823_2_;
-      this.temptItemTag = p_i47823_5_;
+      this.temptItemPredicate = p_i47823_5_;
       this.canScare = p_i47823_4_;
       this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
    }
@@ -50,8 +52,8 @@ public class AptitudeTemptGoal extends Goal {
       }
    }
 
-   protected boolean shouldFollowItem(ItemStack p_188508_1_) {
-      return p_188508_1_.getItem().is(this.temptItemTag);
+   protected boolean shouldFollowItem(ItemStack stack) {
+      return temptItemPredicate.test(stack);
    }
 
    public boolean canContinueToUse() {

@@ -23,7 +23,7 @@ public class AptitudeFollowParentGoal<T extends MobEntity & IAnimal> extends Goa
    }
 
    public boolean canUse() {
-      if (this.animal.getAge() >= IAnimal.ADULT_AGE) {
+      if (this.animal.getAge(this.animal) >= IAnimal.ADULT_AGE) {
          return false;
       } else {
          List<MobEntity> list = this.animal.level.getEntitiesOfClass(this.animal.getClass(), this.animal.getBoundingBox().inflate(this.parentSearchDist, this.parentSearchDist / 2, this.parentSearchDist));
@@ -32,7 +32,7 @@ public class AptitudeFollowParentGoal<T extends MobEntity & IAnimal> extends Goa
 
          for(MobEntity nearbyMob : list) {
             T nearbyAnimal = nearbyMob instanceof IAnimal ? (T) nearbyMob : null;
-            if (nearbyAnimal != null && nearbyAnimal.getAge() >= IAnimal.ADULT_AGE) {
+            if (nearbyAnimal != null && nearbyAnimal.getAge(nearbyAnimal) >= IAnimal.ADULT_AGE) {
                double distSqrToNearby = this.animal.distanceToSqr(nearbyAnimal);
                if (!(distSqrToNearby > minDistSq)) {
                   minDistSq = distSqrToNearby;
@@ -53,7 +53,7 @@ public class AptitudeFollowParentGoal<T extends MobEntity & IAnimal> extends Goa
    }
 
    public boolean canContinueToUse() {
-      if (this.animal.getAge() >= 0) {
+      if (this.animal.getAge(this.animal) >= 0) {
          return false;
       } else if (!this.parent.isAlive()) {
          return false;

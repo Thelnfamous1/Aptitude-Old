@@ -1,32 +1,32 @@
 package com.infamous.aptitude.mixin;
 
+import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.entity.IAgeable;
 import com.infamous.aptitude.common.entity.IAnimal;
+import com.infamous.aptitude.common.entity.IEatsFood;
+import com.infamous.aptitude.common.entity.IPredator;
 import com.infamous.aptitude.common.util.AptitudeResources;
 import com.infamous.aptitude.server.goal.AptitudeHurtByTargetGoal;
 import com.infamous.aptitude.server.goal.AptitudeTemptGoal;
+import com.infamous.aptitude.server.goal.HuntGoal;
 import com.infamous.aptitude.server.goal.animal.AptitudeBreedGoal;
 import com.infamous.aptitude.server.goal.animal.AptitudeFollowParentGoal;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ILivingEntityData;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.GoalSelector;
 import net.minecraft.entity.ai.goal.HurtByTargetGoal;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.monster.GuardianEntity;
 import net.minecraft.entity.passive.DolphinEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
+import net.minecraft.util.*;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
@@ -40,16 +40,24 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 @Mixin(DolphinEntity.class)
-public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
+public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPredator, IEatsFood {
     //private static final Ingredient DOLPHIN_FOOD_ITEMS = Ingredient.of(AptitudeResources.DOLPHINS_EAT);
+
+    private static final Predicate<LivingEntity> PREY_PREDICATE = living -> living.getType().is(AptitudeResources.DOLPHINS_HUNT);
+    private static final Predicate<ItemStack> FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.DOLPHINS_EAT);
+    private static final RangedInteger TIME_BETWEEN_HUNTS = TickRangeConverter.rangeOfSeconds(30, 120);
     private static final DataParameter<Boolean> DATA_BABY_ID = EntityDataManager.defineId(DolphinEntity.class, DataSerializers.BOOLEAN);
     protected int age;
     protected int forcedAge;
     protected int forcedAgeTimer;
     private int inLove;
     private UUID loveCause;
+    private int huntCooldown;
+    private int ticksSinceEaten;
+    private int eatCooldown;
 
     protected DolphinEntityMixin(EntityType<? extends WaterMobEntity> entityType, World world) {
         super(entityType, world);
@@ -61,7 +69,7 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
     private void onAboutToAddGoal(GoalSelector goalSelector, int priority, Goal goal){
         if(goalSelector == this.targetSelector && goal instanceof HurtByTargetGoal){
             this.targetSelector.addGoal(priority, new AptitudeHurtByTargetGoal(this, GuardianEntity.class).setAlertOthers());
-        } else{
+        } else {
             goalSelector.addGoal(priority, goal);
         }
     }
@@ -71,9 +79,10 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
         /*
         Dolphins move around really fast, so we have to quadruple the parent/partner search distances to reduce search failures
          */
-        this.goalSelector.addGoal(1, new AptitudeBreedGoal<>(this, 1.25D, 120, 8.0D, 3.0D));
-        this.goalSelector.addGoal(3, new AptitudeTemptGoal(this, 1.25D, AptitudeResources.DOLPHINS_EAT, false));
+        this.goalSelector.addGoal(1, new AptitudeBreedGoal<>(this, 1.25D, 60 * 10, 8.0D * 4, 3.0D));
+        this.goalSelector.addGoal(3, new AptitudeTemptGoal(this, 1.25D, FOOD_PREDICATE, false));
         this.goalSelector.addGoal(4, new AptitudeFollowParentGoal<>(this, 1.25D, 8.0D, 3.0D));
+        this.targetSelector.addGoal(2, new HuntGoal<>(this, LivingEntity.class, 10, true, false, PREY_PREDICATE));
     }
 
     @Inject(at = @At("RETURN"), method = "defineSynchedData")
@@ -92,7 +101,7 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
     @Inject(at = @At("RETURN"), method = "addAdditionalSaveData")
     private void addSaveData(CompoundNBT compoundNBT, CallbackInfo ci){
         this.addAnimalData(compoundNBT);
-        this.addAgeableData(compoundNBT);
+        this.addAgeableData(this, compoundNBT);
     }
 
     @Inject(at = @At("RETURN"), method = "readAdditionalSaveData")
@@ -101,16 +110,24 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
         this.readAgeableData(compoundNBT);
     }
 
-    @Inject(at = @At("HEAD"), method = "handleEntityEvent")
-    private void handleBreed(byte eventId, CallbackInfo ci){
+    @Inject(at = @At("HEAD"), method = "handleEntityEvent", cancellable = true)
+    private void checkCustomEvents(byte eventId, CallbackInfo ci){
         if(eventId == IAnimal.LOVE_ID){
             this.handleBreedEvent(this);
+            ci.cancel();
+        } else if(eventId == IEatsFood.EAT_ID){
+            this.handleEatEvent(this);
+            ci.cancel();
+        } else if(eventId == FINISHED_EATING_ID){
+            this.onFinishedEating();
+            ci.cancel();
         }
     }
 
     @Inject(at = @At("RETURN"), method = "finalizeSpawn", cancellable = true)
     private void finalize(IServerWorld serverWorld, DifficultyInstance difficultyInstance, SpawnReason spawnReason, ILivingEntityData livingEntityData, CompoundNBT compoundNBT, CallbackInfoReturnable<ILivingEntityData> cir){
         ILivingEntityData ageableData = this.finalizeAgeableSpawn(livingEntityData);
+        this.setHuntCooldown(TIME_BETWEEN_HUNTS.randomValue(this.level.random));
         cir.setReturnValue(super.finalizeSpawn(serverWorld, difficultyInstance, spawnReason, ageableData, compoundNBT));
     }
 
@@ -121,6 +138,14 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
             this.setPersistenceRequired();
             cir.setReturnValue(animalInteractResult);
         }
+    }
+
+    @Inject(at = @At(value = "HEAD"), method = "pickUpItem", cancellable = true)
+    private void customPickUpItem(ItemEntity itemEntity, CallbackInfo ci){
+        this.handlePickUpItem(this, itemEntity);
+
+        ci.cancel();
+        Aptitude.LOGGER.debug("Handled DolphinEntity#pickUpItem for {}", this);
     }
 
     @Override
@@ -134,8 +159,16 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
     }
 
     @Override
+    public void killed(ServerWorld serverWorld, LivingEntity killedEntity) {
+        super.killed(serverWorld, killedEntity);
+        if(this.isPrey(killedEntity)){
+            this.setHuntCooldown(TIME_BETWEEN_HUNTS.randomValue(this.level.random));
+        }
+    }
+
+    @Override
     protected void customServerAiStep() {
-        this.animalCustomServerAiStep();
+        this.animalCustomServerAiStep(this);
         super.customServerAiStep();
     }
 
@@ -144,6 +177,17 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
         super.aiStep();
         this.ageableAiStep(this);
         this.animalAiStep(this);
+        this.eatsFoodAiStep(this);
+    }
+
+    @Override
+    public boolean canHoldItem(ItemStack stackToHold) {
+        Item itemToHold = stackToHold.getItem();
+        ItemStack itemBySlot = this.getItemBySlot(this.getSlotForFood());
+        return itemBySlot.isEmpty()
+                || this.getTicksSinceEaten() > 0
+                    && (itemToHold.isEdible() && this.isFood(stackToHold))
+                    && !(itemBySlot.getItem().isEdible() && this.isFood(stackToHold));
     }
 
     @Override
@@ -158,7 +202,12 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
 
     @Override
     public boolean isBaby() {
-        return this.getAge() < IAgeable.ADULT_AGE;
+        return this.getAge(this) < IAgeable.ADULT_AGE;
+    }
+
+    @Override
+    public boolean getBabyData() {
+        return this.entityData.get(DATA_BABY_ID);
     }
 
     @Override
@@ -202,15 +251,6 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
     }
 
     @Override
-    public int getAge() {
-        if (this.level.isClientSide) {
-            return this.entityData.get(DATA_BABY_ID) ? -1 : 1;
-        } else {
-            return this.getAgeRaw();
-        }
-    }
-
-    @Override
     public void setForcedAgeTimer(int i) {
         this.forcedAgeTimer = i;
     }
@@ -242,6 +282,88 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
 
     @Override
     public boolean isFood(ItemStack stack) {
-        return stack.getItem().is(AptitudeResources.DOLPHINS_EAT);
+        return FOOD_PREDICATE.test(stack);
+    }
+
+    @Override
+    public int getHuntCooldown() {
+        return this.huntCooldown;
+    }
+
+    @Override
+    public void setHuntCooldown(int huntCooldown) {
+        this.huntCooldown = huntCooldown;
+    }
+
+    @Override
+    public boolean isPrey(LivingEntity living) {
+        return PREY_PREDICATE.test(living);
+    }
+
+    @Override
+    public int getTicksSinceEaten() {
+        return this.ticksSinceEaten;
+    }
+
+    @Override
+    public void setTicksSinceEaten(int ticksSinceEaten) {
+        this.ticksSinceEaten = ticksSinceEaten;
+    }
+
+    @Override
+    public int getEatCooldown() {
+        return this.eatCooldown;
+    }
+
+    @Override
+    public void setEatCooldown(int eatCooldown) {
+        this.eatCooldown = eatCooldown;
+    }
+
+    @Override
+    public int getEatInterval() {
+        return 200;
+    }
+
+    @Override
+    public void onFinishedEating() {
+        IEatsFood.super.onFinishedEating();
+
+        if(!this.level.isClientSide && this.getAge(this) == ADULT_AGE && this.canFallInLove()){
+            this.setInLove(this, null);
+        }
+        if (this.isBaby()) {
+            this.ageUp(this, (int)((float)(-this.getAge(this) / 20) * 0.1F), true);
+            this.level.broadcastEntityEvent(this, (byte) FINISHED_EATING_ID);
+        }
+    }
+
+    @Override
+    public <T extends MobEntity & IEatsFood> boolean canEat(T eatsFood, ItemStack stack) {
+        return this.isFood(stack)
+                && stack.getItem().isEdible()
+                && !eatsFood.isAggressive()
+                && !eatsFood.isSleeping()
+                && this.getEatCooldown() <= 0;
+    }
+
+    @Override
+    public SoundEvent getSpitOutItemSound() {
+        return SoundEvents.DOLPHIN_PLAY;
+    }
+
+    @Override
+    public void usePlayerItem(PlayerEntity player, ItemStack stack) {
+        if(this.isFood(stack)){
+            this.setEatCooldown(this.getEatInterval());
+        }
+        IAnimal.super.usePlayerItem(player, stack);
+    }
+
+    @Override
+    public <T extends MobEntity & IAnimal> boolean canAcceptFood(T animal, ItemStack stack) {
+        return IAnimal.super.canAcceptFood(animal, stack)
+                && this.getEatCooldown() <= 0
+                && this.getItemBySlot(this.getSlotForFood()).isEmpty();
     }
 }
