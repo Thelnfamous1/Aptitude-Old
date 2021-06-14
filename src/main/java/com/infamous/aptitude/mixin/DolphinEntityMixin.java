@@ -220,11 +220,12 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
         return IAnimal.RIDING_OFFSET;
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
     @Override
     public <T extends MobEntity & IAgeable> T getBreedOffspring(ServerWorld serverWorld, T ageable) {
         T dolphin = (T) EntityType.DOLPHIN.create(serverWorld);
-        if(dolphin != null){
+        if(dolphin != null & ageable instanceof IAnimal && ((IAnimal) ageable).wasBredRecently()){
             dolphin.setPersistenceRequired();
         }
         return dolphin;

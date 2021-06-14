@@ -211,8 +211,14 @@ public interface IAnimal extends IAgeable {
         this.setInLoveTime(LOVE_TICKS);
         if (playerEntity != null) {
             this.setLoveCause(playerEntity.getUUID());
+        } else{
+            this.setLoveCause(null);
         }
 
         animal.level.broadcastEntityEvent(animal, (byte)LOVE_ID);
+    }
+
+    default boolean wasBredRecently(){
+        return this.getLoveCause() != null;
     }
 }
