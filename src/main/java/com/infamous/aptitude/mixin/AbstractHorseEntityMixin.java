@@ -37,7 +37,7 @@ import java.util.UUID;
 @Mixin(AbstractHorseEntity.class)
 public abstract class AbstractHorseEntityMixin extends AnimalEntity implements IAptitudeHorse, IRearable {
 
-    private static final Ingredient FOOD_ITEMS_USING_TAG = Ingredient.of(AptitudeResources.HORSES_EAT);
+    //private static final Ingredient HORSE_FOOD_ITEMS = Ingredient.of(AptitudeResources.HORSES_EAT);
 
     @Shadow @Nullable public abstract UUID getOwnerUUID();
 
@@ -80,7 +80,7 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
 
     @Inject(at = @At("RETURN"), method = "isFood", cancellable = true)
     protected void checkFoodTag(ItemStack stack, CallbackInfoReturnable<Boolean> cir){
-        cir.setReturnValue(FOOD_ITEMS_USING_TAG.test(stack));
+        cir.setReturnValue(stack.getItem().is(AptitudeResources.HORSES_EAT));
     }
 
     @Inject(at = @At("HEAD"), method = "handleEating", cancellable = true)

@@ -17,7 +17,6 @@
     "MuleEntityMixin"
   ],
   "client": [
-    "LivingRendererMixin",
-    "LlamaModelMixin"
+    "LivingRendererMixin"
   ]
 }

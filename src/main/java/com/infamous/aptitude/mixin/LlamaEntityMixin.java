@@ -6,7 +6,6 @@ import com.infamous.aptitude.common.util.AptitudeResources;
 import com.infamous.aptitude.server.goal.*;
 import com.infamous.aptitude.server.goal.horse.LlamaHurtByTargetGoal;
 import com.infamous.aptitude.server.goal.horse.SwitchableRearinglAttackGoal;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.LivingEntity;
@@ -16,7 +15,6 @@ import net.minecraft.entity.passive.horse.LlamaEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundEvent;
@@ -32,7 +30,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LlamaEntity.class)
 public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implements IAptitudeLlama, ISwitchCombatTask, IRangedAttackMob {
-    private static final Ingredient FOOD_ITEMS_USING_TAG = Ingredient.of(AptitudeResources.LLAMAS_EAT);
+    //private static final Ingredient LLAMA_FOOD_ITEMS = Ingredient.of(AptitudeResources.LLAMAS_EAT);
 
     private static final int SPIT_INTERVAL = 40;
 
@@ -75,7 +73,7 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
 
     @Override
     protected void checkFoodTag(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(FOOD_ITEMS_USING_TAG.test(stack));
+        cir.setReturnValue(stack.getItem().is(AptitudeResources.LLAMAS_EAT));
     }
 
     @Override

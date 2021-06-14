@@ -43,7 +43,7 @@ import java.util.UUID;
 
 @Mixin(DolphinEntity.class)
 public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
-    private static final Ingredient FOOD_ITEMS = Ingredient.of(AptitudeResources.DOLPHINS_EAT);
+    //private static final Ingredient DOLPHIN_FOOD_ITEMS = Ingredient.of(AptitudeResources.DOLPHINS_EAT);
     private static final DataParameter<Boolean> DATA_BABY_ID = EntityDataManager.defineId(DolphinEntity.class, DataSerializers.BOOLEAN);
     protected int age;
     protected int forcedAge;
@@ -72,7 +72,7 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
         Dolphins move around really fast, so we have to quadruple the parent/partner search distances to reduce search failures
          */
         this.goalSelector.addGoal(1, new AptitudeBreedGoal<>(this, 1.25D, 120, 8.0D, 3.0D));
-        this.goalSelector.addGoal(3, new AptitudeTemptGoal(this, 1.25D, FOOD_ITEMS, false));
+        this.goalSelector.addGoal(3, new AptitudeTemptGoal(this, 1.25D, AptitudeResources.DOLPHINS_EAT, false));
         this.goalSelector.addGoal(4, new AptitudeFollowParentGoal<>(this, 1.25D, 8.0D, 3.0D));
     }
 
@@ -242,6 +242,6 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal {
 
     @Override
     public boolean isFood(ItemStack stack) {
-        return FOOD_ITEMS.test(stack);
+        return stack.getItem().is(AptitudeResources.DOLPHINS_EAT);
     }
 }
