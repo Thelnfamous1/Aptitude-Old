@@ -13,11 +13,12 @@
     "DolphinEntityMixin",
     "LlamaEntityMixin",
     "OcelotEntityMixin",
+    "ParrotEntityMixin",
     "PlayWithItemsGoalMixin",
     "PolarBearEntityMixin"
   ],
   "client": [
-    "LivingRendererMixin",
-    "AgeableModelMixin"
+    "AgeableModelMixin",
+    "ParrotVariantLayerMixin"
   ]
 }

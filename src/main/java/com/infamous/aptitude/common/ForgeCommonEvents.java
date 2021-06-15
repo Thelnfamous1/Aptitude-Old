@@ -17,11 +17,10 @@ import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.BreedGoal;
+import net.minecraft.entity.ai.goal.FollowParentGoal;
+import net.minecraft.entity.ai.goal.TemptGoal;
 import net.minecraft.entity.monster.CreeperEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.DolphinEntity;
-import net.minecraft.entity.passive.OcelotEntity;
-import net.minecraft.entity.passive.PolarBearEntity;
+import net.minecraft.entity.passive.*;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.passive.horse.LlamaEntity;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -57,6 +56,10 @@ public class ForgeCommonEvents {
             eventMob.goalSelector.addGoal(3, new AptitudeTemptGoal((CreatureEntity) eventMob, 1.25D, AptitudePredicates.POLAR_BEAR_FOOD_PREDICATE, false));
             eventMob.goalSelector.addGoal(8, new DevourerFindItemsGoal<>(eventMob, AptitudePredicates.POLAR_BEAR_ALLOWED_ITEMS, 10));
             eventMob.setCanPickUpLoot(true);
+        } else if(eventMob instanceof ParrotEntity){
+            eventMob.goalSelector.addGoal(1, new BreedGoal((AnimalEntity) eventMob, 1.0D));
+            eventMob.goalSelector.addGoal(1, new AptitudeTemptGoal((CreatureEntity) eventMob, 1.0D, false, AptitudePredicates.PARROT_FOOD_PREDICATE));
+            eventMob.goalSelector.addGoal(2, new FollowParentGoal((AnimalEntity) eventMob, 1.1D));
         }
     }
 

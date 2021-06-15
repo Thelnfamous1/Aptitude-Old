@@ -4,6 +4,7 @@ import com.infamous.aptitude.Aptitude;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.Tags;
@@ -14,6 +15,7 @@ public class AptitudeResources {
     public static final Tags.IOptionalNamedTag<Item> LLAMAS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "llamas_eat"));
     public static final Tags.IOptionalNamedTag<Item> POLAR_BEARS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "polar_bears_eat"));
     public static final Tags.IOptionalNamedTag<Item> OCELOTS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "ocelots_eat"));
+    public static final Tags.IOptionalNamedTag<Item> PARROTS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "parrots_eat"));
 
     public static final Tags.IOptionalNamedTag<Item> APPLE_EQUIVALENTS = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "apple_equivalents"));
     public static final Tags.IOptionalNamedTag<Item> GOLDEN_APPLE_EQUIVALENTS = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "golden_apple_equivalents"));
