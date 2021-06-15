@@ -2,8 +2,20 @@ package com.infamous.aptitude.common.entity;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.util.RangedInteger;
+import net.minecraft.util.TickRangeConverter;
+
+import java.util.Random;
 
 public interface IPredator {
+    RangedInteger TIME_BETWEEN_HUNTS = TickRangeConverter.rangeOfSeconds(30, 120);
+    Random RANDOM = new Random();
+
+    default void onHuntedPrey(LivingEntity killedEntity) {
+        if(this.isPrey(killedEntity)){
+            this.setHuntCooldown(getHuntInterval());
+        }
+    }
 
     int getHuntCooldown();
 
@@ -17,5 +29,8 @@ public interface IPredator {
 
     boolean isPrey(LivingEntity living);
 
+    default int getHuntInterval(){
+        return TIME_BETWEEN_HUNTS.randomValue(RANDOM);
+    }
 
 }

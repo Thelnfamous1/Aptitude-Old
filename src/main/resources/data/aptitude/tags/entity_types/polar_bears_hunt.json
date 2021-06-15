@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:cod",
+    "minecraft:salmon",
+    "minecraft:fox",
+    "#aptitude:small_prey",
+    "#aptitude:large_prey"
+  ]
+}

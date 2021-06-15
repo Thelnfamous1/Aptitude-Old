@@ -39,6 +39,9 @@ public class AptitudeTemptGoal extends Goal {
    }
 
    public boolean canUse() {
+      if(this.mob.isAggressive()){
+         return false;
+      }
       if (this.calmDown > 0) {
          --this.calmDown;
          return false;

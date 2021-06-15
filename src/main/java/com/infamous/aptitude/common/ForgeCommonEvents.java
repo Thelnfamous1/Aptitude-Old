@@ -2,10 +2,9 @@ package com.infamous.aptitude.common;
 
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.entity.IAptitudeLlama;
-import com.infamous.aptitude.common.entity.IEatsFood;
+import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.entity.IPredator;
 import com.infamous.aptitude.common.entity.IRearable;
-import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -15,8 +14,8 @@ public class ForgeCommonEvents {
 
     @SubscribeEvent
     public static void onLivingUpdate(LivingEvent.LivingUpdateEvent event){
-        if(event.getEntityLiving() instanceof IEatsFood){
-            IEatsFood eatsFood = (IEatsFood) event.getEntityLiving();
+        if(event.getEntityLiving() instanceof IDevourer){
+            IDevourer eatsFood = (IDevourer) event.getEntityLiving();
             if(eatsFood.getEatCooldown() > 0){
                 eatsFood.setEatCooldown(eatsFood.getEatCooldown() - 1);
             } else{

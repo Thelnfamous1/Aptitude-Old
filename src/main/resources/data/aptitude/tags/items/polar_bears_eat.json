@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:fishes",
+    "#aptitude:meats",
+    "minecraft:sweet_berries"
+  ]
+}
