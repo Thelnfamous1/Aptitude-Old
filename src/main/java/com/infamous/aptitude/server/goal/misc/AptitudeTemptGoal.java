@@ -1,4 +1,4 @@
-package com.infamous.aptitude.server.goal;
+package com.infamous.aptitude.server.goal.misc;
 
 import java.util.EnumSet;
 import java.util.function.Predicate;

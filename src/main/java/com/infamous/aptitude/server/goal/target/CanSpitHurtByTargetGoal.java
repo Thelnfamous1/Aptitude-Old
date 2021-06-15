@@ -1,14 +1,13 @@
-package com.infamous.aptitude.server.goal.horse;
+package com.infamous.aptitude.server.goal.target;
 
-import com.infamous.aptitude.common.entity.IAptitudeLlama;
+import com.infamous.aptitude.common.entity.ICanSpit;
 import com.infamous.aptitude.common.entity.ISwitchCombatTask;
-import com.infamous.aptitude.server.goal.AptitudeHurtByTargetGoal;
 import net.minecraft.entity.CreatureEntity;
 
-public class LlamaHurtByTargetGoal<T extends CreatureEntity & ISwitchCombatTask & IAptitudeLlama> extends AptitudeHurtByTargetGoal {
+public class CanSpitHurtByTargetGoal<T extends CreatureEntity & ISwitchCombatTask & ICanSpit> extends AptitudeHurtByTargetGoal {
     protected T llama;
 
-    public LlamaHurtByTargetGoal(T llama, Class<?>... p_i50317_2_) {
+    public CanSpitHurtByTargetGoal(T llama, Class<?>... p_i50317_2_) {
         super(llama, p_i50317_2_);
         this.llama = llama;
     }

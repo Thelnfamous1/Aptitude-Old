@@ -7,16 +7,20 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.passive.AnimalEntity;
 
-public class AptitudeFollowParentGoal<T extends MobEntity & IAnimal> extends Goal {
-   private final T animal;
-   private T parent;
-   private final double speedModifier;
+public class AptitudeFollowParentGoal<T extends MobEntity, A extends MobEntity & IAnimal> extends Goal {
+   protected final A animal;
+   private A parent;
+   protected final double speedModifier;
    private int timeToRecalcPath;
-   private final double parentSearchDist;
-   private final double nearParentDistSq;
+   protected final double parentSearchDist;
+   protected final double nearParentDistSq;
 
    public AptitudeFollowParentGoal(T animalIn, double speedModifierIn, double parentSearchDistIn, double nearParentDistIn) {
-      this.animal = animalIn;
+      if(animalIn instanceof IAnimal){
+         this.animal = (A) animalIn;
+      } else{
+         throw new IllegalArgumentException("Invalid type for AptitudeFollowParentGoal: " + animalIn.getType());
+      }
       this.speedModifier = speedModifierIn;
       this.parentSearchDist = parentSearchDistIn;
       this.nearParentDistSq = nearParentDistIn * nearParentDistIn;
@@ -27,11 +31,11 @@ public class AptitudeFollowParentGoal<T extends MobEntity & IAnimal> extends Goa
          return false;
       } else {
          List<MobEntity> list = this.animal.level.getEntitiesOfClass(this.animal.getClass(), this.animal.getBoundingBox().inflate(this.parentSearchDist, this.parentSearchDist / 2, this.parentSearchDist));
-         T parentAnimal = null;
+         A parentAnimal = null;
          double minDistSq = Double.MAX_VALUE;
 
          for(MobEntity nearbyMob : list) {
-            T nearbyAnimal = nearbyMob instanceof IAnimal ? (T) nearbyMob : null;
+            A nearbyAnimal = nearbyMob instanceof IAnimal ? (A) nearbyMob : null;
             if (nearbyAnimal != null && nearbyAnimal.getAge(nearbyAnimal) >= IAnimal.ADULT_AGE) {
                double distSqrToNearby = this.animal.distanceToSqr(nearbyAnimal);
                if (!(distSqrToNearby > minDistSq)) {

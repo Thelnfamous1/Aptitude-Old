@@ -13,7 +13,7 @@ public interface IDevourer {
     int EAT_ID = 45;
     int FINISHED_EATING_ID = 2;
 
-    default <T extends MobEntity & IDevourer> void eatsFoodAiStep(T devourer){
+    default <T extends MobEntity & IDevourer> void devourerAiStep(T devourer){
         if(this != devourer) throw new IllegalArgumentException("Argument devourer " + devourer + " is not equal to this: " + this);
 
         if (!devourer.level.isClientSide && devourer.isAlive() && devourer.isEffectiveAi()) {
@@ -28,6 +28,7 @@ public interface IDevourer {
                     }
 
                     this.onFinishedEating();
+                    this.setEatCooldown(this.getEatInterval());
                     this.setTicksSinceEaten(0);
                 }
                 // dummy-proofing start/finish eat time, preferring start
@@ -52,9 +53,7 @@ public interface IDevourer {
         return EquipmentSlotType.MAINHAND;
     }
 
-    default void onFinishedEating(){
-        this.setEatCooldown(this.getEatInterval());
-    }
+    void onFinishedEating();
 
     default <T extends MobEntity & IDevourer> void handleEatEvent(T devourer){
         if(this != devourer) throw new IllegalArgumentException("Argument devourer " + devourer + " is not equal to this: " + this);

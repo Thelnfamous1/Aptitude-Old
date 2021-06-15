@@ -1,6 +1,6 @@
 package com.infamous.aptitude.common.entity;
 
-public interface IAptitudeLlama {
+public interface ICanSpit {
 
     boolean getDidSpit();
 

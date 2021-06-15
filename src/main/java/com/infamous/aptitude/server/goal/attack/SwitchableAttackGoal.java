@@ -1,23 +1,23 @@
-package com.infamous.aptitude.server.goal;
+package com.infamous.aptitude.server.goal.attack;
 
 import com.infamous.aptitude.common.entity.ISwitchCombatTask;
 import net.minecraft.entity.CreatureEntity;
 
 public class SwitchableAttackGoal<T extends CreatureEntity & ISwitchCombatTask> extends AptitudeAttackGoal {
-    protected T switchableMob;
+    protected T switchableCreature;
 
     public SwitchableAttackGoal(T creature, double speedModifierIn, boolean mustSee) {
         super(creature, speedModifierIn, mustSee);
-        this.switchableMob = creature;
+        this.switchableCreature = creature;
     }
 
     @Override
     public boolean canUse() {
-        return !this.switchableMob.isRanged() && super.canUse();
+        return !this.switchableCreature.isRanged() && super.canUse();
     }
 
     @Override
     public boolean canContinueToUse() {
-        return !this.switchableMob.isRanged() && super.canContinueToUse();
+        return !this.switchableCreature.isRanged() && super.canContinueToUse();
     }
 }

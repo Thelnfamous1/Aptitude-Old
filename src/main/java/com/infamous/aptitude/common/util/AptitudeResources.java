@@ -13,6 +13,7 @@ public class AptitudeResources {
     public static final Tags.IOptionalNamedTag<Item> HORSES_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "horses_eat"));
     public static final Tags.IOptionalNamedTag<Item> LLAMAS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "llamas_eat"));
     public static final Tags.IOptionalNamedTag<Item> POLAR_BEARS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "polar_bears_eat"));
+    public static final Tags.IOptionalNamedTag<Item> OCELOTS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "ocelots_eat"));
 
     public static final Tags.IOptionalNamedTag<Item> APPLE_EQUIVALENTS = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "apple_equivalents"));
     public static final Tags.IOptionalNamedTag<Item> GOLDEN_APPLE_EQUIVALENTS = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "golden_apple_equivalents"));
@@ -23,4 +24,5 @@ public class AptitudeResources {
 
     public static final Tags.IOptionalNamedTag<EntityType<?>> DOLPHINS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "dolphins_hunt"));
     public static final Tags.IOptionalNamedTag<EntityType<?>> POLAR_BEARS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "polar_bears_hunt"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> OCELOTS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "ocelots_hunt"));
 }

@@ -1,4 +1,4 @@
-package com.infamous.aptitude.server.goal;
+package com.infamous.aptitude.server.goal.attack;
 
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.MobEntity;

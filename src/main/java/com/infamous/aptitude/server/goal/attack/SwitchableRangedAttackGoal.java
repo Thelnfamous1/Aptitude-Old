@@ -1,4 +1,4 @@
-package com.infamous.aptitude.server.goal;
+package com.infamous.aptitude.server.goal.attack;
 
 import com.infamous.aptitude.common.entity.ISwitchCombatTask;
 import net.minecraft.entity.IRangedAttackMob;
@@ -12,12 +12,12 @@ public class SwitchableRangedAttackGoal<T extends MobEntity & IRangedAttackMob &
 
     @Override
     public boolean canUse() {
-        return this.ageableMob.isRanged() && super.canUse();
+        return this.rangedMob.isRanged() && super.canUse();
     }
 
     @Override
     public boolean canContinueToUse() {
-        return this.ageableMob.isRanged() && super.canContinueToUse();
+        return this.rangedMob.isRanged() && super.canContinueToUse();
     }
 
 }

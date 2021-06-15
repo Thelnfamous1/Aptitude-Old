@@ -11,13 +11,13 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
-public class AptitudeBreedGoal<T extends MobEntity & IAnimal> extends Goal {
+public class AptitudeBreedGoal<T extends MobEntity, A extends MobEntity & IAnimal> extends Goal {
    private static final EntityPredicate PARTNER_TARGETING = (new EntityPredicate()).range(8.0D).allowInvulnerable().allowSameTeam().allowUnseeable();
-   protected final T animal;
+   protected final A animal;
    private final Class<? extends MobEntity> partnerClass;
    protected final World level;
    @Nullable
-   protected T partner;
+   protected A partnerMob;
    private int searchTime;
    private final int maxSearchTime;
    private int loveTime;
@@ -30,7 +30,11 @@ public class AptitudeBreedGoal<T extends MobEntity & IAnimal> extends Goal {
    }
 
    public AptitudeBreedGoal(T animalIn, double speedModifierIn, Class<? extends MobEntity> partnerClassIn, int maxSearchTimeIn, double partnerSearchDistIn, double breedDistIn) {
-      this.animal = animalIn;
+      if(animalIn instanceof IAnimal){
+         this.animal = (A) animalIn;
+      } else{
+         throw new IllegalArgumentException("Invalid type for AptitudeBreedGoal: " + animalIn.getType());
+      }
       this.level = animalIn.level;
       this.partnerClass = partnerClassIn;
       this.speedModifier = speedModifierIn;
@@ -44,32 +48,32 @@ public class AptitudeBreedGoal<T extends MobEntity & IAnimal> extends Goal {
       if (!this.animal.isInLove()) {
          return false;
       } else {
-         this.partner = this.getFreePartner();
-         return this.partner != null;
+         this.partnerMob = this.getFreePartner();
+         return this.partnerMob != null;
       }
    }
 
    public boolean canContinueToUse() {
-      return this.partner != null
-              && this.partner.isAlive()
+      return this.partnerMob != null
+              && this.partnerMob.isAlive()
               && this.animal.isInLove()
-              && this.partner.isInLove()
+              && this.partnerMob.isInLove()
               && this.searchTime < this.maxSearchTime
               && this.loveTime < 60;
    }
 
    public void stop() {
-      this.partner = null;
+      this.partnerMob = null;
       this.searchTime = 0;
       this.loveTime = 0;
    }
 
    public void tick() {
-      if(this.partner != null){
-         this.animal.getLookControl().setLookAt(this.partner, 10.0F, (float)this.animal.getMaxHeadXRot());
-         this.animal.getNavigation().moveTo(this.partner, this.speedModifier);
+      if(this.partnerMob != null){
+         this.animal.getLookControl().setLookAt(this.partnerMob, 10.0F, (float)this.animal.getMaxHeadXRot());
+         this.animal.getNavigation().moveTo(this.partnerMob, this.speedModifier);
          ++this.searchTime;
-         if (this.animal.distanceToSqr(this.partner) < breedDistSq) {
+         if (this.animal.distanceToSqr(this.partnerMob) < breedDistSq) {
             this.loveTime++;
             if(this.loveTime >= 60){
                this.breed();
@@ -80,13 +84,13 @@ public class AptitudeBreedGoal<T extends MobEntity & IAnimal> extends Goal {
    }
 
    @Nullable
-   private T getFreePartner() {
+   private A getFreePartner() {
       List<MobEntity> list = this.level.getNearbyEntities(this.partnerClass, PARTNER_TARGETING, this.animal, this.animal.getBoundingBox().inflate(this.partnerSearchDist));
       double minDistSq = Double.MAX_VALUE;
-      T freePartner = null;
+      A freePartner = null;
 
       for(MobEntity nearbyMob : list) {
-         T nearbyAnimal = nearbyMob instanceof IAnimal ? (T) nearbyMob : null;
+         A nearbyAnimal = nearbyMob instanceof IAnimal ? (A) nearbyMob : null;
          if (nearbyAnimal != null
                  && this.animal.canMate(nearbyAnimal)
                  && this.animal.distanceToSqr(nearbyAnimal) < minDistSq) {
@@ -99,6 +103,6 @@ public class AptitudeBreedGoal<T extends MobEntity & IAnimal> extends Goal {
    }
 
    protected void breed() {
-      this.animal.spawnChildFromBreeding((ServerWorld)this.level, this.animal, this.partner);
+      this.animal.spawnChildFromBreeding((ServerWorld)this.level, this.animal, this.partnerMob);
    }
 }

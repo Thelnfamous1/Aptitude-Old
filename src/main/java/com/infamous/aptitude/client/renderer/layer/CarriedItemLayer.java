@@ -1,24 +1,21 @@
 package com.infamous.aptitude.client.renderer.layer;
 
-import com.infamous.aptitude.common.entity.IDevourer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-import net.minecraft.client.renderer.entity.model.DolphinModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.passive.DolphinEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class CarriedItemLayer<T extends MobEntity & IDevourer, M extends EntityModel<T>> extends LayerRenderer<T, M> {
+public class CarriedItemLayer<T extends MobEntity, M extends EntityModel<T>> extends LayerRenderer<T, M> {
    public CarriedItemLayer(IEntityRenderer<T, M> entityRenderer) {
       super(entityRenderer);
    }
@@ -34,8 +31,12 @@ public class CarriedItemLayer<T extends MobEntity & IDevourer, M extends EntityM
          matrixStack.translate(0.0D, (double)(1.0F + f2 * 0.8F), (double)(-1.0F + f2 * 0.2F));
       }
 
-      ItemStack itemBySlot = mob.getItemBySlot(mob.getSlotForFood());
+      ItemStack itemBySlot = mob.getItemBySlot(this.getCarriedItemSlot(mob));
       Minecraft.getInstance().getItemInHandRenderer().renderItem(mob, itemBySlot, ItemCameraTransforms.TransformType.GROUND, false, matrixStack, renderTypeBuffer, p_225628_3_);
       matrixStack.popPose();
+   }
+
+   protected EquipmentSlotType getCarriedItemSlot(T mob) {
+      return EquipmentSlotType.MAINHAND;
    }
 }

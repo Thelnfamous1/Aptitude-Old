@@ -1,12 +1,12 @@
 package com.infamous.aptitude.mixin;
 
 import com.infamous.aptitude.Aptitude;
-import com.infamous.aptitude.common.entity.IAptitudeHorse;
+import com.infamous.aptitude.common.entity.IHasOwner;
 import com.infamous.aptitude.common.entity.IRearable;
 import com.infamous.aptitude.common.util.AptitudeResources;
-import com.infamous.aptitude.server.goal.AptitudeHurtByTargetGoal;
-import com.infamous.aptitude.server.goal.AptitudePanicGoal;
-import com.infamous.aptitude.server.goal.horse.RearingAttackGoal;
+import com.infamous.aptitude.server.goal.target.AptitudeHurtByTargetGoal;
+import com.infamous.aptitude.server.goal.misc.AptitudePanicGoal;
+import com.infamous.aptitude.server.goal.attack.RearingAttackGoal;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -18,7 +18,6 @@ import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.SoundEvent;
@@ -36,15 +35,15 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 @Mixin(AbstractHorseEntity.class)
-public abstract class AbstractHorseEntityMixin extends AnimalEntity implements IAptitudeHorse, IRearable {
+public abstract class AbstractHorseEntityMixin extends AnimalEntity implements IHasOwner, IRearable {
 
     //private static final Ingredient HORSE_FOOD_ITEMS = Ingredient.of(AptitudeResources.HORSES_EAT);
     private static final Predicate<ItemStack> FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.HORSES_EAT);
 
-    @Shadow @Nullable public abstract UUID getOwnerUUID();
-
     private static final int ANGRY_SOUND_INTERVAL = 40;
     private int angrySoundCooldown;
+
+    private boolean addedPanicReplacements;
 
     protected AbstractHorseEntityMixin(EntityType<? extends AnimalEntity> p_i48568_1_, World p_i48568_2_) {
         super(p_i48568_1_, p_i48568_2_);
@@ -54,17 +53,13 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
             target = "Lnet/minecraft/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/entity/ai/goal/Goal;)V"),
             method = "registerGoals")
     private void onAboutToAddPanicGoal(GoalSelector goalSelector, int priority, Goal goal){
-        if(goalSelector == this.goalSelector && goal instanceof PanicGoal){
-            this.goalSelector.addGoal(priority, new RearingAttackGoal<>(this, 1.25D, true));
-            this.goalSelector.addGoal(priority, new AptitudePanicGoal(this, 1.2D));
+        if(goalSelector == this.goalSelector && priority == 1 && goal instanceof PanicGoal && !this.addedPanicReplacements){
+            goalSelector.addGoal(priority, new RearingAttackGoal<>(this, 1.25D, true));
+            goalSelector.addGoal(priority, new AptitudePanicGoal(this, 1.2D));
+            this.addedPanicReplacements = true;
         } else{
             goalSelector.addGoal(priority, goal);
         }
-    }
-
-    @Inject(at = @At("RETURN"), method = "registerGoals")
-    private void addTargetGoals(CallbackInfo ci){
-        this.targetSelector.addGoal(1, new AptitudeHurtByTargetGoal(this));
     }
 
     @Inject(at = @At("RETURN"), method = "isImmobile", cancellable = true)
@@ -150,26 +145,9 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
         }
 
         cir.setReturnValue(handled);
-        Aptitude.LOGGER.debug("Handled AbstractHorseEntity#handlingEating for {}", this);
+        Aptitude.LOGGER.debug("Silently overwrote AbstractHorseEntity#handlingEating for {}", this);
     }
 
-    @Shadow
-    public abstract int getMaxTemper();
-
-    @Shadow
-    public abstract int getTemper();
-
-    @Shadow
-    public abstract int modifyTemper(int j);
-
-    @Shadow
-    protected abstract void eating();
-
-    @Shadow
-    public abstract boolean isEating();
-
-    @Shadow
-    public abstract boolean isSaddled();
 
     @Override
     public Team getTeam() {
@@ -206,19 +184,6 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
         return uuid == null ? null : this.level.getPlayerByUUID(uuid);
     }
 
-    @Shadow
-    public abstract boolean isTamed();
-
-    @Shadow protected abstract void stand();
-
-    @Shadow public abstract void setStanding(boolean p_110219_1_);
-
-    @Shadow public abstract boolean isStanding();
-
-    @Shadow public abstract boolean isFood(ItemStack p_70877_1_);
-
-    @Shadow @Nullable protected abstract SoundEvent getAngrySound();
-
     @Override
     public void playAngrySound() {
         if(this.getAngrySoundCooldown() <= 0){
@@ -251,4 +216,30 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
     public void setAngrySoundCooldown(int angrySoundCooldown) {
         this.angrySoundCooldown = angrySoundCooldown;
     }
+
+    @Shadow public abstract int getMaxTemper();
+
+    @Shadow public abstract int getTemper();
+
+    @Shadow public abstract int modifyTemper(int j);
+
+    @Shadow protected abstract void eating();
+
+    @Shadow public abstract boolean isEating();
+
+    @Shadow public abstract boolean isSaddled();
+
+    @Shadow public abstract boolean isTamed();
+
+    @Shadow protected abstract void stand();
+
+    @Shadow public abstract void setStanding(boolean p_110219_1_);
+
+    @Shadow public abstract boolean isStanding();
+
+    @Shadow public abstract boolean isFood(ItemStack p_70877_1_);
+
+    @Shadow @Nullable protected abstract SoundEvent getAngrySound();
+
+    @Shadow @Nullable public abstract UUID getOwnerUUID();
 }

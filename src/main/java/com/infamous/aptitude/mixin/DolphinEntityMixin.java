@@ -5,12 +5,8 @@ import com.infamous.aptitude.common.entity.IAgeable;
 import com.infamous.aptitude.common.entity.IAnimal;
 import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.entity.IPredator;
-import com.infamous.aptitude.common.util.AptitudeResources;
-import com.infamous.aptitude.server.goal.AptitudeHurtByTargetGoal;
-import com.infamous.aptitude.server.goal.AptitudeTemptGoal;
-import com.infamous.aptitude.server.goal.HuntGoal;
-import com.infamous.aptitude.server.goal.animal.AptitudeBreedGoal;
-import com.infamous.aptitude.server.goal.animal.AptitudeFollowParentGoal;
+import com.infamous.aptitude.common.util.AptitudePredicates;
+import com.infamous.aptitude.server.goal.target.AptitudeHurtByTargetGoal;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.GoalSelector;
@@ -40,14 +36,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 @Mixin(DolphinEntity.class)
 public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPredator, IDevourer {
     //private static final Ingredient DOLPHIN_FOOD_ITEMS = Ingredient.of(AptitudeResources.DOLPHINS_EAT);
 
-    private static final Predicate<LivingEntity> PREY_PREDICATE = living -> living.getType().is(AptitudeResources.DOLPHINS_HUNT);
-    private static final Predicate<ItemStack> FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.DOLPHINS_EAT);
     private static final DataParameter<Boolean> DATA_BABY_ID = EntityDataManager.defineId(DolphinEntity.class, DataSerializers.BOOLEAN);
     protected int age;
     protected int forcedAge;
@@ -57,6 +50,7 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
     private int huntCooldown;
     private int ticksSinceEaten;
     private int eatCooldown;
+    private boolean addedHurtByReplacements;
 
     protected DolphinEntityMixin(EntityType<? extends WaterMobEntity> entityType, World world) {
         super(entityType, world);
@@ -66,22 +60,12 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
             target = "Lnet/minecraft/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/entity/ai/goal/Goal;)V"),
             method = "registerGoals")
     private void onAboutToAddGoal(GoalSelector goalSelector, int priority, Goal goal){
-        if(goalSelector == this.targetSelector && goal instanceof HurtByTargetGoal){
-            this.targetSelector.addGoal(priority, new AptitudeHurtByTargetGoal(this, GuardianEntity.class).setAlertOthers());
+        if(goalSelector == this.targetSelector && priority == 1 && goal instanceof HurtByTargetGoal && !this.addedHurtByReplacements){
+            goalSelector.addGoal(priority, new AptitudeHurtByTargetGoal(this, GuardianEntity.class).setAlertOthers());
+            this.addedHurtByReplacements = true;
         } else {
             goalSelector.addGoal(priority, goal);
         }
-    }
-
-    @Inject(at = @At("HEAD"), method = "registerGoals")
-    private void addAnimalGoals(CallbackInfo ci){
-        /*
-        Dolphins move around really fast, so we have to quadruple the parent/partner search distances to reduce search failures
-         */
-        this.goalSelector.addGoal(1, new AptitudeBreedGoal<>(this, 1.25D, 60 * 10, 8.0D * 4, 3.0D));
-        this.goalSelector.addGoal(3, new AptitudeTemptGoal(this, 1.25D, FOOD_PREDICATE, false));
-        this.goalSelector.addGoal(4, new AptitudeFollowParentGoal<>(this, 1.25D, 8.0D, 3.0D));
-        this.targetSelector.addGoal(2, new HuntGoal<>(this, LivingEntity.class, 10, true, false, PREY_PREDICATE));
     }
 
     @Inject(at = @At("RETURN"), method = "defineSynchedData")
@@ -89,13 +73,6 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
         this.entityData.define(DATA_BABY_ID, false);
     }
 
-    @Override
-    public void onSyncedDataUpdated(DataParameter<?> dataParameter) {
-        if (DATA_BABY_ID.equals(dataParameter)) {
-            this.refreshDimensions();
-        }
-        super.onSyncedDataUpdated(dataParameter);
-    }
 
     @Inject(at = @At("RETURN"), method = "addAdditionalSaveData")
     private void addSaveData(CompoundNBT compoundNBT, CallbackInfo ci){
@@ -144,7 +121,15 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
         this.handlePickUpItem(this, itemEntity);
 
         ci.cancel();
-        Aptitude.LOGGER.debug("Handled DolphinEntity#pickUpItem for {}", this);
+        Aptitude.LOGGER.debug("Silently overwrote DolphinEntity#pickUpItem for {}", this);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(DataParameter<?> dataParameter) {
+        if (DATA_BABY_ID.equals(dataParameter)) {
+            this.refreshDimensions();
+        }
+        super.onSyncedDataUpdated(dataParameter);
     }
 
     @Override
@@ -174,7 +159,7 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
         super.aiStep();
         this.ageableAiStep(this);
         this.animalAiStep(this);
-        this.eatsFoodAiStep(this);
+        this.devourerAiStep(this);
     }
 
     @Override
@@ -280,7 +265,7 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
 
     @Override
     public boolean isFood(ItemStack stack) {
-        return FOOD_PREDICATE.test(stack);
+        return AptitudePredicates.DOLPHIN_FOOD_PREDICATE.test(stack);
     }
 
     @Override
@@ -295,7 +280,7 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
 
     @Override
     public boolean isPrey(LivingEntity living) {
-        return PREY_PREDICATE.test(living);
+        return AptitudePredicates.DOLPHIN_PREY_PREDICATE.test(living);
     }
 
     @Override
@@ -320,8 +305,6 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
 
     @Override
     public void onFinishedEating() {
-        IDevourer.super.onFinishedEating();
-
         if(!this.level.isClientSide && this.getAge(this) == ADULT_AGE && this.canFallInLove()){
             this.setInLove(this, null);
         }

@@ -1,13 +1,13 @@
 package com.infamous.aptitude.mixin;
 
 import com.infamous.aptitude.Aptitude;
-import com.infamous.aptitude.common.entity.IAptitudeLlama;
+import com.infamous.aptitude.common.entity.ICanSpit;
 import com.infamous.aptitude.common.entity.ISwitchCombatTask;
 import com.infamous.aptitude.common.util.AptitudeResources;
-import com.infamous.aptitude.server.goal.AptitudePanicGoal;
-import com.infamous.aptitude.server.goal.SwitchableRangedAttackGoal;
-import com.infamous.aptitude.server.goal.horse.LlamaHurtByTargetGoal;
-import com.infamous.aptitude.server.goal.horse.SwitchableRearinglAttackGoal;
+import com.infamous.aptitude.server.goal.misc.AptitudePanicGoal;
+import com.infamous.aptitude.server.goal.attack.SwitchableRangedAttackGoal;
+import com.infamous.aptitude.server.goal.target.CanSpitHurtByTargetGoal;
+import com.infamous.aptitude.server.goal.attack.SwitchableRearingAttackGoal;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.LivingEntity;
@@ -30,11 +30,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.function.Predicate;
 
 @Mixin(LlamaEntity.class)
-public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implements IAptitudeLlama, ISwitchCombatTask, IRangedAttackMob {
+public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implements ICanSpit, ISwitchCombatTask, IRangedAttackMob {
     //private static final Ingredient LLAMA_FOOD_ITEMS = Ingredient.of(AptitudeResources.LLAMAS_EAT);
-    private static final Predicate<ItemStack> FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.LLAMAS_EAT);
+    private static final Predicate<ItemStack> LLAMA_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.LLAMAS_EAT);
 
     private static final int SPIT_INTERVAL = 40;
+
+    private boolean addedPanicReplacements;
+    private boolean addedRangedAttackReplacements;
+    private boolean addedHurtByReplacements;
+
+    private int spitCooldown;
 
     @Shadow private boolean didSpit;
 
@@ -42,21 +48,20 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
         super(p_i48568_1_, p_i48568_2_);
     }
 
-    @Shadow protected abstract void setDidSpit(boolean p_190714_1_);
-
-    private int spitCooldown;
-
     @Redirect(at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/entity/ai/goal/Goal;)V"),
             method = "registerGoals")
     private void onAboutToAddGoal(GoalSelector goalSelector, int priority, Goal goal){
-        if(goalSelector == this.goalSelector && goal instanceof PanicGoal){
-            this.goalSelector.addGoal(priority, new SwitchableRearinglAttackGoal<>(this, 1.25D, true));
-            this.goalSelector.addGoal(priority, new AptitudePanicGoal(this, 1.2D));
-        } else if(goalSelector == this.goalSelector && goal instanceof RangedAttackGoal){
-            this.goalSelector.addGoal(priority, new SwitchableRangedAttackGoal<>(this, 1.25D, SPIT_INTERVAL, 20.0F));
-        } else if(goalSelector == this.targetSelector && goal instanceof HurtByTargetGoal){
-            this.targetSelector.addGoal(priority, new LlamaHurtByTargetGoal<>(this));
+        if(goalSelector == this.goalSelector && priority == 3 && goal instanceof PanicGoal && !this.addedPanicReplacements){
+            goalSelector.addGoal(priority, new SwitchableRearingAttackGoal<>(this, 1.25D, true));
+            goalSelector.addGoal(priority, new AptitudePanicGoal(this, 1.2D));
+            this.addedPanicReplacements = true;
+        } else if(goalSelector == this.goalSelector && priority == 3 && goal instanceof RangedAttackGoal && !this.addedRangedAttackReplacements){
+            goalSelector.addGoal(priority, new SwitchableRangedAttackGoal<>(this, 1.25D, SPIT_INTERVAL, 20.0F));
+            this.addedRangedAttackReplacements = true;
+        } else if(goalSelector == this.targetSelector && priority == 1 && goal instanceof HurtByTargetGoal && !this.addedHurtByReplacements){
+            goalSelector.addGoal(priority, new CanSpitHurtByTargetGoal<>(this));
+            this.addedHurtByReplacements = true;
         }
         else{
             goalSelector.addGoal(priority, goal);
@@ -75,7 +80,7 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
 
     @Override
     protected void checkFoodTag(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(FOOD_PREDICATE.test(stack));
+        cir.setReturnValue(LLAMA_FOOD_PREDICATE.test(stack));
     }
 
     @Override
@@ -128,7 +133,7 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
         }
 
         cir.setReturnValue(handled);
-        Aptitude.LOGGER.debug("Handled LlamaEntity#handlingEating for {}", this);
+        Aptitude.LOGGER.debug("Silently overwrote LlamaEntity#handlingEating for {}", this);
     }
 
     @Override
@@ -163,4 +168,6 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
     public void setSpitCooldown(int spitCooldown) {
         this.spitCooldown = spitCooldown;
     }
+
+    @Shadow protected abstract void setDidSpit(boolean p_190714_1_);
 }

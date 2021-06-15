@@ -5,7 +5,7 @@ import net.minecraft.util.SoundEvent;
 
 import javax.annotation.Nullable;
 
-public interface IAptitudeHorse
+public interface IHasOwner
 {
     @Nullable
     LivingEntity getOwner();

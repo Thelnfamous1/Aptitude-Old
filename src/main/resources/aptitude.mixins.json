@@ -12,12 +12,12 @@
     "BredAnimalsTriggerMixin",
     "DolphinEntityMixin",
     "LlamaEntityMixin",
+    "OcelotEntityMixin",
     "PlayWithItemsGoalMixin",
-    "PolarBearEntityMixin",
-    "PolarBearRendererMixin"
+    "PolarBearEntityMixin"
   ],
   "client": [
     "LivingRendererMixin",
-    "QuadrupedModelMixin"
+    "AgeableModelMixin"
   ]
 }

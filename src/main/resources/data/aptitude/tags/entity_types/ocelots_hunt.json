@@ -2,8 +2,6 @@
   "replace": false,
   "values": [
     "#aptitude:aquatic_small_prey",
-    "#aptitude:small_prey",
-    "#aptitude:large_prey",
-    "minecraft:fox"
+    "#aptitude:small_prey"
   ]
 }

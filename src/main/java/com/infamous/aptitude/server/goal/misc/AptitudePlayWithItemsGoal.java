@@ -1,23 +1,25 @@
-package com.infamous.aptitude.server.goal;
+package com.infamous.aptitude.server.goal.misc;
 
-import com.infamous.aptitude.common.entity.IDevourer;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.List;
 import java.util.function.Predicate;
 
-public class AptitudePlayWithItemsGoal<T extends MobEntity & IDevourer> extends Goal {
+public class AptitudePlayWithItemsGoal<T extends MobEntity> extends Goal {
     private final T mob;
     private int cooldown;
     private final Predicate<ItemEntity> itemEntityPredicate;
+    private final int cooldownInterval;
 
-    public AptitudePlayWithItemsGoal(T mob, Predicate<ItemEntity> itemEntityPredicate) {
+    public AptitudePlayWithItemsGoal(T mob, Predicate<ItemEntity> itemEntityPredicate, int cooldownInterval) {
         this.mob = mob;
         this.itemEntityPredicate = itemEntityPredicate;
+        this.cooldownInterval = cooldownInterval;
     }
 
     public boolean canUse() {
@@ -25,12 +27,13 @@ public class AptitudePlayWithItemsGoal<T extends MobEntity & IDevourer> extends 
             return false;
         } else { 
             List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(8.0D, 8.0D, 8.0D), this.itemEntityPredicate);
-
-            ItemStack itemBySlot = this.mob.getItemBySlot(this.mob.getSlotForFood());
-            boolean canEatFood = this.mob.canEat(this.mob, itemBySlot);
-
-            return (!list.isEmpty() || !itemBySlot.isEmpty()) && !canEatFood;
+            ItemStack playItem = this.mob.getItemBySlot(this.getPlayItemSlot());
+            return !list.isEmpty() || !playItem.isEmpty();
         }
+    }
+
+    protected EquipmentSlotType getPlayItemSlot() {
+        return EquipmentSlotType.MAINHAND;
     }
 
     public void start() {
@@ -48,23 +51,20 @@ public class AptitudePlayWithItemsGoal<T extends MobEntity & IDevourer> extends 
     }
 
     public void stop() {
-        ItemStack itemBySlot = this.mob.getItemBySlot(this.mob.getSlotForFood());
-        boolean canEatFood = this.mob.canEat(this.mob, itemBySlot);
-        if(canEatFood){
-            this.cooldown = this.mob.tickCount + this.mob.getRandom().nextInt(100);
-        } else if (!itemBySlot.isEmpty()) {
-            this.drop(itemBySlot);
-            this.mob.setItemSlot(this.mob.getSlotForFood(), ItemStack.EMPTY);
-            this.cooldown = this.mob.tickCount + this.mob.getRandom().nextInt(100);
+        ItemStack playItem = this.mob.getItemBySlot(this.getPlayItemSlot());
+        if (!playItem.isEmpty()) {
+            this.drop(playItem);
+            this.mob.setItemSlot(this.getPlayItemSlot(), ItemStack.EMPTY);
+            this.cooldown = this.mob.tickCount + this.mob.getRandom().nextInt(this.cooldownInterval);
         }
     }
 
     public void tick() {
         List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(8.0D, 8.0D, 8.0D), this.itemEntityPredicate);
-        ItemStack itemstack = this.mob.getItemBySlot(this.mob.getSlotForFood());
-        if (!itemstack.isEmpty()) {
-            this.drop(itemstack);
-            this.mob.setItemSlot(this.mob.getSlotForFood(), ItemStack.EMPTY);
+        ItemStack playItem = this.mob.getItemBySlot(this.getPlayItemSlot());
+        if (!playItem.isEmpty()) {
+            this.drop(playItem);
+            this.mob.setItemSlot(this.getPlayItemSlot(), ItemStack.EMPTY);
         } else if (!list.isEmpty()) {
             this.mob.getNavigation().moveTo(list.get(0), (double)1.2F);
         }

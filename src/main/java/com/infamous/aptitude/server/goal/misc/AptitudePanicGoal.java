@@ -1,4 +1,4 @@
-package com.infamous.aptitude.server.goal;
+package com.infamous.aptitude.server.goal.misc;
 
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.ai.goal.PanicGoal;

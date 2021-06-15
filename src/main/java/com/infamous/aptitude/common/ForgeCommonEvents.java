@@ -1,16 +1,64 @@
 package com.infamous.aptitude.common;
 
 import com.infamous.aptitude.Aptitude;
-import com.infamous.aptitude.common.entity.IAptitudeLlama;
+import com.infamous.aptitude.common.entity.ICanSpit;
 import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.entity.IPredator;
 import com.infamous.aptitude.common.entity.IRearable;
+import com.infamous.aptitude.common.util.AptitudePredicates;
+import com.infamous.aptitude.server.goal.animal.AptitudeBreedGoal;
+import com.infamous.aptitude.server.goal.animal.AptitudeFollowParentGoal;
+import com.infamous.aptitude.server.goal.misc.AptitudeTemptGoal;
+import com.infamous.aptitude.server.goal.misc.DevourerFindItemsGoal;
+import com.infamous.aptitude.server.goal.target.AptitudeDefendTargetGoal;
+import com.infamous.aptitude.server.goal.target.AptitudeHurtByTargetGoal;
+import com.infamous.aptitude.server.goal.target.HuntGoal;
+import net.minecraft.entity.CreatureEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.BreedGoal;
+import net.minecraft.entity.monster.CreeperEntity;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.DolphinEntity;
+import net.minecraft.entity.passive.OcelotEntity;
+import net.minecraft.entity.passive.PolarBearEntity;
+import net.minecraft.entity.passive.horse.AbstractHorseEntity;
+import net.minecraft.entity.passive.horse.LlamaEntity;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.function.Predicate;
+
 @Mod.EventBusSubscriber(modid = Aptitude.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeCommonEvents {
+
+    @SubscribeEvent
+    public static void onEntityJoinWorld(EntityJoinWorldEvent event){
+        MobEntity eventMob = event.getEntity() instanceof MobEntity ? ((MobEntity) event.getEntity()) : null;
+        if(eventMob instanceof AbstractHorseEntity && !(eventMob instanceof LlamaEntity)){
+            eventMob.targetSelector.addGoal(1, new AptitudeHurtByTargetGoal((CreatureEntity) eventMob));
+        } else if(eventMob instanceof DolphinEntity){
+            /*
+        Dolphins move around really fast, so we have to quadruple the parent/partner search distances to reduce search failures
+         */
+            eventMob.goalSelector.addGoal(1, new AptitudeBreedGoal<>(eventMob, 1.25D, 60 * 10, 8.0D * 4, 3.0D));
+            eventMob.goalSelector.addGoal(3, new AptitudeTemptGoal((CreatureEntity) eventMob, 1.25D, AptitudePredicates.DOLPHIN_FOOD_PREDICATE, false));
+            eventMob.goalSelector.addGoal(4, new AptitudeFollowParentGoal<>(eventMob, 1.25D, 8.0D, 3.0D));
+            eventMob.targetSelector.addGoal(2, new HuntGoal<>(eventMob, LivingEntity.class, 10, true, false, AptitudePredicates.DOLPHIN_PREY_PREDICATE));
+            eventMob.setCanPickUpLoot(true);
+        } else if(eventMob instanceof OcelotEntity){
+            eventMob.goalSelector.addGoal(8, new DevourerFindItemsGoal<>(eventMob, AptitudePredicates.OCELOT_ALLOWED_ITEMS, 10));
+            eventMob.targetSelector.addGoal(1, new AptitudeDefendTargetGoal<>(eventMob, CreeperEntity.class, 10, false, false, (Predicate<LivingEntity>)null));
+            eventMob.setCanPickUpLoot(true);
+        } else if(eventMob instanceof PolarBearEntity){
+            eventMob.goalSelector.addGoal(1, new BreedGoal((AnimalEntity) eventMob, 1.25D));
+            eventMob.goalSelector.addGoal(3, new AptitudeTemptGoal((CreatureEntity) eventMob, 1.25D, AptitudePredicates.POLAR_BEAR_FOOD_PREDICATE, false));
+            eventMob.goalSelector.addGoal(8, new DevourerFindItemsGoal<>(eventMob, AptitudePredicates.POLAR_BEAR_ALLOWED_ITEMS, 10));
+            eventMob.setCanPickUpLoot(true);
+        }
+    }
 
     @SubscribeEvent
     public static void onLivingUpdate(LivingEvent.LivingUpdateEvent event){
@@ -38,8 +86,8 @@ public class ForgeCommonEvents {
                 rearable.setAngrySoundCooldown(0);
             }
         }
-        if(event.getEntityLiving() instanceof IAptitudeLlama){
-            IAptitudeLlama llama = (IAptitudeLlama) event.getEntityLiving();
+        if(event.getEntityLiving() instanceof ICanSpit){
+            ICanSpit llama = (ICanSpit) event.getEntityLiving();
             if(llama.getSpitCooldown() > 0){
                 llama.setSpitCooldown(llama.getSpitCooldown() - 1);
             } else{
