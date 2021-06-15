@@ -1,6 +1,7 @@
-package com.infamous.aptitude.client.renderer.layer;
+package com.infamous.aptitude.client;
 
 import com.infamous.aptitude.Aptitude;
+import com.infamous.aptitude.client.renderer.layer.AgeableHeldItemLayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
