@@ -1,6 +1,6 @@
 package com.infamous.aptitude.common.entity;
 
-public interface IRearable {
+public interface IRearing {
 
     void startRearing();
 

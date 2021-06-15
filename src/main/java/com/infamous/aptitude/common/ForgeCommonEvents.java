@@ -4,7 +4,7 @@ import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.entity.ICanSpit;
 import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.entity.IPredator;
-import com.infamous.aptitude.common.entity.IRearable;
+import com.infamous.aptitude.common.entity.IRearing;
 import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.server.goal.animal.AptitudeBreedGoal;
 import com.infamous.aptitude.server.goal.animal.AptitudeFollowParentGoal;
@@ -18,7 +18,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.BreedGoal;
 import net.minecraft.entity.ai.goal.FollowParentGoal;
-import net.minecraft.entity.ai.goal.TemptGoal;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.passive.*;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
@@ -81,8 +80,8 @@ public class ForgeCommonEvents {
                 predator.setHuntCooldown(0);
             }
         }
-        if(event.getEntityLiving() instanceof IRearable){
-            IRearable rearable = (IRearable) event.getEntityLiving();
+        if(event.getEntityLiving() instanceof IRearing){
+            IRearing rearable = (IRearing) event.getEntityLiving();
             if(rearable.getAngrySoundCooldown() > 0){
                 rearable.setAngrySoundCooldown(rearable.getAngrySoundCooldown() - 1);
             } else{

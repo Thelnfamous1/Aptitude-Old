@@ -1,10 +1,10 @@
 package com.infamous.aptitude.server.goal.attack;
 
-import com.infamous.aptitude.common.entity.IRearable;
+import com.infamous.aptitude.common.entity.IRearing;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.LivingEntity;
 
-public class RearingAttackGoal<T extends CreatureEntity & IRearable> extends AptitudeAttackGoal {
+public class RearingAttackGoal<T extends CreatureEntity & IRearing> extends AptitudeAttackGoal {
     protected T rearingCreature;
     
     public RearingAttackGoal(T rearingCreature, double speedModifierIn, boolean mustSee) {

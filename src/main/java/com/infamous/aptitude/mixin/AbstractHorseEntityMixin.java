@@ -2,9 +2,8 @@ package com.infamous.aptitude.mixin;
 
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.entity.IHasOwner;
-import com.infamous.aptitude.common.entity.IRearable;
+import com.infamous.aptitude.common.entity.IRearing;
 import com.infamous.aptitude.common.util.AptitudeResources;
-import com.infamous.aptitude.server.goal.target.AptitudeHurtByTargetGoal;
 import com.infamous.aptitude.server.goal.misc.AptitudePanicGoal;
 import com.infamous.aptitude.server.goal.attack.RearingAttackGoal;
 import net.minecraft.entity.Entity;
@@ -27,7 +26,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
@@ -35,7 +33,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 @Mixin(AbstractHorseEntity.class)
-public abstract class AbstractHorseEntityMixin extends AnimalEntity implements IHasOwner, IRearable {
+public abstract class AbstractHorseEntityMixin extends AnimalEntity implements IHasOwner, IRearing {
 
     //private static final Ingredient HORSE_FOOD_ITEMS = Ingredient.of(AptitudeResources.HORSES_EAT);
     private static final Predicate<ItemStack> FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.HORSES_EAT);
