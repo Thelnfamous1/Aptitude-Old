@@ -23,16 +23,32 @@ public class AgeableHeldItemLayer<T extends MobEntity, M extends AgeableModel<T>
       super(entityRenderer);
    }
 
-   public void render(MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, int p_225628_3_, T mob, float p_225628_5_, float p_225628_6_, float p_225628_7_, float p_225628_8_, float p_225628_9_, float p_225628_10_) {
-      boolean sleeping = mob.isSleeping();
+   public void render(MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, int p_225628_3_, T mob, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
       boolean baby = mob.isBaby();
       matrixStack.pushPose();
       if (baby) {
-         float babyScale = 0.75F;
-         matrixStack.scale(babyScale, babyScale, babyScale);
-         matrixStack.translate(0.0D, 0.5D, (double)0.209375F);
+         this.scaleAndTranslateForBaby(matrixStack);
       }
 
+      this.translateToHead(matrixStack);
+      this.poseItem(matrixStack, mob, netHeadYaw, headPitch);
+
+      EquipmentSlotType slotType = mob instanceof IDevourer ? ((IDevourer) mob).getSlotForFood() : EquipmentSlotType.MAINHAND;
+      ItemStack itemBySlot = mob.getItemBySlot(slotType);
+      Minecraft.getInstance().getItemInHandRenderer().renderItem(mob, itemBySlot, ItemCameraTransforms.TransformType.GROUND, false, matrixStack, renderTypeBuffer, p_225628_3_);
+      matrixStack.popPose();
+   }
+
+   protected void scaleAndTranslateForBaby(MatrixStack matrixStack) {
+      float babyScale = 0.75F;
+      matrixStack.scale(babyScale, babyScale, babyScale);
+      double babyTranslateX = 0.0D;
+      double babyTranslateY = 0.5D;
+      double babyTranslateZ = 0.209375F;
+      matrixStack.translate(babyTranslateX, babyTranslateY, babyTranslateZ);
+   }
+
+   protected void translateToHead(MatrixStack matrixStack) {
       M parentModel = this.getParentModel();
       if(parentModel instanceof IHeadAccessor){
          IHeadAccessor headAccessor = (IHeadAccessor) parentModel;
@@ -40,30 +56,45 @@ public class AgeableHeldItemLayer<T extends MobEntity, M extends AgeableModel<T>
             matrixStack.translate((double)(headAccessor.getHead().x / 16.0F), (double)(headAccessor.getHead().y / 16.0F), (double)(headAccessor.getHead().z / 16.0F));
          }
       }
-      //float headRollAngle = mob.getHeadRollAngle(p_225628_7_);
+   }
+
+   protected void poseItem(MatrixStack matrixStack, T mob, float netHeadYaw, float headPitch) {
+      boolean sleeping = mob.isSleeping();
+      //float headRollAngle = mob.getHeadRollAngle(partialTicks);
       //matrixStack.mulPose(Vector3f.ZP.rotation(headRollAngle));
-      matrixStack.mulPose(Vector3f.YP.rotationDegrees(p_225628_9_));
-      matrixStack.mulPose(Vector3f.XP.rotationDegrees(p_225628_10_));
-      if (mob.isBaby()) {
-         if (sleeping) {
-            matrixStack.translate((double)0.4F, (double)0.26F, (double)0.15F);
-         } else {
-            matrixStack.translate((double)0.06F, (double)0.26F, -0.5D);
-         }
-      } else if (sleeping) {
-         matrixStack.translate((double)0.46F, (double)0.26F, (double)0.22F);
-      } else {
-         matrixStack.translate((double)0.06F, (double)0.27F, -0.5D);
-      }
+      matrixStack.mulPose(Vector3f.YP.rotationDegrees(netHeadYaw));
+      matrixStack.mulPose(Vector3f.XP.rotationDegrees(headPitch));
+
+      this.translateItem(matrixStack, mob);
 
       matrixStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
       if (sleeping) {
          matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
       }
+   }
 
-      EquipmentSlotType slotType = mob instanceof IDevourer ? ((IDevourer) mob).getSlotForFood() : EquipmentSlotType.MAINHAND;
-      ItemStack itemBySlot = mob.getItemBySlot(slotType);
-      Minecraft.getInstance().getItemInHandRenderer().renderItem(mob, itemBySlot, ItemCameraTransforms.TransformType.GROUND, false, matrixStack, renderTypeBuffer, p_225628_3_);
-      matrixStack.popPose();
+   protected void translateItem(MatrixStack matrixStack, T mob) {
+      boolean baby = mob.isBaby();
+      boolean sleeping = mob.isSleeping();
+
+      double normalX = 0.06F;
+      double anyY = 0.26F;
+      double normalZ = -0.5D;
+      if (baby) {
+         if (sleeping) {
+            double babySleepX = 0.4F;
+            double babySleepZ = 0.15F;
+            matrixStack.translate(babySleepX, anyY, babySleepZ);
+         } else {
+            matrixStack.translate(normalX, anyY, normalZ);
+         }
+      } else if (sleeping) {
+         double adultSleepX = 0.46F;
+         double adultSleepZ = 0.22F;
+         matrixStack.translate(adultSleepX, anyY, adultSleepZ);
+      } else {
+         double adultNormalY = 0.27F;
+         matrixStack.translate(normalX, adultNormalY, normalZ);
+      }
    }
 }
