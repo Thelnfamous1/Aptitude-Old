@@ -6,10 +6,12 @@ import com.infamous.aptitude.common.entity.IPredator;
 import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.server.goal.target.HuntGoal;
 import net.minecraft.entity.*;
-import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.GoalSelector;
+import net.minecraft.entity.ai.goal.NonTamedTargetGoal;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.PolarBearEntity;
+import net.minecraft.entity.passive.CatEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
@@ -24,32 +26,26 @@ import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(PolarBearEntity.class)
-public abstract class PolarBearEntityMixin extends AnimalEntity implements IPredator, IDevourer {
-
-    private boolean addedRandomWalkingReplacements;
-    private boolean addedNearestAttackableReplacements;
-
-    @Shadow public abstract boolean isFood(ItemStack p_70877_1_);
+@Mixin(CatEntity.class)
+public abstract class CatEntityMixin extends AnimalEntity implements IPredator, IDevourer {
 
     private int ticksSinceEaten;
     private int eatCooldown;
     private int huntCooldown;
+    private boolean addedNonTamedTargetReplacements;
 
-    protected PolarBearEntityMixin(EntityType<? extends AnimalEntity> p_i48568_1_, World p_i48568_2_) {
+    protected CatEntityMixin(EntityType<? extends AnimalEntity> p_i48568_1_, World p_i48568_2_) {
         super(p_i48568_1_, p_i48568_2_);
     }
 
     @Inject(at = @At("RETURN"), method = "isFood", cancellable = true)
     private void checkFoodTag(ItemStack stack, CallbackInfoReturnable<Boolean> cir){
-        cir.setReturnValue(AptitudePredicates.POLAR_BEAR_FOOD_PREDICATE.test(stack));
+        cir.setReturnValue(AptitudePredicates.CAT_FOOD_PREDICATE.test(stack));
     }
 
     @Inject(at = @At("RETURN"), method = "finalizeSpawn")
@@ -61,15 +57,19 @@ public abstract class PolarBearEntityMixin extends AnimalEntity implements IPred
             target = "Lnet/minecraft/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/entity/ai/goal/Goal;)V"),
             method = "registerGoals")
     private void onAboutToAddGoal(GoalSelector goalSelector, int priority, Goal goal){
-        if(goalSelector == this.goalSelector && priority == 5 && goal instanceof RandomWalkingGoal && !this.addedRandomWalkingReplacements){
-            goalSelector.addGoal(priority, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
-            this.addedRandomWalkingReplacements = true;
-        } else if(goalSelector == this.targetSelector && priority == 4 && goal instanceof NearestAttackableTargetGoal && !this.addedNearestAttackableReplacements){
-            goalSelector.addGoal(priority, new HuntGoal<>(this, LivingEntity.class, 10, true, true, AptitudePredicates.POLAR_BEAR_PREY_PREDICATE));
-            this.addedNearestAttackableReplacements = true;
-        }
-        else {
+        if(goalSelector == this.targetSelector && priority == 1 && goal instanceof NonTamedTargetGoal && !this.addedNonTamedTargetReplacements){
+            goalSelector.addGoal(priority, new HuntGoal<>(this, LivingEntity.class, 10, false, false, AptitudePredicates.CAT_PREY_PREDICATE));
+            this.addedNonTamedTargetReplacements = true;
+        } else {
             goalSelector.addGoal(priority, goal);
+        }
+    }
+
+    @Inject(at = @At("HEAD"), method = "mobInteract", cancellable = true)
+    private void handleAnimalInteract(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResultType> cir){
+        ItemStack itemstack = player.getItemInHand(hand);
+        if (!(this.isFood(itemstack) && this.isHungry(this))) {
+            cir.setReturnValue(ActionResultType.PASS);
         }
     }
 
@@ -80,12 +80,11 @@ public abstract class PolarBearEntityMixin extends AnimalEntity implements IPred
     }
 
     @Override
-    public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
-        ItemStack itemstack = player.getItemInHand(hand);
-        if (this.isFood(itemstack) && this.isHungry(this)) {
-            return super.mobInteract(player, hand);
+    public void handleEntityEvent(byte eventId) {
+        if(eventId == FINISHED_EATING_ID){
+            this.onFinishedEating();
         } else{
-            return ActionResultType.PASS;
+            super.handleEntityEvent(eventId);
         }
     }
 
@@ -115,34 +114,26 @@ public abstract class PolarBearEntityMixin extends AnimalEntity implements IPred
     }
 
     @Override
-    public void handleEntityEvent(byte eventId) {
-        if(eventId == FINISHED_EATING_ID){
-            this.onFinishedEating();
-        } else{
-            super.handleEntityEvent(eventId);
-        }
-    }
-
-    @Override
     public void killed(ServerWorld serverWorld, LivingEntity killedEntity) {
         super.killed(serverWorld, killedEntity);
         this.onHuntedPrey(killedEntity);
     }
 
     @Override
-    public void usePlayerItem(PlayerEntity player, ItemStack stack) {
-        if(this.isFood(stack)){
-            this.playSound(this.getEatingSound(stack), 1.0F, 1.0F);
-            if(stack.isEdible()) {
-                this.heal(stack.getItem().getFoodProperties().getNutrition());
-            }
+    public void onFinishedEating() {
+        if(!this.level.isClientSide && this.getAge() == IAnimal.ADULT_AGE && this.canFallInLove()){
+            this.setInLove(null);
         }
-        super.usePlayerItem(player, stack);
+
+        if (this.isBaby()) {
+            this.ageUp((int)((float)(-this.getAge() / 20) * 0.1F), true);
+            this.level.broadcastEntityEvent(this, (byte) FINISHED_EATING_ID);
+        }
     }
 
     @Override
     public SoundEvent getSpitOutItemSound() {
-        return SoundEvents.POLAR_BEAR_AMBIENT;
+        return SoundEvents.CAT_AMBIENT;
     }
 
     @Override
@@ -176,24 +167,12 @@ public abstract class PolarBearEntityMixin extends AnimalEntity implements IPred
     }
 
     @Override
+    public boolean isPrey(LivingEntity living) {
+        return AptitudePredicates.CAT_PREY_PREDICATE.test(living);
+    }
+
+    @Override
     public <T extends MobEntity & IDevourer> boolean canEat(T eatsFood, ItemStack stack) {
         return IDevourer.super.canEat(eatsFood, stack) && this.isFood(stack);
-    }
-
-    @Override
-    public void onFinishedEating() {
-        if(!this.level.isClientSide && this.getAge() == IAnimal.ADULT_AGE && this.canFallInLove()){
-            this.setInLove(null);
-        }
-
-        if (this.isBaby()) {
-            this.ageUp((int)((float)(-this.getAge() / 20) * 0.1F), true);
-            this.level.broadcastEntityEvent(this, (byte) FINISHED_EATING_ID);
-        }
-    }
-
-    @Override
-    public boolean isPrey(LivingEntity living) {
-        return AptitudePredicates.POLAR_BEAR_PREY_PREDICATE.test(living);
     }
 }

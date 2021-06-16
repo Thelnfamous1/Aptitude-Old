@@ -15,6 +15,7 @@ public class AptitudeResources {
     public static final Tags.IOptionalNamedTag<Item> LLAMAS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "llamas_eat"));
     public static final Tags.IOptionalNamedTag<Item> POLAR_BEARS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "polar_bears_eat"));
     public static final Tags.IOptionalNamedTag<Item> OCELOTS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "ocelots_eat"));
+    public static final Tags.IOptionalNamedTag<Item> CATS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "cats_eat"));
     public static final Tags.IOptionalNamedTag<Item> PARROTS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "parrots_eat"));
 
     public static final Tags.IOptionalNamedTag<Item> APPLE_EQUIVALENTS = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "apple_equivalents"));
@@ -27,4 +28,10 @@ public class AptitudeResources {
     public static final Tags.IOptionalNamedTag<EntityType<?>> DOLPHINS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "dolphins_hunt"));
     public static final Tags.IOptionalNamedTag<EntityType<?>> POLAR_BEARS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "polar_bears_hunt"));
     public static final Tags.IOptionalNamedTag<EntityType<?>> OCELOTS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "ocelots_hunt"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> CATS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "cats_hunt"));
+
+    public static final Tags.IOptionalNamedTag<EntityType<?>> CATS_REPEL = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "cats_repel"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> OCELOTS_REPEL = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "ocelots_repel"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> LLAMAS_REPEL = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "llamas_repel"));
+
 }

@@ -38,7 +38,6 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
     //private static final Ingredient HORSE_FOOD_ITEMS = Ingredient.of(AptitudeResources.HORSES_EAT);
     private static final Predicate<ItemStack> FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.HORSES_EAT);
 
-    private static final int ANGRY_SOUND_INTERVAL = 40;
     private int angrySoundCooldown;
 
     private boolean addedPanicReplacements;
@@ -189,7 +188,7 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
             if (angrySound != null) {
                 this.playSound(angrySound, this.getSoundVolume(), this.getVoicePitch());
             }
-            this.setAngrySoundCooldown(ANGRY_SOUND_INTERVAL);
+            this.setAngrySoundCooldown(this.getAngrySoundInterval());
         }
     }
 

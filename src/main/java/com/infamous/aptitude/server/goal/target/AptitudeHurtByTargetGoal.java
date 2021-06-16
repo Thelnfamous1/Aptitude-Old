@@ -5,15 +5,23 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.HurtByTargetGoal;
 
-public class AptitudeHurtByTargetGoal extends HurtByTargetGoal {
+public class AptitudeHurtByTargetGoal<T extends CreatureEntity> extends HurtByTargetGoal {
+    private boolean babiesCanAttack;
+    protected final T creatureAsGeneric;
 
-    public AptitudeHurtByTargetGoal(CreatureEntity creature, Class<?>... toIgnoreDamage) {
+    public AptitudeHurtByTargetGoal(T creature, Class<?>... toIgnoreDamage) {
         super(creature, toIgnoreDamage);
+        this.creatureAsGeneric = creature;
+    }
+
+    public AptitudeHurtByTargetGoal<T> setBabiesCanAttack(){
+        this.babiesCanAttack = true;
+        return this;
     }
 
     public void start() {
         super.start();
-        if (this.mob.isBaby()) {
+        if (this.mob.isBaby() && !this.babiesCanAttack) {
             this.alertOthers();
             this.stop();
         }
@@ -21,9 +29,8 @@ public class AptitudeHurtByTargetGoal extends HurtByTargetGoal {
     }
 
     protected void alertOther(MobEntity toAlert, LivingEntity target) {
-        if (!toAlert.isBaby()) {
+        if (!toAlert.isBaby() || this.babiesCanAttack) {
             super.alertOther(toAlert, target);
         }
-
     }
 }

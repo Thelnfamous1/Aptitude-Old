@@ -22,6 +22,7 @@ public interface IDevourer {
             if (this.canEat(devourer, itemBySlot)) {
                 // dummy-proofing start/finish eat time, preferring finish
                 if (this.getTicksSinceEaten() > Math.max(this.getFinishEatTime(), this.getStartEatTime())) {
+                    this.healUsingFood(devourer, itemBySlot);
                     ItemStack finishedItem = itemBySlot.finishUsingItem(devourer.level, devourer);
                     if (!finishedItem.isEmpty()) {
                         devourer.setItemSlot(this.getSlotForFood(), finishedItem);
@@ -38,6 +39,14 @@ public interface IDevourer {
                     devourer.level.broadcastEntityEvent(devourer, (byte)EAT_ID);
                 }
             }
+        }
+    }
+
+    default <T extends MobEntity & IDevourer> void healUsingFood(T devourer, ItemStack itemBySlot) {
+        if(this != devourer) throw new IllegalArgumentException("Argument devourer " + devourer + " is not equal to this: " + this);
+
+        if(itemBySlot.isEdible()){
+            devourer.heal(itemBySlot.getItem().getFoodProperties().getNutrition());
         }
     }
 
@@ -110,9 +119,7 @@ public interface IDevourer {
         if(this != devourer) throw new IllegalArgumentException("Argument devourer " + devourer + " is not equal to this: " + this);
 
         return !devourer.isAggressive()
-                && !devourer.isSleeping()
-                && this.getEatCooldown() <= 0
-                && devourer.getItemBySlot(this.getSlotForFood()).isEmpty();
+                && !devourer.isSleeping();
     }
 
     SoundEvent getSpitOutItemSound();

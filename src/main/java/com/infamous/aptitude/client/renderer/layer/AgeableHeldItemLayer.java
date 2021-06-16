@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.AgeableModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
@@ -17,31 +18,38 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class AgeableHeldItemLayer<T extends MobEntity, M extends AgeableModel<T>> extends LayerRenderer<T, M> {
+public class AgeableHeldItemLayer<T extends LivingEntity, M extends AgeableModel<T>> extends LayerRenderer<T, M> {
 
    public AgeableHeldItemLayer(IEntityRenderer<T, M> entityRenderer) {
       super(entityRenderer);
    }
 
-   public void render(MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, int p_225628_3_, T mob, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-      boolean baby = mob.isBaby();
+   public void render(MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, int p_225628_3_, T living, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
       matrixStack.pushPose();
-      if (baby) {
-         this.scaleAndTranslateForBaby(matrixStack);
+      if (living.isBaby()) {
+         this.scaleForBaby(matrixStack);
+         this.translateForBaby(matrixStack);
       }
 
       this.translateToHead(matrixStack);
-      this.poseItem(matrixStack, mob, netHeadYaw, headPitch);
+      this.poseItem(matrixStack, living, netHeadYaw, headPitch, partialTicks);
 
-      EquipmentSlotType slotType = mob instanceof IDevourer ? ((IDevourer) mob).getSlotForFood() : EquipmentSlotType.MAINHAND;
-      ItemStack itemBySlot = mob.getItemBySlot(slotType);
-      Minecraft.getInstance().getItemInHandRenderer().renderItem(mob, itemBySlot, ItemCameraTransforms.TransformType.GROUND, false, matrixStack, renderTypeBuffer, p_225628_3_);
+      EquipmentSlotType slotType = this.getSlotType(living);
+      ItemStack itemBySlot = living.getItemBySlot(slotType);
+      Minecraft.getInstance().getItemInHandRenderer().renderItem(living, itemBySlot, ItemCameraTransforms.TransformType.GROUND, false, matrixStack, renderTypeBuffer, p_225628_3_);
       matrixStack.popPose();
    }
 
-   protected void scaleAndTranslateForBaby(MatrixStack matrixStack) {
+   protected EquipmentSlotType getSlotType(T living) {
+      return living instanceof IDevourer ? ((IDevourer) living).getSlotForFood() : EquipmentSlotType.MAINHAND;
+   }
+
+   protected void scaleForBaby(MatrixStack matrixStack) {
       float babyScale = 0.75F;
       matrixStack.scale(babyScale, babyScale, babyScale);
+   }
+
+   protected void translateForBaby(MatrixStack matrixStack) {
       double babyTranslateX = 0.0D;
       double babyTranslateY = 0.5D;
       double babyTranslateZ = 0.209375F;
@@ -58,24 +66,23 @@ public class AgeableHeldItemLayer<T extends MobEntity, M extends AgeableModel<T>
       }
    }
 
-   protected void poseItem(MatrixStack matrixStack, T mob, float netHeadYaw, float headPitch) {
-      boolean sleeping = mob.isSleeping();
-      //float headRollAngle = mob.getHeadRollAngle(partialTicks);
+   protected void poseItem(MatrixStack matrixStack, T living, float netHeadYaw, float headPitch, float partialTicks) {
+      //float headRollAngle = living.getHeadRollAngle(partialTicks);
       //matrixStack.mulPose(Vector3f.ZP.rotation(headRollAngle));
       matrixStack.mulPose(Vector3f.YP.rotationDegrees(netHeadYaw));
       matrixStack.mulPose(Vector3f.XP.rotationDegrees(headPitch));
 
-      this.translateItem(matrixStack, mob);
+      this.translateItem(matrixStack, living);
 
       matrixStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-      if (sleeping) {
+      if (living.isSleeping()) {
          matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
       }
    }
 
-   protected void translateItem(MatrixStack matrixStack, T mob) {
-      boolean baby = mob.isBaby();
-      boolean sleeping = mob.isSleeping();
+   protected void translateItem(MatrixStack matrixStack, T living) {
+      boolean baby = living.isBaby();
+      boolean sleeping = living.isSleeping();
 
       double normalX = 0.06F;
       double anyY = 0.26F;

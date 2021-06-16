@@ -3,9 +3,12 @@ package com.infamous.aptitude.mixin;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.entity.ICanSpit;
 import com.infamous.aptitude.common.entity.ISwitchCombatTask;
+import com.infamous.aptitude.common.util.AptitudeHelper;
+import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.common.util.AptitudeResources;
 import com.infamous.aptitude.server.goal.misc.AptitudePanicGoal;
 import com.infamous.aptitude.server.goal.attack.SwitchableRangedAttackGoal;
+import com.infamous.aptitude.server.goal.target.AptitudeDefendTargetGoal;
 import com.infamous.aptitude.server.goal.target.CanSpitHurtByTargetGoal;
 import com.infamous.aptitude.server.goal.attack.SwitchableRearingAttackGoal;
 import net.minecraft.entity.EntityType;
@@ -13,6 +16,7 @@ import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.passive.horse.LlamaEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -39,6 +43,7 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
     private boolean addedPanicReplacements;
     private boolean addedRangedAttackReplacements;
     private boolean addedHurtByReplacements;
+    private boolean addedDefendReplacements;
 
     private int spitCooldown;
 
@@ -62,6 +67,9 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
         } else if(goalSelector == this.targetSelector && priority == 1 && goal instanceof HurtByTargetGoal && !this.addedHurtByReplacements){
             goalSelector.addGoal(priority, new CanSpitHurtByTargetGoal<>(this));
             this.addedHurtByReplacements = true;
+        } else if(goalSelector == this.targetSelector && priority == 2 && goal instanceof NearestAttackableTargetGoal && !this.addedDefendReplacements){
+            goalSelector.addGoal(priority, new AptitudeDefendTargetGoal<>(this, LivingEntity.class, 16, false, true, AptitudePredicates.LLAMA_DEFEND_PREDICATE).setFollowDistanceFactor(0.25F));
+            this.addedDefendReplacements = true;
         }
         else{
             goalSelector.addGoal(priority, goal);

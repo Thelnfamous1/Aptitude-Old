@@ -2,11 +2,11 @@ package com.infamous.aptitude.client;
 
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.client.renderer.layer.AgeableHeldItemLayer;
+import com.infamous.aptitude.client.renderer.layer.CatHeldItemLayer;
+import com.infamous.aptitude.client.renderer.layer.OcelotHeldItemLayer;
+import com.infamous.aptitude.client.renderer.layer.PolarBearHeldItemLayer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.entity.OcelotRenderer;
-import net.minecraft.client.renderer.entity.PolarBearRenderer;
+import net.minecraft.client.renderer.entity.*;
 import net.minecraft.entity.EntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -26,11 +26,15 @@ public class ModClientEvents {
         for(EntityRenderer<?> entityRenderer : renderers.values()){
             if(entityRenderer instanceof OcelotRenderer){
                 OcelotRenderer ocelotRenderer = (OcelotRenderer) entityRenderer;
-                ocelotRenderer.addLayer(new AgeableHeldItemLayer<>(ocelotRenderer));
+                ocelotRenderer.addLayer(new OcelotHeldItemLayer<>(ocelotRenderer));
+            }
+            else if(entityRenderer instanceof CatRenderer){
+                CatRenderer ocelotRenderer = (CatRenderer) entityRenderer;
+                ocelotRenderer.addLayer(new CatHeldItemLayer<>(ocelotRenderer));
             }
             else if(entityRenderer instanceof PolarBearRenderer){
                 PolarBearRenderer polarBearRenderer = (PolarBearRenderer) entityRenderer;
-                polarBearRenderer.addLayer(new AgeableHeldItemLayer<>(polarBearRenderer));
+                polarBearRenderer.addLayer(new PolarBearHeldItemLayer<>(polarBearRenderer));
             }
         }
     }

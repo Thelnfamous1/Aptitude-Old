@@ -18,48 +18,89 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.BreedGoal;
 import net.minecraft.entity.ai.goal.FollowParentGoal;
-import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.passive.*;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
+import net.minecraft.entity.passive.horse.HorseEntity;
 import net.minecraft.entity.passive.horse.LlamaEntity;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.function.Predicate;
-
 @Mod.EventBusSubscriber(modid = Aptitude.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeCommonEvents {
 
     @SubscribeEvent
     public static void onEntityJoinWorld(EntityJoinWorldEvent event){
-        MobEntity eventMob = event.getEntity() instanceof MobEntity ? ((MobEntity) event.getEntity()) : null;
-        if(eventMob instanceof AbstractHorseEntity && !(eventMob instanceof LlamaEntity)){
-            eventMob.targetSelector.addGoal(1, new AptitudeHurtByTargetGoal((CreatureEntity) eventMob));
-        } else if(eventMob instanceof DolphinEntity){
-            /*
-        Dolphins move around really fast, so we have to quadruple the parent/partner search distances to reduce search failures
-         */
-            eventMob.goalSelector.addGoal(1, new AptitudeBreedGoal<>(eventMob, 1.25D, 60 * 10, 8.0D * 4, 3.0D));
-            eventMob.goalSelector.addGoal(3, new AptitudeTemptGoal((CreatureEntity) eventMob, 1.25D, AptitudePredicates.DOLPHIN_FOOD_PREDICATE, false));
-            eventMob.goalSelector.addGoal(4, new AptitudeFollowParentGoal<>(eventMob, 1.25D, 8.0D, 3.0D));
-            eventMob.targetSelector.addGoal(2, new HuntGoal<>(eventMob, LivingEntity.class, 10, true, false, AptitudePredicates.DOLPHIN_PREY_PREDICATE));
-            eventMob.setCanPickUpLoot(true);
-        } else if(eventMob instanceof OcelotEntity){
-            eventMob.goalSelector.addGoal(8, new DevourerFindItemsGoal<>(eventMob, AptitudePredicates.OCELOT_ALLOWED_ITEMS, 10));
-            eventMob.targetSelector.addGoal(1, new AptitudeDefendTargetGoal<>(eventMob, CreeperEntity.class, 10, false, false, (Predicate<LivingEntity>)null));
-            eventMob.setCanPickUpLoot(true);
-        } else if(eventMob instanceof PolarBearEntity){
-            eventMob.goalSelector.addGoal(1, new BreedGoal((AnimalEntity) eventMob, 1.25D));
-            eventMob.goalSelector.addGoal(3, new AptitudeTemptGoal((CreatureEntity) eventMob, 1.25D, AptitudePredicates.POLAR_BEAR_FOOD_PREDICATE, false));
-            eventMob.goalSelector.addGoal(8, new DevourerFindItemsGoal<>(eventMob, AptitudePredicates.POLAR_BEAR_ALLOWED_ITEMS, 10));
-            eventMob.setCanPickUpLoot(true);
-        } else if(eventMob instanceof ParrotEntity){
-            eventMob.goalSelector.addGoal(1, new BreedGoal((AnimalEntity) eventMob, 1.0D));
-            eventMob.goalSelector.addGoal(1, new AptitudeTemptGoal((CreatureEntity) eventMob, 1.0D, false, AptitudePredicates.PARROT_FOOD_PREDICATE));
-            eventMob.goalSelector.addGoal(2, new FollowParentGoal((AnimalEntity) eventMob, 1.1D));
+        if(event.getWorld().isClientSide){
+            return;
         }
+
+        MobEntity eventMob = event.getEntity() instanceof MobEntity ? ((MobEntity) event.getEntity()) : null;
+
+        if(eventMob instanceof CatEntity){
+            CatEntity cat = (CatEntity) eventMob;
+            addCatGoals(cat);
+        } else if(eventMob instanceof DolphinEntity){
+            DolphinEntity dolphin = (DolphinEntity) eventMob;
+            addDolphinGoals(dolphin);
+        } else if(eventMob instanceof HorseEntity){
+            HorseEntity horse = (HorseEntity) eventMob;
+            addHorseGoals(horse);
+        } else if(eventMob instanceof OcelotEntity){
+            OcelotEntity ocelot = (OcelotEntity) eventMob;
+            addOcelotGoals(ocelot);
+        } else if(eventMob instanceof ParrotEntity){
+            ParrotEntity parrot = (ParrotEntity) eventMob;
+            addParrotGoals(parrot);
+        } else if(eventMob instanceof PolarBearEntity){
+            PolarBearEntity polarBear = (PolarBearEntity) eventMob;
+            addPolarBearGoals(polarBear);
+        }
+    }
+
+    private static void addCatGoals(CatEntity cat) {
+        cat.goalSelector.addGoal(8, new DevourerFindItemsGoal<>(cat, AptitudePredicates.ALLOWED_ITEMS, 10));
+
+        cat.targetSelector.addGoal(1, new AptitudeDefendTargetGoal<>(cat, LivingEntity.class, 10, false, false, AptitudePredicates.CAT_DEFEND_PREDICATE).setFollowDistanceFactor(0.25D));
+
+        cat.setCanPickUpLoot(true);
+    }
+
+    private static void addDolphinGoals(DolphinEntity dolphin) {
+        dolphin.goalSelector.addGoal(1, new AptitudeBreedGoal<>(dolphin, 1.25D, 60 * 10, 8.0D * 4, 3.0D));
+        dolphin.goalSelector.addGoal(3, new AptitudeTemptGoal(dolphin, 1.25D, AptitudePredicates.DOLPHIN_FOOD_PREDICATE, false));
+        dolphin.goalSelector.addGoal(4, new AptitudeFollowParentGoal<>(dolphin, 1.25D, 8.0D, 3.0D));
+
+        dolphin.targetSelector.addGoal(2, new HuntGoal<>(dolphin, LivingEntity.class, 10, true, false, AptitudePredicates.DOLPHIN_PREY_PREDICATE));
+
+        dolphin.setCanPickUpLoot(true);
+    }
+
+    private static void addHorseGoals(HorseEntity horse) {
+        horse.targetSelector.addGoal(1, new AptitudeHurtByTargetGoal<>(horse));
+    }
+
+    private static void addOcelotGoals(OcelotEntity ocelot) {
+        ocelot.goalSelector.addGoal(8, new DevourerFindItemsGoal<>(ocelot, AptitudePredicates.ALLOWED_ITEMS, 10));
+
+        ocelot.targetSelector.addGoal(1, new AptitudeDefendTargetGoal<>(ocelot, LivingEntity.class, 10, false, false, AptitudePredicates.OCELOT_DEFEND_PREDICATE).setFollowDistanceFactor(0.25D));
+
+        ocelot.setCanPickUpLoot(true);
+    }
+
+    private static void addParrotGoals(ParrotEntity parrot) {
+        parrot.goalSelector.addGoal(1, new BreedGoal(parrot, 1.0D));
+        parrot.goalSelector.addGoal(1, new AptitudeTemptGoal(parrot, 1.0D, false, AptitudePredicates.PARROT_FOOD_PREDICATE));
+        parrot.goalSelector.addGoal(2, new FollowParentGoal(parrot, 1.1D));
+    }
+
+    private static void addPolarBearGoals(PolarBearEntity polarBear) {
+        polarBear.goalSelector.addGoal(1, new BreedGoal(polarBear, 1.25D));
+        polarBear.goalSelector.addGoal(3, new AptitudeTemptGoal(polarBear, 1.25D, AptitudePredicates.POLAR_BEAR_FOOD_PREDICATE, false));
+        polarBear.goalSelector.addGoal(8, new DevourerFindItemsGoal<>(polarBear, AptitudePredicates.ALLOWED_ITEMS, 10));
+
+        polarBear.setCanPickUpLoot(true);
     }
 
     @SubscribeEvent

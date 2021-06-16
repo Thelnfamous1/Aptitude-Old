@@ -27,6 +27,7 @@ import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -35,6 +36,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(OcelotEntity.class)
 public abstract class OcelotEntityMixin extends AnimalEntity implements IPredator, IDevourer {
+
+    @Shadow public abstract boolean isFood(ItemStack p_70877_1_);
 
     private int ticksSinceEaten;
     private int eatCooldown;
@@ -60,18 +63,10 @@ public abstract class OcelotEntityMixin extends AnimalEntity implements IPredato
             method = "registerGoals")
     private void onAboutToAddGoal(GoalSelector goalSelector, int priority, Goal goal){
         if(goalSelector == this.targetSelector && priority == 1 && goal instanceof NearestAttackableTargetGoal && !this.addedNearestAttackableReplacements){
-            this.targetSelector.addGoal(priority, new HuntGoal<>(this, LivingEntity.class, 10, false, false, AptitudePredicates.OCELOT_PREY_PREDICATE));
+            goalSelector.addGoal(priority, new HuntGoal<>(this, LivingEntity.class, 10, false, false, AptitudePredicates.OCELOT_PREY_PREDICATE));
             this.addedNearestAttackableReplacements = true;
         } else {
             goalSelector.addGoal(priority, goal);
-        }
-    }
-
-    @Inject(at = @At("HEAD"), method = "mobInteract", cancellable = true)
-    private void handleAnimalInteract(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResultType> cir){
-        ItemStack itemstack = player.getItemInHand(hand);
-        if (!(this.isFood(itemstack) && this.isHungry(this))) {
-            cir.setReturnValue(ActionResultType.PASS);
         }
     }
 
@@ -80,6 +75,14 @@ public abstract class OcelotEntityMixin extends AnimalEntity implements IPredato
         if(eventId == FINISHED_EATING_ID){
             this.onFinishedEating();
             ci.cancel();
+        }
+    }
+
+    @Inject(at = @At("HEAD"), method = "mobInteract", cancellable = true)
+    private void handleAnimalInteract(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResultType> cir){
+        ItemStack itemstack = player.getItemInHand(hand);
+        if (!(this.isFood(itemstack) && this.isHungry(this))) {
+            cir.setReturnValue(ActionResultType.PASS);
         }
     }
 
@@ -123,15 +126,17 @@ public abstract class OcelotEntityMixin extends AnimalEntity implements IPredato
     @Override
     public void usePlayerItem(PlayerEntity player, ItemStack stack) {
         if(this.isFood(stack)){
-            this.setEatCooldown(this.getEatInterval());
             this.playSound(this.getEatingSound(stack), 1.0F, 1.0F);
+            if(stack.isEdible()) {
+                this.heal(stack.getItem().getFoodProperties().getNutrition());
+            }
         }
         super.usePlayerItem(player, stack);
     }
 
     @Override
     public SoundEvent getSpitOutItemSound() {
-        return SoundEvents.POLAR_BEAR_AMBIENT;
+        return SoundEvents.OCELOT_AMBIENT;
     }
 
     @Override
