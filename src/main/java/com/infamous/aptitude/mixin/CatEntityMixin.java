@@ -12,6 +12,7 @@ import net.minecraft.entity.ai.goal.NonTamedTargetGoal;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.CatEntity;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
@@ -32,14 +33,14 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(CatEntity.class)
-public abstract class CatEntityMixin extends AnimalEntity implements IPredator, IDevourer {
+public abstract class CatEntityMixin extends TameableEntity implements IPredator, IDevourer {
 
     private int ticksSinceEaten;
     private int eatCooldown;
     private int huntCooldown;
     private boolean addedNonTamedTargetReplacements;
 
-    protected CatEntityMixin(EntityType<? extends AnimalEntity> p_i48568_1_, World p_i48568_2_) {
+    protected CatEntityMixin(EntityType<? extends TameableEntity> p_i48568_1_, World p_i48568_2_) {
         super(p_i48568_1_, p_i48568_2_);
     }
 
@@ -62,14 +63,6 @@ public abstract class CatEntityMixin extends AnimalEntity implements IPredator, 
             this.addedNonTamedTargetReplacements = true;
         } else {
             goalSelector.addGoal(priority, goal);
-        }
-    }
-
-    @Inject(at = @At("HEAD"), method = "mobInteract", cancellable = true)
-    private void handleAnimalInteract(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResultType> cir){
-        ItemStack itemstack = player.getItemInHand(hand);
-        if (!(this.isFood(itemstack) && this.isHungry(this))) {
-            cir.setReturnValue(ActionResultType.PASS);
         }
     }
 
@@ -172,7 +165,7 @@ public abstract class CatEntityMixin extends AnimalEntity implements IPredator, 
     }
 
     @Override
-    public <T extends MobEntity & IDevourer> boolean canEat(T eatsFood, ItemStack stack) {
-        return IDevourer.super.canEat(eatsFood, stack) && this.isFood(stack);
+    public <T extends MobEntity & IDevourer> boolean canEat(T devourer, ItemStack stack) {
+        return IDevourer.super.canEat(devourer, stack) && this.isFood(stack);
     }
 }

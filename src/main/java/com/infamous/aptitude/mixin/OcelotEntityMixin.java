@@ -81,7 +81,7 @@ public abstract class OcelotEntityMixin extends AnimalEntity implements IPredato
     @Inject(at = @At("HEAD"), method = "mobInteract", cancellable = true)
     private void handleAnimalInteract(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResultType> cir){
         ItemStack itemstack = player.getItemInHand(hand);
-        if (!(this.isFood(itemstack) && this.isHungry(this))) {
+        if (!this.isFood(itemstack) || !this.isHungry(this)) {
             cir.setReturnValue(ActionResultType.PASS);
         }
     }
@@ -170,8 +170,8 @@ public abstract class OcelotEntityMixin extends AnimalEntity implements IPredato
     }
 
     @Override
-    public <T extends MobEntity & IDevourer> boolean canEat(T eatsFood, ItemStack stack) {
-        return IDevourer.super.canEat(eatsFood, stack) && this.isFood(stack);
+    public <T extends MobEntity & IDevourer> boolean canEat(T devourer, ItemStack stack) {
+        return IDevourer.super.canEat(devourer, stack) && this.isFood(stack);
     }
 
     @Override

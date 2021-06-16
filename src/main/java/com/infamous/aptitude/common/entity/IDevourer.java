@@ -76,10 +76,11 @@ public interface IDevourer {
         }
     }
 
-    default <T extends MobEntity & IDevourer> boolean canEat(T eatsFood, ItemStack stack) {
+    default <T extends MobEntity & IDevourer> boolean canEat(T devourer, ItemStack stack) {
+        if(this != devourer) throw new IllegalArgumentException("Argument devourer " + devourer + " is not equal to this: " + this);
+
         return stack.getItem().isEdible()
-                && !eatsFood.isAggressive()
-                && !eatsFood.isSleeping()
+                && this.isHungry(devourer)
                 && this.getEatCooldown() <= 0;
     }
 

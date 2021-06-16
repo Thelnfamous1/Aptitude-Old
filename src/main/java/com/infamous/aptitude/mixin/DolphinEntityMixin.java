@@ -315,8 +315,8 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
     }
 
     @Override
-    public <T extends MobEntity & IDevourer> boolean canEat(T eatsFood, ItemStack stack) {
-        return this.isFood(stack) && IDevourer.super.canEat(eatsFood, stack);
+    public <T extends MobEntity & IDevourer> boolean canEat(T devourer, ItemStack stack) {
+        return this.isFood(stack) && IDevourer.super.canEat(devourer, stack);
     }
 
     @Override

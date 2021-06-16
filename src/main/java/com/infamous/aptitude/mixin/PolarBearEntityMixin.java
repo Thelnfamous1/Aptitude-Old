@@ -176,8 +176,8 @@ public abstract class PolarBearEntityMixin extends AnimalEntity implements IPred
     }
 
     @Override
-    public <T extends MobEntity & IDevourer> boolean canEat(T eatsFood, ItemStack stack) {
-        return IDevourer.super.canEat(eatsFood, stack) && this.isFood(stack);
+    public <T extends MobEntity & IDevourer> boolean canEat(T devourer, ItemStack stack) {
+        return IDevourer.super.canEat(devourer, stack) && this.isFood(stack);
     }
 
     @Override
