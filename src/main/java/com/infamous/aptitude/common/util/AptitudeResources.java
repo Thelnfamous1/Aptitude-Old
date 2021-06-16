@@ -18,6 +18,9 @@ public class AptitudeResources {
     public static final Tags.IOptionalNamedTag<Item> CATS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "cats_eat"));
     public static final Tags.IOptionalNamedTag<Item> PARROTS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "parrots_eat"));
 
+    public static final Tags.IOptionalNamedTag<Item> HORSES_BREED_WITH = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "horses_breed_with"));
+    public static final Tags.IOptionalNamedTag<Item> LLAMAS_BREED_WITH = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "llamas_breed_with"));
+
     public static final Tags.IOptionalNamedTag<Item> APPLE_EQUIVALENTS = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "apple_equivalents"));
     public static final Tags.IOptionalNamedTag<Item> GOLDEN_APPLE_EQUIVALENTS = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "golden_apple_equivalents"));
     public static final Tags.IOptionalNamedTag<Item> GOLDEN_CARROT_EQUIVALENTS = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "golden_carrot_equivalents"));

@@ -108,7 +108,7 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
             healAmount = 10.0F;
         }
 
-        if(this.isFood(stack)){
+        if(item.is(AptitudeResources.LLAMAS_BREED_WITH)){
             if (!this.level.isClientSide && this.isTamed() && this.getAge() == 0 && !this.isInLove()) {
                 handled = true;
                 this.setInLove(player);

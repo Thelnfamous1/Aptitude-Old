@@ -109,7 +109,7 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
             temperBoost = 10;
         }
 
-        if(this.isFood(stack)){
+        if(item.is(AptitudeResources.HORSES_BREED_WITH)){
             if (!this.level.isClientSide && this.isTamed() && this.getAge() == 0 && !this.isInLove()) {
                 handled = true;
                 this.setInLove(player);

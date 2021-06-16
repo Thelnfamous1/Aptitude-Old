@@ -11,9 +11,11 @@
     "AbstractHorseEntityMixin",
     "BredAnimalsTriggerMixin",
     "CatEntityMixin",
+    "CatEntityTemptGoalMixin",
     "DolphinEntityMixin",
     "LlamaEntityMixin",
     "OcelotEntityMixin",
+    "OcelotEntityTemptGoalMixin",
     "ParrotEntityMixin",
     "PlayWithItemsGoalMixin",
     "PolarBearEntityMixin"
