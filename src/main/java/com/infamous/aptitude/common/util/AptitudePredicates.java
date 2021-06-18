@@ -3,6 +3,7 @@ package com.infamous.aptitude.common.util;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 
 import java.util.function.Predicate;
 
@@ -22,6 +23,16 @@ public class AptitudePredicates {
     public static final Predicate<ItemStack> POLAR_BEAR_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.POLAR_BEARS_EAT);
 
     public static final Predicate<ItemStack> PARROT_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.PARROTS_EAT);
+    public static final Predicate<ItemStack> COW_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.COWS_EAT);
+    public static final Predicate<ItemStack> PIG_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.PIGS_EAT);
+    public static final Predicate<ItemStack> CHICKEN_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.CHICKENS_EAT);
+    public static final Predicate<ItemStack> RABBIT_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.RABBITS_EAT);
+    public static final Predicate<ItemStack> SHEEP_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.SHEEP_EAT);
+    public static final Predicate<ItemStack> FOX_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.FOXES_EAT);
+    public static final Predicate<ItemStack> PANDA_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.PANDAS_EAT);
+    public static final Predicate<ItemStack> TURTLE_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.TURTLES_EAT);
+    public static final Predicate<ItemStack> STRIDER_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.STRIDERS_EAT);
+    public static final Predicate<ItemStack> STRIDER_TEMPT_PREDICATE = stack -> STRIDER_FOOD_PREDICATE.test(stack) && stack.getItem() == Items.WARPED_FUNGUS_ON_A_STICK;
 
     public static final Predicate<LivingEntity> CAT_DEFEND_PREDICATE = living -> living.getType().is(AptitudeResources.CATS_REPEL) && !AptitudeHelper.isTamedAnimal(living);
     public static final Predicate<LivingEntity> OCELOT_DEFEND_PREDICATE = living -> living.getType().is(AptitudeResources.OCELOTS_REPEL) && !AptitudeHelper.isTamedAnimal(living);

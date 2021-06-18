@@ -20,6 +20,11 @@ public class DevourerFindItemsGoal<M extends MobEntity, D extends MobEntity & ID
     }
 
     @Override
+    protected boolean isUndesiredItem(ItemStack itemStack) {
+        return super.isUndesiredItem(itemStack) || !itemStack.isEdible();
+    }
+
+    @Override
     protected ItemStack getFoundItemBySlot() {
         return this.devourer.getItemBySlot(this.devourer.getSlotForFood());
     }

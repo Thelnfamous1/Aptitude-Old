@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "#aptitude:fruits",
+    "#aptitude:veggies",
+    "#aptitude:meats",
+    "#aptitude:edible_fishes",
+    "#forge:eggs",
+    "#forge:mushrooms"
+  ]
+}

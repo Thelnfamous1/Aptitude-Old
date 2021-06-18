@@ -17,6 +17,17 @@ public class AptitudeResources {
     public static final Tags.IOptionalNamedTag<Item> OCELOTS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "ocelots_eat"));
     public static final Tags.IOptionalNamedTag<Item> CATS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "cats_eat"));
     public static final Tags.IOptionalNamedTag<Item> PARROTS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "parrots_eat"));
+    public static final Tags.IOptionalNamedTag<Item> COWS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "cows_eat"));
+    public static final Tags.IOptionalNamedTag<Item> PIGS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "pigs_eat"));
+    public static final Tags.IOptionalNamedTag<Item> CHICKENS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "chickens_eat"));
+    public static final Tags.IOptionalNamedTag<Item> RABBITS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "rabbits_eat"));
+    public static final Tags.IOptionalNamedTag<Item> SHEEP_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "sheep_eat"));
+    public static final Tags.IOptionalNamedTag<Item> FOXES_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "foxes_eat"));
+    public static final Tags.IOptionalNamedTag<Item> PANDAS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "pandas_eat"));
+    public static final Tags.IOptionalNamedTag<Item> TURTLES_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "turtles_eat"));
+    public static final Tags.IOptionalNamedTag<Item> STRIDERS_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "striders_eat"));
+
+    public static final Tags.IOptionalNamedTag<Item> PARROTS_CANNOT_EAT = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "parrots_cannot_eat"));
 
     public static final Tags.IOptionalNamedTag<Item> HORSES_BREED_WITH = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "horses_breed_with"));
     public static final Tags.IOptionalNamedTag<Item> LLAMAS_BREED_WITH = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "llamas_breed_with"));

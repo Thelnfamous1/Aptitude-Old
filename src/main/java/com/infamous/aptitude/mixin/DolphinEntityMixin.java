@@ -1,11 +1,9 @@
 package com.infamous.aptitude.mixin;
 
-import com.infamous.aptitude.Aptitude;
-import com.infamous.aptitude.common.entity.IAgeable;
-import com.infamous.aptitude.common.entity.IAnimal;
-import com.infamous.aptitude.common.entity.IDevourer;
-import com.infamous.aptitude.common.entity.IPredator;
+import com.infamous.aptitude.common.entity.*;
+import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudePredicates;
+import com.infamous.aptitude.server.goal.misc.DevourerPlayWithItemsGoal;
 import com.infamous.aptitude.server.goal.target.AptitudeHurtByTargetGoal;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.Goal;
@@ -38,7 +36,7 @@ import javax.annotation.Nullable;
 import java.util.UUID;
 
 @Mixin(DolphinEntity.class)
-public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPredator, IDevourer {
+public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPredator, IDevourer, IPlaysWithItems {
     //private static final Ingredient DOLPHIN_FOOD_ITEMS = Ingredient.of(AptitudeResources.DOLPHINS_EAT);
 
     private static final DataParameter<Boolean> DATA_BABY_ID = EntityDataManager.defineId(DolphinEntity.class, DataSerializers.BOOLEAN);
@@ -51,6 +49,7 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
     private int ticksSinceEaten;
     private int eatCooldown;
     private boolean addedHurtByReplacements;
+    private boolean addedPlayWithItemsReplacement;
 
     protected DolphinEntityMixin(EntityType<? extends WaterMobEntity> entityType, World world) {
         super(entityType, world);
@@ -61,8 +60,11 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
             method = "registerGoals")
     private void onAboutToAddGoal(GoalSelector goalSelector, int priority, Goal goal){
         if(goalSelector == this.targetSelector && priority == 1 && goal instanceof HurtByTargetGoal && !this.addedHurtByReplacements){
-            goalSelector.addGoal(priority, new AptitudeHurtByTargetGoal(this, GuardianEntity.class).setAlertOthers());
+            goalSelector.addGoal(priority, new AptitudeHurtByTargetGoal<>(this, GuardianEntity.class).setAlertOthers());
             this.addedHurtByReplacements = true;
+        } else if(goalSelector == this.goalSelector && priority == 8 && !this.addedPlayWithItemsReplacement){
+            goalSelector.addGoal(priority, new DevourerPlayWithItemsGoal<>(this, AptitudePredicates.ALLOWED_ITEMS, 100));
+            this.addedPlayWithItemsReplacement = true;
         } else {
             goalSelector.addGoal(priority, goal);
         }
@@ -119,9 +121,7 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
     @Inject(at = @At(value = "HEAD"), method = "pickUpItem", cancellable = true)
     private void customPickUpItem(ItemEntity itemEntity, CallbackInfo ci){
         this.handlePickUpItem(this, itemEntity);
-
         ci.cancel();
-        Aptitude.LOGGER.debug("Silently overwrote DolphinEntity#pickUpItem for {}", this);
     }
 
     @Override
@@ -335,6 +335,7 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
             this.playSound(this.getEatingSound(stack), 1.0F, 1.0F);
             if(stack.isEdible()) {
                 this.heal(stack.getItem().getFoodProperties().getNutrition());
+                AptitudeHelper.addEatEffect(stack, this.level, this);
             }
         }
         IAnimal.super.usePlayerItem(player, stack);
@@ -343,5 +344,10 @@ public class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPred
     @Override
     public <T extends MobEntity & IAnimal> boolean canAcceptFood(T animal, ItemStack stack) {
         return this.isHungry(this);
+    }
+
+    @Override
+    public SoundEvent getPlayingSound() {
+        return SoundEvents.DOLPHIN_PLAY;
     }
 }

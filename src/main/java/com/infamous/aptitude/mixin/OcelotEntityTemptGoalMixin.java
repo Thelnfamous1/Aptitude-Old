@@ -22,6 +22,6 @@ public abstract class OcelotEntityTemptGoalMixin extends TemptGoal {
 
     @Override
     protected boolean shouldFollowItem(ItemStack stack) {
-        return ocelot.isFood(stack);
+        return this.ocelot.isFood(stack);
     }
 }

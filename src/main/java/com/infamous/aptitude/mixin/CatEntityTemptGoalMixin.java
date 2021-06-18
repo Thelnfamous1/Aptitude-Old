@@ -1,7 +1,5 @@
 package com.infamous.aptitude.mixin;
 
-import com.infamous.aptitude.common.util.AptitudePredicates;
-import com.infamous.aptitude.common.util.AptitudeResources;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.ai.goal.TemptGoal;
 import net.minecraft.entity.passive.CatEntity;
@@ -24,6 +22,6 @@ public abstract class CatEntityTemptGoalMixin extends TemptGoal {
 
     @Override
     protected boolean shouldFollowItem(ItemStack stack) {
-        return cat.isFood(stack);
+        return this.cat.isFood(stack);
     }
 }

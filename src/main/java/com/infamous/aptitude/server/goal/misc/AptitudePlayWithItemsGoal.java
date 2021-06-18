@@ -1,5 +1,6 @@
 package com.infamous.aptitude.server.goal.misc;
 
+import com.infamous.aptitude.common.entity.IPlaysWithItems;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.item.ItemEntity;
@@ -10,11 +11,11 @@ import net.minecraft.util.math.MathHelper;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class AptitudePlayWithItemsGoal<T extends MobEntity> extends Goal {
-    private final T mob;
-    private int cooldown;
-    private final Predicate<ItemEntity> itemEntityPredicate;
-    private final int cooldownInterval;
+public class AptitudePlayWithItemsGoal<T extends MobEntity & IPlaysWithItems> extends Goal {
+    protected final T mob;
+    protected int cooldown;
+    protected final Predicate<ItemEntity> itemEntityPredicate;
+    protected final int cooldownInterval;
 
     public AptitudePlayWithItemsGoal(T mob, Predicate<ItemEntity> itemEntityPredicate, int cooldownInterval) {
         this.mob = mob;
@@ -40,14 +41,14 @@ public class AptitudePlayWithItemsGoal<T extends MobEntity> extends Goal {
         List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(8.0D, 8.0D, 8.0D), this.itemEntityPredicate);
         if (!list.isEmpty()) {
             this.mob.getNavigation().moveTo(list.get(0), (double)1.2F);
-            this.playPlaySound();
+            this.mob.playSound(this.mob.getPlayingSound(), 1.0F, 1.0F);
         }
 
-        this.cooldown = 0;
+        this.resetCooldown();
     }
 
-    protected void playPlaySound() {
-        this.mob.playAmbientSound();
+    protected void resetCooldown() {
+        this.cooldown = 0;
     }
 
     public void stop() {
@@ -55,8 +56,12 @@ public class AptitudePlayWithItemsGoal<T extends MobEntity> extends Goal {
         if (!playItem.isEmpty()) {
             this.drop(playItem);
             this.mob.setItemSlot(this.getPlayItemSlot(), ItemStack.EMPTY);
-            this.cooldown = this.mob.tickCount + this.mob.getRandom().nextInt(this.cooldownInterval);
+            this.generateCooldown();
         }
+    }
+
+    protected void generateCooldown() {
+        this.cooldown = this.mob.tickCount + this.mob.getRandom().nextInt(this.cooldownInterval);
     }
 
     public void tick() {

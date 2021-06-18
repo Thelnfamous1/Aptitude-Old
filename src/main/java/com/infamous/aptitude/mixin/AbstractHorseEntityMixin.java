@@ -3,6 +3,7 @@ package com.infamous.aptitude.mixin;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.entity.IHasOwner;
 import com.infamous.aptitude.common.entity.IRearing;
+import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudeResources;
 import com.infamous.aptitude.server.goal.misc.AptitudePanicGoal;
 import com.infamous.aptitude.server.goal.attack.RearingAttackGoal;
@@ -22,6 +23,7 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -77,8 +79,12 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
         cir.setReturnValue(FOOD_PREDICATE.test(stack));
     }
 
-    @Inject(at = @At("HEAD"), method = "handleEating", cancellable = true)
-    protected void handleEatingForFoodTag(PlayerEntity player, ItemStack stack, CallbackInfoReturnable<Boolean> cir){
+    /**
+     * @author Thelnfamous1
+     * @reason Replacing hardcoded food checks with tags
+     */
+    @Overwrite
+    protected boolean handleEating(PlayerEntity player, ItemStack stack){
         boolean handled = false;
         float healAmount = 0.0F;
         int ageBoost = 0;
@@ -141,10 +147,15 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
             this.eating();
         }
 
-        cir.setReturnValue(handled);
-        Aptitude.LOGGER.debug("Silently overwrote AbstractHorseEntity#handlingEating for {}", this);
+        AptitudeHelper.addEatEffect(stack, this.level, this);
+
+        return handled;
     }
 
+    @Override
+    public boolean canAttack(LivingEntity living) {
+        return !this.isOwnedBy(living) && super.canAttack(living);
+    }
 
     @Override
     public Team getTeam() {

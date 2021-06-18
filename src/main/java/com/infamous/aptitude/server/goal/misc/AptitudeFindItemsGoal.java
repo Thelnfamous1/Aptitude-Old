@@ -23,7 +23,7 @@ public class AptitudeFindItemsGoal<T extends MobEntity> extends Goal {
     }
 
       public boolean canUse() {
-         if (!this.getFoundItemBySlot().isEmpty()) {
+         if (!this.isUndesiredItem(this.getFoundItemBySlot())) {
             return false;
          } else if (this.mob.getTarget() == null && this.mob.getLastHurtByMob() == null) {
             if (!this.canMove()) {
@@ -32,12 +32,16 @@ public class AptitudeFindItemsGoal<T extends MobEntity> extends Goal {
                return false;
             } else {
                List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(8.0D, 8.0D, 8.0D), this.itemEntityPredicate);
-               return !list.isEmpty() && this.getFoundItemBySlot().isEmpty();
+               return !list.isEmpty() && this.isUndesiredItem(this.getFoundItemBySlot());
             }
          } else {
             return false;
          }
       }
+
+    protected boolean isUndesiredItem(ItemStack itemStack) {
+        return this.getFoundItemBySlot().isEmpty();
+    }
 
     protected ItemStack getFoundItemBySlot() {
         return this.mob.getItemBySlot(EquipmentSlotType.MAINHAND);
@@ -50,7 +54,7 @@ public class AptitudeFindItemsGoal<T extends MobEntity> extends Goal {
     public void tick() {
          List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(8.0D, 8.0D, 8.0D), this.itemEntityPredicate);
          ItemStack itemBySlot = this.getFoundItemBySlot();
-         if (itemBySlot.isEmpty() && !list.isEmpty()) {
+         if (this.isUndesiredItem(itemBySlot) && !list.isEmpty()) {
             this.mob.getNavigation().moveTo(list.get(0), (double)1.2F);
          }
 

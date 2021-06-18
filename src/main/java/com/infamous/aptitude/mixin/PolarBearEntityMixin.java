@@ -3,6 +3,7 @@ package com.infamous.aptitude.mixin;
 import com.infamous.aptitude.common.entity.IAnimal;
 import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.entity.IPredator;
+import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.server.goal.target.HuntGoal;
 import net.minecraft.entity.*;
@@ -135,6 +136,7 @@ public abstract class PolarBearEntityMixin extends AnimalEntity implements IPred
             this.playSound(this.getEatingSound(stack), 1.0F, 1.0F);
             if(stack.isEdible()) {
                 this.heal(stack.getItem().getFoodProperties().getNutrition());
+                AptitudeHelper.addEatEffect(stack, this.level, this);
             }
         }
         super.usePlayerItem(player, stack);

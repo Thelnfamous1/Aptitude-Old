@@ -3,6 +3,7 @@ package com.infamous.aptitude.mixin;
 import com.infamous.aptitude.common.entity.IAnimal;
 import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.entity.IPredator;
+import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.server.goal.target.HuntGoal;
 import net.minecraft.entity.*;
@@ -30,6 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(CatEntity.class)
@@ -63,6 +65,14 @@ public abstract class CatEntityMixin extends TameableEntity implements IPredator
             this.addedNonTamedTargetReplacements = true;
         } else {
             goalSelector.addGoal(priority, goal);
+        }
+    }
+
+    @Inject(at = @At("HEAD"), method = "usePlayerItem")
+    private void addFoodEffects(PlayerEntity player, ItemStack stack, CallbackInfo ci){
+        if(this.isFood(stack) && stack.isEdible()){
+            // when this is called in CatEntity#mobInteract, the cat subsequently calls LivingEntity#heal
+            AptitudeHelper.addEatEffect(stack, this.level, this);
         }
     }
 

@@ -24,6 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -91,8 +92,12 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
         cir.setReturnValue(LLAMA_FOOD_PREDICATE.test(stack));
     }
 
-    @Override
-    protected void handleEatingForFoodTag(PlayerEntity player, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+    /**
+     * @author Thelnfamous1
+     * @reason Replacing hardcoded food checks with tags
+     */
+    @Overwrite
+    protected boolean handleEating(PlayerEntity player, ItemStack stack) {
         int ageBoost = 0;
         int temperBoost = 0;
         float healAmount = 0.0F;
@@ -140,8 +145,9 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
             this.eating();
         }
 
-        cir.setReturnValue(handled);
-        Aptitude.LOGGER.debug("Silently overwrote LlamaEntity#handlingEating for {}", this);
+        AptitudeHelper.addEatEffect(stack, this.level, this);
+
+        return handled;
     }
 
     @Override

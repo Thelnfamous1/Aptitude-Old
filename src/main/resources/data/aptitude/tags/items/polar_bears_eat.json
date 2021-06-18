@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "#minecraft:fishes",
+    "#aptitude:edible_fishes",
     "#aptitude:meats",
     "minecraft:sweet_berries"
   ]

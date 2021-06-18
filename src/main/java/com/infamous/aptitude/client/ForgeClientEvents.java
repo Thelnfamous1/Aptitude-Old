@@ -1,5 +1,6 @@
-package com.infamous.aptitude;
+package com.infamous.aptitude.client;
 
+import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.entity.IAnimal;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.LivingRenderer;
