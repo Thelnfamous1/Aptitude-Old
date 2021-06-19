@@ -43,6 +43,8 @@ public class AptitudeResources {
     public static final Tags.IOptionalNamedTag<EntityType<?>> POLAR_BEARS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "polar_bears_hunt"));
     public static final Tags.IOptionalNamedTag<EntityType<?>> OCELOTS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "ocelots_hunt"));
     public static final Tags.IOptionalNamedTag<EntityType<?>> CATS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "cats_hunt"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> FOXES_HUNT_ON_LAND = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "foxes_hunt_on_land"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> FOXES_HUNT_IN_WATER = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "foxes_hunt_in_water"));
 
     public static final Tags.IOptionalNamedTag<EntityType<?>> CATS_REPEL = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "cats_repel"));
     public static final Tags.IOptionalNamedTag<EntityType<?>> OCELOTS_REPEL = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "ocelots_repel"));

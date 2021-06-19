@@ -1,5 +1,6 @@
 package com.infamous.aptitude.common.util;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
@@ -21,6 +22,10 @@ public class AptitudePredicates {
 
     public static final Predicate<LivingEntity> POLAR_BEAR_PREY_PREDICATE = living -> living.getType().is(AptitudeResources.POLAR_BEARS_HUNT);
     public static final Predicate<ItemStack> POLAR_BEAR_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.POLAR_BEARS_EAT);
+
+    public static final Predicate<LivingEntity> FOXES_HUNT_ON_LAND = entity -> entity.getType().is(AptitudeResources.FOXES_HUNT_ON_LAND);
+    public static final Predicate<LivingEntity> FOXES_HUNT_IN_WATER = entity -> entity.getType().is(AptitudeResources.FOXES_HUNT_IN_WATER);
+    public static final Predicate<Entity> FOXES_CAN_STALK = entity -> entity instanceof LivingEntity && FOXES_HUNT_ON_LAND.test((LivingEntity) entity);
 
     public static final Predicate<ItemStack> PARROT_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.PARROTS_EAT);
     public static final Predicate<ItemStack> COW_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.COWS_EAT);

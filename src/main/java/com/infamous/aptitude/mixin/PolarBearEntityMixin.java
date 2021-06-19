@@ -1,5 +1,6 @@
 package com.infamous.aptitude.mixin;
 
+import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.entity.IAnimal;
 import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.entity.IPredator;
@@ -179,7 +180,10 @@ public abstract class PolarBearEntityMixin extends AnimalEntity implements IPred
 
     @Override
     public <T extends MobEntity & IDevourer> boolean canEat(T devourer, ItemStack stack) {
-        return IDevourer.super.canEat(devourer, stack) && this.isFood(stack);
+        return stack.getItem().isEdible()
+                && this.isHungry(devourer)
+                && this.getEatCooldown() <= 0
+                && this.isFood(stack);
     }
 
     @Override

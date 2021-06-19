@@ -23,7 +23,6 @@
     "PandaEntityMixin",
     "ParrotEntityMixin",
     "PigEntityMixin",
-    "PlayerTemptGoalMixin",
     "PolarBearEntityMixin",
     "ProjectileHelperMixin",
     "RabbitEntityMixin",

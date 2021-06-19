@@ -1,5 +1,7 @@
 package com.infamous.aptitude.common.entity;
 
+import com.infamous.aptitude.Aptitude;
+import com.infamous.aptitude.common.util.AptitudeHelper;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -47,6 +49,7 @@ public interface IDevourer {
 
         if(itemBySlot.isEdible()){
             devourer.heal(itemBySlot.getItem().getFoodProperties().getNutrition());
+            AptitudeHelper.addEatEffect(itemBySlot, devourer.level, devourer);
         }
     }
 

@@ -44,6 +44,9 @@ public class ForgeCommonEvents {
         } else if(eventMob instanceof DolphinEntity){
             DolphinEntity dolphin = (DolphinEntity) eventMob;
             addDolphinGoals(dolphin);
+        } else if(eventMob instanceof FoxEntity){
+            FoxEntity fox = (FoxEntity) eventMob;
+            addFoxGoals(fox);
         } else if(eventMob instanceof HorseEntity){
             HorseEntity horse = (HorseEntity) eventMob;
             addHorseGoals(horse);
@@ -75,6 +78,10 @@ public class ForgeCommonEvents {
         dolphin.targetSelector.addGoal(2, new HuntGoal<>(dolphin, LivingEntity.class, 10, true, false, AptitudePredicates.DOLPHIN_PREY_PREDICATE));
 
         dolphin.setCanPickUpLoot(true);
+    }
+
+    private static void addFoxGoals(FoxEntity fox){
+        fox.goalSelector.addGoal(3, new AptitudeTemptGoal(fox, 1.25D, AptitudePredicates.FOX_FOOD_PREDICATE, false));
     }
 
     private static void addHorseGoals(HorseEntity horse) {

@@ -316,7 +316,9 @@ public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnim
 
     @Override
     public <T extends MobEntity & IDevourer> boolean canEat(T devourer, ItemStack stack) {
-        return this.isFood(stack) && IDevourer.super.canEat(devourer, stack);
+        return stack.getItem().isEdible()
+                && this.getEatCooldown() <= 0
+                && this.isFood(stack);
     }
 
     @Override

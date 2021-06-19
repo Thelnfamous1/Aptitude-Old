@@ -173,7 +173,10 @@ public abstract class OcelotEntityMixin extends AnimalEntity implements IPredato
 
     @Override
     public <T extends MobEntity & IDevourer> boolean canEat(T devourer, ItemStack stack) {
-        return IDevourer.super.canEat(devourer, stack) && this.isFood(stack);
+        return stack.getItem().isEdible()
+                && this.isHungry(devourer)
+                && this.getEatCooldown() <= 0
+                && this.isFood(stack);
     }
 
     @Override
