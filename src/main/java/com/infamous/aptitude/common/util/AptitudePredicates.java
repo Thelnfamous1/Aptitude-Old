@@ -9,8 +9,6 @@ import net.minecraft.item.Items;
 import java.util.function.Predicate;
 
 public class AptitudePredicates {
-    public static final Predicate<ItemEntity> ALLOWED_ITEMS = (itemEntity) -> !itemEntity.hasPickUpDelay() && itemEntity.isAlive();
-
     public static final Predicate<LivingEntity> OCELOT_PREY_PREDICATE = living -> living.getType().is(AptitudeResources.OCELOTS_HUNT);
     public static final Predicate<ItemStack> OCELOT_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.OCELOTS_EAT);
 
@@ -37,10 +35,16 @@ public class AptitudePredicates {
     public static final Predicate<ItemStack> PANDA_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.PANDAS_EAT);
     public static final Predicate<ItemStack> TURTLE_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.TURTLES_EAT);
     public static final Predicate<ItemStack> STRIDER_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.STRIDERS_EAT);
-    public static final Predicate<ItemStack> STRIDER_TEMPT_PREDICATE = stack -> STRIDER_FOOD_PREDICATE.test(stack) && stack.getItem() == Items.WARPED_FUNGUS_ON_A_STICK;
+    public static final Predicate<ItemStack> STRIDER_TEMPT_PREDICATE = stack -> STRIDER_FOOD_PREDICATE.test(stack) || stack.getItem() == Items.WARPED_FUNGUS_ON_A_STICK;
+    public static final Predicate<ItemStack> CAKE_PREDICATE = stack -> stack.getItem().is(AptitudeResources.CAKES);
+    public static final Predicate<ItemStack> PANDA_FOOD_OR_CAKE_PREDICATE = stack -> PANDA_FOOD_PREDICATE.test(stack) || CAKE_PREDICATE.test(stack);
 
     public static final Predicate<LivingEntity> CAT_DEFEND_PREDICATE = living -> living.getType().is(AptitudeResources.CATS_REPEL) && !AptitudeHelper.isTamedAnimal(living);
     public static final Predicate<LivingEntity> OCELOT_DEFEND_PREDICATE = living -> living.getType().is(AptitudeResources.OCELOTS_REPEL) && !AptitudeHelper.isTamedAnimal(living);
     public static final Predicate<LivingEntity> LLAMA_DEFEND_PREDICATE = living -> living.getType().is(AptitudeResources.LLAMAS_REPEL) && !AptitudeHelper.isTamedAnimal(living);
+
+    public static final Predicate<ItemEntity> ALLOWED_ITEMS = (itemEntity) -> !itemEntity.hasPickUpDelay() && itemEntity.isAlive();
+    public static final Predicate<ItemEntity> PANDA_ITEMS =
+            (itemEntity) -> PANDA_FOOD_OR_CAKE_PREDICATE.test(itemEntity.getItem()) && !itemEntity.hasPickUpDelay() && itemEntity.isAlive();
 
 }

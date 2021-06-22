@@ -3,24 +3,42 @@ package com.infamous.aptitude.mixin;
 import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.server.goal.misc.AptitudeTemptGoal;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.GoalSelector;
 import net.minecraft.entity.ai.goal.TemptGoal;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.ChickenEntity;
 import net.minecraft.entity.passive.PandaEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.function.Predicate;
+
 @Mixin(PandaEntity.class)
 public abstract class PandaEntityMixin extends AnimalEntity {
+
+    @Final
+    @Shadow
+    @Mutable
+    private static Predicate<ItemEntity> PANDA_ITEMS;
+
+    static {
+        PANDA_ITEMS = AptitudePredicates.PANDA_ITEMS;
+    }
 
     private boolean addedTemptReplacements;
 
@@ -43,6 +61,11 @@ public abstract class PandaEntityMixin extends AnimalEntity {
     @Inject(at = @At("RETURN"), method = "isFood", cancellable = true)
     private void checkFoodTag(ItemStack stack, CallbackInfoReturnable<Boolean> cir){
         cir.setReturnValue(AptitudePredicates.PANDA_FOOD_PREDICATE.test(stack));
+    }
+
+    @Inject(at = @At("RETURN"), method = "isFoodOrCake", cancellable = true)
+    private void checkFoodOrCakeTag(ItemStack stack, CallbackInfoReturnable<Boolean> cir){
+        cir.setReturnValue(AptitudePredicates.PANDA_FOOD_OR_CAKE_PREDICATE.test(stack));
     }
 
     @Override

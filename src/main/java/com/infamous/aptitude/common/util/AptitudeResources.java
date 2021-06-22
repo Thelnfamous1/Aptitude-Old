@@ -38,6 +38,7 @@ public class AptitudeResources {
     public static final Tags.IOptionalNamedTag<Item> HAY_EQUIVALENTS = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "hay_equivalents"));
     public static final Tags.IOptionalNamedTag<Item> SUGAR_EQUIVALENTS = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "sugar_equivalents"));
     public static final Tags.IOptionalNamedTag<Item> WHEAT_EQUIVALENTS = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "wheat_equivalents"));
+    public static final Tags.IOptionalNamedTag<Item> CAKES = ItemTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "cakes"));
 
     public static final Tags.IOptionalNamedTag<EntityType<?>> DOLPHINS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "dolphins_hunt"));
     public static final Tags.IOptionalNamedTag<EntityType<?>> POLAR_BEARS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "polar_bears_hunt"));
