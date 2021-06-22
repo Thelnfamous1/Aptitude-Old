@@ -1,5 +1,7 @@
 package com.infamous.aptitude.mixin;
 
+import com.infamous.aptitude.common.entity.IAnimal;
+import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.server.goal.misc.AptitudeTemptGoal;
@@ -24,6 +26,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.function.Predicate;
@@ -66,6 +69,32 @@ public abstract class PandaEntityMixin extends AnimalEntity {
     @Inject(at = @At("RETURN"), method = "isFoodOrCake", cancellable = true)
     private void checkFoodOrCakeTag(ItemStack stack, CallbackInfoReturnable<Boolean> cir){
         cir.setReturnValue(AptitudePredicates.PANDA_FOOD_OR_CAKE_PREDICATE.test(stack));
+    }
+
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/PandaEntity;setItemSlot(Lnet/minecraft/inventory/EquipmentSlotType;Lnet/minecraft/item/ItemStack;)V"),
+            method = "handleEating")
+    private void setInLoveModeAfterEating(CallbackInfo ci){
+        this.onFinishedEating();
+    }
+
+    private void onFinishedEating() {
+        if(!this.level.isClientSide && this.getAge() == IAnimal.ADULT_AGE && this.canFallInLove()){
+            this.setInLove(null);
+        }
+
+        if (this.isBaby()) {
+            this.ageUp((int)((float)(-this.getAge() / 20) * 0.1F), true);
+            this.level.broadcastEntityEvent(this, (byte) IDevourer.FINISHED_EATING_ID);
+        }
+    }
+
+    @Override
+    public void handleEntityEvent(byte eventId) {
+        if(eventId == IDevourer.FINISHED_EATING_ID){
+            this.onFinishedEating();
+        } else{
+            super.handleEntityEvent(eventId);
+        }
     }
 
     @Override

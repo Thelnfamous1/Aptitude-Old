@@ -19,7 +19,7 @@ mixin {
     add sourceSets.main, "aptitude.refmap.json"
 }
 
-version = '0.0.3'
+version = '0.0.4'
 group = 'com.infamous.aptitude' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'aptitude-1.16.5'
 

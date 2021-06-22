@@ -11,6 +11,11 @@ public class SwitchableRangedAttackGoal<T extends MobEntity & IRangedAttackMob &
     }
 
     @Override
+    public SwitchableRangedAttackGoal<T> setBabiesCanAttack(){
+        return (SwitchableRangedAttackGoal<T>) super.setBabiesCanAttack();
+    }
+
+    @Override
     public boolean canUse() {
         return this.rangedMob.isRanged() && super.canUse();
     }

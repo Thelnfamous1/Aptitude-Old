@@ -12,21 +12,26 @@ public class SwitchableRearingAttackGoal<T extends CreatureEntity & IRearing & I
     }
 
     @Override
+    public SwitchableRearingAttackGoal<T> setBabiesCanAttack(){
+        return (SwitchableRearingAttackGoal<T>) super.setBabiesCanAttack();
+    }
+
+    @Override
     public boolean canUse() {
-        return !this.rearingCreature.isRanged() && super.canUse();
+        return !this.creature.isRanged() && super.canUse();
     }
 
     @Override
     public boolean canContinueToUse() {
-        return !this.rearingCreature.isRanged() && super.canContinueToUse();
+        return !this.creature.isRanged() && super.canContinueToUse();
     }
 
     @Override
     public void stop() {
-        LivingEntity target = this.rearingCreature.getTarget();
+        LivingEntity target = this.creature.getTarget();
         super.stop();
-        if(this.rearingCreature.isRanged()){
-            this.rearingCreature.setTarget(target);
+        if(this.creature.isRanged()){
+            this.creature.setTarget(target);
         }
     }
 }

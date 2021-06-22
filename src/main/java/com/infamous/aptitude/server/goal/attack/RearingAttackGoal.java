@@ -4,12 +4,10 @@ import com.infamous.aptitude.common.entity.IRearing;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.LivingEntity;
 
-public class RearingAttackGoal<T extends CreatureEntity & IRearing> extends AptitudeAttackGoal {
-    protected T rearingCreature;
-    
+public class RearingAttackGoal<T extends CreatureEntity & IRearing> extends AptitudeAttackGoal<T> {
+
     public RearingAttackGoal(T rearingCreature, double speedModifierIn, boolean mustSee) {
         super(rearingCreature, speedModifierIn, mustSee);
-        this.rearingCreature = rearingCreature;
     }
 
     protected void checkAndPerformAttack(LivingEntity target, double distSqToTarget) {
@@ -17,26 +15,26 @@ public class RearingAttackGoal<T extends CreatureEntity & IRearing> extends Apti
         if (distSqToTarget <= attackReachSqr && this.isTimeToAttack()) {
             this.resetAttackCooldown();
             this.mob.doHurtTarget(target);
-            this.rearingCreature.stopRearing();
+            this.creature.stopRearing();
         } else if (distSqToTarget <= attackReachSqr * 2.0D) {
             if (this.isTimeToAttack()) {
-                this.rearingCreature.stopRearing();
+                this.creature.stopRearing();
                 this.resetAttackCooldown();
             }
 
             if (this.getTicksUntilNextAttack() <= 10) {
-                this.rearingCreature.startRearing();
-                this.rearingCreature.playAngrySound();
+                this.creature.startRearing();
+                this.creature.playAngrySound();
             }
         } else {
             this.resetAttackCooldown();
-            this.rearingCreature.stopRearing();
+            this.creature.stopRearing();
         }
 
     }
 
     public void stop() {
-        this.rearingCreature.stopRearing();
+        this.creature.stopRearing();
         super.stop();
     }
 }

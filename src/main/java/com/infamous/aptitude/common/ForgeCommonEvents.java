@@ -37,6 +37,7 @@ public class ForgeCommonEvents {
         }
 
         MobEntity eventMob = event.getEntity() instanceof MobEntity ? ((MobEntity) event.getEntity()) : null;
+        if(eventMob == null) return;
 
         if(eventMob instanceof CatEntity){
             CatEntity cat = (CatEntity) eventMob;
