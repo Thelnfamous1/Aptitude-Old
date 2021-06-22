@@ -340,7 +340,9 @@ public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnim
                 AptitudeHelper.addEatEffect(stack, this.level, this);
             }
         }
-        IAnimal.super.usePlayerItem(player, stack);
+        if (!player.abilities.instabuild) {
+            stack.shrink(1);
+        }
     }
 
     @Override
