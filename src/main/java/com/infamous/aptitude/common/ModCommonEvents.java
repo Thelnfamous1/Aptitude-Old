@@ -20,5 +20,14 @@ public class ModCommonEvents {
 
         event.add(EntityType.LLAMA, Attributes.ATTACK_DAMAGE, 4.0D);
         event.add(EntityType.TRADER_LLAMA, Attributes.ATTACK_DAMAGE, 4.0D);
+
+        event.add(EntityType.HORSE, Attributes.ATTACK_KNOCKBACK, 1.5D);
+        event.add(EntityType.DONKEY, Attributes.ATTACK_KNOCKBACK, 1.5D);
+        event.add(EntityType.MULE, Attributes.ATTACK_KNOCKBACK, 1.5D);
+        event.add(EntityType.SKELETON_HORSE, Attributes.ATTACK_KNOCKBACK, 1.5D);
+        event.add(EntityType.ZOMBIE_HORSE, Attributes.ATTACK_KNOCKBACK, 1.5D);
+
+        event.add(EntityType.LLAMA, Attributes.ATTACK_KNOCKBACK, 1.0D);
+        event.add(EntityType.TRADER_LLAMA, Attributes.ATTACK_KNOCKBACK, 1.0D);
     }
 }

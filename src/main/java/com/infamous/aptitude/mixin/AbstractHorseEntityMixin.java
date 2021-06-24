@@ -63,10 +63,11 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
 
     @Inject(at = @At("RETURN"), method = "isImmobile", cancellable = true)
     private void checkAggressiveForImmobility(CallbackInfoReturnable<Boolean> cir){
+        boolean cannotMoveWhileStanding = !this.isAggressive() || this.isDeadOrDying();
         cir.setReturnValue(
                 super.isImmobile() && this.isVehicle() && this.isSaddled()
                         || this.isEating()
-                        || (this.isStanding() && !this.isAggressive()));
+                        || (this.isStanding() && cannotMoveWhileStanding));
     }
 
     @Inject(at = @At("RETURN"), method = "canEatGrass", cancellable = true)
