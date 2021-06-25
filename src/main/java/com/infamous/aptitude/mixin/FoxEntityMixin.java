@@ -7,7 +7,9 @@ import com.infamous.aptitude.common.util.AptitudePredicates;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.GoalSelector;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.FoxEntity;
@@ -19,6 +21,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -55,10 +58,29 @@ public abstract class FoxEntityMixin extends AnimalEntity {
     @Shadow
     private Goal fishTargetGoal;
 
+    private int addedAvoidReplacementsCounter;
+
     @Shadow public abstract boolean isFood(ItemStack p_70877_1_);
+
+    @Shadow protected abstract boolean isDefending();
 
     protected FoxEntityMixin(EntityType<? extends AnimalEntity> p_i48568_1_, World p_i48568_2_) {
         super(p_i48568_1_, p_i48568_2_);
+    }
+
+    @Redirect(at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/entity/ai/goal/Goal;)V"),
+            method = "registerGoals")
+    private void replaceGoals(GoalSelector goalSelector, int priority, Goal goal){
+        if(goalSelector == this.goalSelector && priority == 4 && goal instanceof AvoidEntityGoal && this.addedAvoidReplacementsCounter < 3){
+            if(this.addedAvoidReplacementsCounter == 1){
+                goalSelector.addGoal(priority, new AvoidEntityGoal<>(this, LivingEntity.class, 8.0F, 1.6D, 1.4D,
+                        livingEntity -> AptitudePredicates.FOXES_AVOID_PREDICATE.test(livingEntity) && !this.isDefending()));
+            }
+            this.addedAvoidReplacementsCounter++;
+        } else{
+            goalSelector.addGoal(priority, goal);
+        }
     }
 
     @Inject(at = @At("RETURN"), method = "registerGoals")

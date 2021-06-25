@@ -5,7 +5,6 @@
     "#aptitude:small_prey",
     "#aptitude:large_prey",
     "minecraft:fox",
-    "#aptitude:humanoids",
-    "#aptitude:steeds"
+    "minecraft:skeleton_horse"
   ]
 }

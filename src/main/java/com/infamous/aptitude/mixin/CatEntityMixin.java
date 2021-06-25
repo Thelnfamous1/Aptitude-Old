@@ -6,6 +6,7 @@ import com.infamous.aptitude.common.entity.IPredator;
 import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.server.goal.target.HuntGoal;
+import com.infamous.aptitude.server.goal.target.UntamedHuntGoal;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.GoalSelector;
@@ -61,7 +62,7 @@ public abstract class CatEntityMixin extends TameableEntity implements IPredator
             method = "registerGoals")
     private void onAboutToAddGoal(GoalSelector goalSelector, int priority, Goal goal){
         if(goalSelector == this.targetSelector && priority == 1 && goal instanceof NonTamedTargetGoal && !this.addedNonTamedTargetReplacements){
-            goalSelector.addGoal(priority, new HuntGoal<>(this, LivingEntity.class, 10, false, false, AptitudePredicates.CAT_PREY_PREDICATE));
+            goalSelector.addGoal(priority, new UntamedHuntGoal<>(this, LivingEntity.class, 10, false, false, AptitudePredicates.CAT_PREY_PREDICATE));
             this.addedNonTamedTargetReplacements = true;
         } else {
             goalSelector.addGoal(priority, goal);

@@ -9,11 +9,13 @@
   "minVersion": "0.8",
   "mixins": [
     "AbstractHorseEntityMixin",
+    "AbstractSkeletonEntityMixin",
     "BredAnimalsTriggerMixin",
     "CatEntityMixin",
     "CatEntityTemptGoalMixin",
     "ChickenEntityMixin",
     "CowEntityMixin",
+    "CreeperEntityMixin",
     "DolphinEntityMixin",
     "FoxEntityMixin",
     "LivingEntityMixin",
@@ -28,7 +30,8 @@
     "RabbitEntityMixin",
     "SheepEntityMixin",
     "StriderEntityMixin",
-    "TurtleEntityMixin"
+    "TurtleEntityMixin",
+    "WolfEntityMixin"
   ],
   "client": [
     "AgeableModelMixin",

@@ -46,9 +46,19 @@ public class AptitudeResources {
     public static final Tags.IOptionalNamedTag<EntityType<?>> CATS_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "cats_hunt"));
     public static final Tags.IOptionalNamedTag<EntityType<?>> FOXES_HUNT_ON_LAND = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "foxes_hunt_on_land"));
     public static final Tags.IOptionalNamedTag<EntityType<?>> FOXES_HUNT_IN_WATER = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "foxes_hunt_in_water"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> WOLVES_HUNT = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "wolves_hunt"));
 
     public static final Tags.IOptionalNamedTag<EntityType<?>> CATS_REPEL = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "cats_repel"));
     public static final Tags.IOptionalNamedTag<EntityType<?>> OCELOTS_REPEL = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "ocelots_repel"));
     public static final Tags.IOptionalNamedTag<EntityType<?>> LLAMAS_REPEL = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "llamas_repel"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> DONKEYS_REPEL = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "donkeys_repel"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> MULES_REPEL = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "mules_repel"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> WOLVES_REPEL = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "wolves_repel"));
+
+    public static final Tags.IOptionalNamedTag<EntityType<?>> FOXES_AVOID = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "foxes_avoid"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> CREEPERS_AVOID = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "creepers_avoid"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> SKELETONS_AVOID = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "skeletons_avoid"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> WOLVES_AVOID = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "wolves_avoid"));
+    public static final Tags.IOptionalNamedTag<EntityType<?>> RABBITS_AVOID = EntityTypeTags.createOptional(new ResourceLocation(Aptitude.MOD_ID, "rabbits_avoid"));
 
 }

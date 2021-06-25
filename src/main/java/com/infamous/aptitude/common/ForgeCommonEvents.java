@@ -19,9 +19,7 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.BreedGoal;
 import net.minecraft.entity.ai.goal.FollowParentGoal;
 import net.minecraft.entity.passive.*;
-import net.minecraft.entity.passive.horse.AbstractHorseEntity;
-import net.minecraft.entity.passive.horse.HorseEntity;
-import net.minecraft.entity.passive.horse.LlamaEntity;
+import net.minecraft.entity.passive.horse.*;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -48,8 +46,8 @@ public class ForgeCommonEvents {
         } else if(eventMob instanceof FoxEntity){
             FoxEntity fox = (FoxEntity) eventMob;
             addFoxGoals(fox);
-        } else if(eventMob instanceof HorseEntity){
-            HorseEntity horse = (HorseEntity) eventMob;
+        } else if(eventMob instanceof AbstractHorseEntity){
+            AbstractHorseEntity horse = (AbstractHorseEntity) eventMob;
             addHorseGoals(horse);
         } else if(eventMob instanceof OcelotEntity){
             OcelotEntity ocelot = (OcelotEntity) eventMob;
@@ -81,12 +79,30 @@ public class ForgeCommonEvents {
         dolphin.setCanPickUpLoot(true);
     }
 
+    private static void addDonkeyGoals(DonkeyEntity donkey) {
+        donkey.targetSelector.addGoal(2, new AptitudeDefendTargetGoal<>(donkey, LivingEntity.class, 16, false, true, AptitudePredicates.DONKEY_DEFEND_PREDICATE).setFollowDistanceFactor(0.25F));
+    }
+
     private static void addFoxGoals(FoxEntity fox){
         fox.goalSelector.addGoal(3, new AptitudeTemptGoal(fox, 1.25D, AptitudePredicates.FOX_FOOD_PREDICATE, false));
     }
 
-    private static void addHorseGoals(HorseEntity horse) {
-        horse.targetSelector.addGoal(1, new AptitudeHurtByTargetGoal<>(horse));
+    private static void addHorseGoals(AbstractHorseEntity horse) {
+        if(!(horse instanceof LlamaEntity)){
+            horse.targetSelector.addGoal(1, new AptitudeHurtByTargetGoal<>(horse));
+        }
+        if(horse instanceof DonkeyEntity){
+            DonkeyEntity donkey = (DonkeyEntity) horse;
+            addDonkeyGoals(donkey);
+        }
+        if(horse instanceof MuleEntity){
+            MuleEntity mule = (MuleEntity) horse;
+            addMuleGoals(mule);
+        }
+    }
+
+    private static void addMuleGoals(MuleEntity mule) {
+        mule.targetSelector.addGoal(2, new AptitudeDefendTargetGoal<>(mule, LivingEntity.class, 16, false, true, AptitudePredicates.MULE_DEFEND_PREDICATE).setFollowDistanceFactor(0.25F));
     }
 
     private static void addOcelotGoals(OcelotEntity ocelot) {
