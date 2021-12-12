@@ -1,14 +1,14 @@
 package com.infamous.aptitude.common.entity;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.util.RangedInteger;
-import net.minecraft.util.TickRangeConverter;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.util.IntRange;
+import net.minecraft.util.TimeUtil;
 
 import java.util.Random;
 
 public interface IPredator {
-    RangedInteger TIME_BETWEEN_HUNTS = TickRangeConverter.rangeOfSeconds(30, 120);
+    IntRange TIME_BETWEEN_HUNTS = TimeUtil.rangeOfSeconds(30, 120);
     Random RANDOM = new Random();
 
     default void onHuntedPrey(LivingEntity killedEntity) {
@@ -21,7 +21,7 @@ public interface IPredator {
 
     void setHuntCooldown(int huntCooldown);
 
-    default <T extends MobEntity & IPredator> boolean canHunt(T predator){
+    default <T extends Mob & IPredator> boolean canHunt(T predator){
         if(this != predator) throw new IllegalArgumentException("Argument predator " + predator + " is not equal to this: " + this);
 
         return !predator.isBaby() && this.getHuntCooldown() <= 0;

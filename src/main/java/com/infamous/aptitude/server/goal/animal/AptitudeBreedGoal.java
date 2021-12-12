@@ -5,17 +5,17 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.infamous.aptitude.common.entity.IAnimal;
-import net.minecraft.entity.EntityPredicate;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 
-public class AptitudeBreedGoal<T extends MobEntity, A extends MobEntity & IAnimal> extends Goal {
-   private static final EntityPredicate PARTNER_TARGETING = (new EntityPredicate()).range(8.0D).allowInvulnerable().allowSameTeam().allowUnseeable();
+public class AptitudeBreedGoal<T extends Mob, A extends Mob & IAnimal> extends Goal {
+   private static final TargetingConditions PARTNER_TARGETING = (new TargetingConditions()).range(8.0D).allowInvulnerable().allowSameTeam().allowUnseeable();
    protected final A animal;
-   private final Class<? extends MobEntity> partnerClass;
-   protected final World level;
+   private final Class<? extends Mob> partnerClass;
+   protected final Level level;
    @Nullable
    protected A partnerMob;
    private int searchTime;
@@ -29,7 +29,7 @@ public class AptitudeBreedGoal<T extends MobEntity, A extends MobEntity & IAnima
       this(animalIn, speedModifierIn, animalIn.getClass(), maxLoveTimeIn, partnerSearchDistIn, breedDistIn);
    }
 
-   public AptitudeBreedGoal(T animalIn, double speedModifierIn, Class<? extends MobEntity> partnerClassIn, int maxSearchTimeIn, double partnerSearchDistIn, double breedDistIn) {
+   public AptitudeBreedGoal(T animalIn, double speedModifierIn, Class<? extends Mob> partnerClassIn, int maxSearchTimeIn, double partnerSearchDistIn, double breedDistIn) {
       if(animalIn instanceof IAnimal){
          this.animal = (A) animalIn;
       } else{
@@ -85,11 +85,11 @@ public class AptitudeBreedGoal<T extends MobEntity, A extends MobEntity & IAnima
 
    @Nullable
    private A getFreePartner() {
-      List<MobEntity> list = this.level.getNearbyEntities(this.partnerClass, PARTNER_TARGETING, this.animal, this.animal.getBoundingBox().inflate(this.partnerSearchDist));
+      List<Mob> list = this.level.getNearbyEntities(this.partnerClass, PARTNER_TARGETING, this.animal, this.animal.getBoundingBox().inflate(this.partnerSearchDist));
       double minDistSq = Double.MAX_VALUE;
       A freePartner = null;
 
-      for(MobEntity nearbyMob : list) {
+      for(Mob nearbyMob : list) {
          A nearbyAnimal = nearbyMob instanceof IAnimal ? (A) nearbyMob : null;
          if (nearbyAnimal != null
                  && this.animal.canMate(nearbyAnimal)
@@ -103,6 +103,6 @@ public class AptitudeBreedGoal<T extends MobEntity, A extends MobEntity & IAnima
    }
 
    protected void breed() {
-      this.animal.spawnChildFromBreeding((ServerWorld)this.level, this.animal, this.partnerMob);
+      this.animal.spawnChildFromBreeding((ServerLevel)this.level, this.animal, this.partnerMob);
    }
 }

@@ -2,14 +2,14 @@ package com.infamous.aptitude.server.goal.misc;
 
 import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.entity.IPlaysWithItems;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Predicate;
 
-public class DevourerPlayWithItemsGoal<M extends MobEntity & IPlaysWithItems, D extends MobEntity & IDevourer & IPlaysWithItems> extends AptitudePlayWithItemsGoal<M> {
+public class DevourerPlayWithItemsGoal<M extends Mob & IPlaysWithItems, D extends Mob & IDevourer & IPlaysWithItems> extends AptitudePlayWithItemsGoal<M> {
     protected final D devourer;
 
     public DevourerPlayWithItemsGoal(M mob, Predicate<ItemEntity> predicate, int randomInterval) {
@@ -47,7 +47,7 @@ public class DevourerPlayWithItemsGoal<M extends MobEntity & IPlaysWithItems, D 
     }
 
     @Override
-    protected EquipmentSlotType getPlayItemSlot() {
+    protected EquipmentSlot getPlayItemSlot() {
         return this.devourer.getSlotForFood();
     }
 }

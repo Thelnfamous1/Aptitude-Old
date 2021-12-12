@@ -1,12 +1,12 @@
 package com.infamous.aptitude.server.goal.target;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 
 import javax.annotation.Nullable;
 import java.util.function.Predicate;
 
-public class AptitudeDefendTargetGoal<T extends LivingEntity, A extends MobEntity> extends AptitudeNearestAttackableTargetGoal<T, A>{
+public class AptitudeDefendTargetGoal<T extends LivingEntity, A extends Mob> extends AptitudeNearestAttackableTargetGoal<T, A>{
     private double followDistanceFactor = 1.0D;
 
     public AptitudeDefendTargetGoal(A attackerIn, Class<T> targetType, int randomIntervalIn, boolean mustSee, boolean mustReach, @Nullable Predicate<LivingEntity> targetPredicate) {

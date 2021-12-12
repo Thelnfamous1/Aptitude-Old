@@ -3,11 +3,11 @@ package com.infamous.aptitude.server.goal.animal;
 import java.util.List;
 
 import com.infamous.aptitude.common.entity.IAnimal;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.entity.passive.AnimalEntity;
 
-public class AptitudeFollowParentGoal<T extends MobEntity, A extends MobEntity & IAnimal> extends Goal {
+public class AptitudeFollowParentGoal<T extends Mob, A extends Mob & IAnimal> extends Goal {
    protected final A animal;
    private A parent;
    protected final double speedModifier;
@@ -30,11 +30,11 @@ public class AptitudeFollowParentGoal<T extends MobEntity, A extends MobEntity &
       if (this.animal.getAge(this.animal) >= IAnimal.ADULT_AGE) {
          return false;
       } else {
-         List<MobEntity> list = this.animal.level.getEntitiesOfClass(this.animal.getClass(), this.animal.getBoundingBox().inflate(this.parentSearchDist, this.parentSearchDist / 2, this.parentSearchDist));
+         List<Mob> list = this.animal.level.getEntitiesOfClass(this.animal.getClass(), this.animal.getBoundingBox().inflate(this.parentSearchDist, this.parentSearchDist / 2, this.parentSearchDist));
          A parentAnimal = null;
          double minDistSq = Double.MAX_VALUE;
 
-         for(MobEntity nearbyMob : list) {
+         for(Mob nearbyMob : list) {
             A nearbyAnimal = nearbyMob instanceof IAnimal ? (A) nearbyMob : null;
             if (nearbyAnimal != null && nearbyAnimal.getAge(nearbyAnimal) >= IAnimal.ADULT_AGE) {
                double distSqrToNearby = this.animal.distanceToSqr(nearbyAnimal);

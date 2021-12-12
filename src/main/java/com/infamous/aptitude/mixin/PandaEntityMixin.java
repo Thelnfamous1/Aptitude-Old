@@ -7,18 +7,18 @@ import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.server.goal.misc.AptitudeTemptGoal;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.GoalSelector;
-import net.minecraft.entity.ai.goal.TemptGoal;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.goal.TemptGoal;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.entity.passive.ChickenEntity;
-import net.minecraft.entity.passive.PandaEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.animal.Panda;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -31,8 +31,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.function.Predicate;
 
-@Mixin(PandaEntity.class)
-public abstract class PandaEntityMixin extends AnimalEntity {
+@Mixin(Panda.class)
+public abstract class PandaEntityMixin extends Animal {
 
     @Final
     @Shadow
@@ -45,7 +45,7 @@ public abstract class PandaEntityMixin extends AnimalEntity {
 
     private boolean addedTemptReplacements;
 
-    protected PandaEntityMixin(EntityType<? extends AnimalEntity> p_i48568_1_, World p_i48568_2_) {
+    protected PandaEntityMixin(EntityType<? extends Animal> p_i48568_1_, Level p_i48568_2_) {
         super(p_i48568_1_, p_i48568_2_);
     }
 
@@ -98,7 +98,7 @@ public abstract class PandaEntityMixin extends AnimalEntity {
     }
 
     @Override
-    public void usePlayerItem(PlayerEntity player, ItemStack stack) {
+    public void usePlayerItem(Player player, ItemStack stack) {
         if(this.isFood(stack)){
             this.playSound(this.getEatingSound(stack), 1.0F, 1.0F);
             if(stack.isEdible()) {

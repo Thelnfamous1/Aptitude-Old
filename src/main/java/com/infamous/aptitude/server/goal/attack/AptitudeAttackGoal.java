@@ -1,10 +1,10 @@
 package com.infamous.aptitude.server.goal.attack;
 
-import net.minecraft.entity.CreatureEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 
-public class AptitudeAttackGoal<T extends CreatureEntity> extends MeleeAttackGoal {
+public class AptitudeAttackGoal<T extends PathfinderMob> extends MeleeAttackGoal {
     private boolean babiesCanAttack;
     protected T creature;
 

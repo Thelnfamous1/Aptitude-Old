@@ -1,17 +1,17 @@
 package com.infamous.aptitude.server.goal.misc;
 
 import com.infamous.aptitude.common.entity.IPlaysWithItems;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.util.Mth;
 
 import java.util.List;
 import java.util.function.Predicate;
 
-public class AptitudePlayWithItemsGoal<T extends MobEntity & IPlaysWithItems> extends Goal {
+public class AptitudePlayWithItemsGoal<T extends Mob & IPlaysWithItems> extends Goal {
     protected final T mob;
     protected int cooldown;
     protected final Predicate<ItemEntity> itemEntityPredicate;
@@ -33,8 +33,8 @@ public class AptitudePlayWithItemsGoal<T extends MobEntity & IPlaysWithItems> ex
         }
     }
 
-    protected EquipmentSlotType getPlayItemSlot() {
-        return EquipmentSlotType.MAINHAND;
+    protected EquipmentSlot getPlayItemSlot() {
+        return EquipmentSlot.MAINHAND;
     }
 
     public void start() {
@@ -85,7 +85,7 @@ public class AptitudePlayWithItemsGoal<T extends MobEntity & IPlaysWithItems> ex
             float f = 0.3F;
             float f1 = this.mob.getRandom().nextFloat() * ((float)Math.PI * 2F);
             float f2 = 0.02F * this.mob.getRandom().nextFloat();
-            itemEntity.setDeltaMovement((double)(0.3F * -MathHelper.sin(this.mob.yRot * ((float)Math.PI / 180F)) * MathHelper.cos(this.mob.xRot * ((float)Math.PI / 180F)) + MathHelper.cos(f1) * f2), (double)(0.3F * MathHelper.sin(this.mob.xRot * ((float)Math.PI / 180F)) * 1.5F), (double)(0.3F * MathHelper.cos(this.mob.yRot * ((float)Math.PI / 180F)) * MathHelper.cos(this.mob.xRot * ((float)Math.PI / 180F)) + MathHelper.sin(f1) * f2));
+            itemEntity.setDeltaMovement((double)(0.3F * -Mth.sin(this.mob.yRot * ((float)Math.PI / 180F)) * Mth.cos(this.mob.xRot * ((float)Math.PI / 180F)) + Mth.cos(f1) * f2), (double)(0.3F * Mth.sin(this.mob.xRot * ((float)Math.PI / 180F)) * 1.5F), (double)(0.3F * Mth.cos(this.mob.yRot * ((float)Math.PI / 180F)) * Mth.cos(this.mob.xRot * ((float)Math.PI / 180F)) + Mth.sin(f1) * f2));
             this.mob.level.addFreshEntity(itemEntity);
          }
     }

@@ -3,34 +3,34 @@ package com.infamous.aptitude.server.goal.misc;
 import java.util.EnumSet;
 import java.util.function.Predicate;
 
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.EntityPredicate;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.Tags;
 
 public class AptitudeTemptGoal extends Goal {
-   private static final EntityPredicate TEMP_TARGETING = (new EntityPredicate()).range(10.0D).allowInvulnerable().allowSameTeam().allowNonAttackable().allowUnseeable();
-   protected final CreatureEntity mob;
+   private static final TargetingConditions TEMP_TARGETING = (new TargetingConditions()).range(10.0D).allowInvulnerable().allowSameTeam().allowNonAttackable().allowUnseeable();
+   protected final PathfinderMob mob;
    private final double speedModifier;
    private double px;
    private double py;
    private double pz;
    private double pRotX;
    private double pRotY;
-   protected PlayerEntity player;
+   protected Player player;
    private int calmDown;
    private boolean isRunning;
    private final Predicate<ItemStack> temptItemPredicate;
    private final boolean canScare;
 
-   public AptitudeTemptGoal(CreatureEntity creature, double p_i47822_2_, Predicate<ItemStack> p_i47822_4_, boolean p_i47822_5_) {
+   public AptitudeTemptGoal(PathfinderMob creature, double p_i47822_2_, Predicate<ItemStack> p_i47822_4_, boolean p_i47822_5_) {
       this(creature, p_i47822_2_, p_i47822_5_, p_i47822_4_);
    }
 
-   public AptitudeTemptGoal(CreatureEntity creature, double p_i47823_2_, boolean p_i47823_4_, Predicate<ItemStack> p_i47823_5_) {
+   public AptitudeTemptGoal(PathfinderMob creature, double p_i47823_2_, boolean p_i47823_4_, Predicate<ItemStack> p_i47823_5_) {
       this.mob = creature;
       this.speedModifier = p_i47823_2_;
       this.temptItemPredicate = p_i47823_5_;

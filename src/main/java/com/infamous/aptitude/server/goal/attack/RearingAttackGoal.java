@@ -1,12 +1,12 @@
 package com.infamous.aptitude.server.goal.attack;
 
 import com.infamous.aptitude.common.entity.IRearing;
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.phys.Vec3;
 
-public class RearingAttackGoal<T extends CreatureEntity & IRearing> extends AptitudeAttackGoal<T> {
+public class RearingAttackGoal<T extends PathfinderMob & IRearing> extends AptitudeAttackGoal<T> {
 
     public RearingAttackGoal(T rearingCreature, double speedModifierIn, boolean mustSee) {
         super(rearingCreature, speedModifierIn, mustSee);
@@ -48,7 +48,7 @@ public class RearingAttackGoal<T extends CreatureEntity & IRearing> extends Apti
             double xDiff = target.getX() - this.creature.getX();
             double zDiff = target.getZ() - this.creature.getZ();
             double pushbackStrength = knockbackStrength * 0.5D;
-            Vector3d pushbackVector = (new Vector3d(xDiff, 0.0D, zDiff)).normalize().scale(pushbackStrength);
+            Vec3 pushbackVector = (new Vec3(xDiff, 0.0D, zDiff)).normalize().scale(pushbackStrength);
             double flingStrength = knockbackStrength * 0.5D;
             target.push(pushbackVector.x, flingStrength, pushbackVector.z);
             target.hurtMarked = true;

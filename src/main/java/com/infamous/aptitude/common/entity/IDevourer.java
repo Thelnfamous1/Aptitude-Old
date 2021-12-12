@@ -2,20 +2,20 @@ package com.infamous.aptitude.common.entity;
 
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.util.AptitudeHelper;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particles.ItemParticleData;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.phys.Vec3;
 
 public interface IDevourer {
     int EAT_ID = 45;
     int FINISHED_EATING_ID = 2;
 
-    default <T extends MobEntity & IDevourer> void devourerAiStep(T devourer){
+    default <T extends Mob & IDevourer> void devourerAiStep(T devourer){
         if(this != devourer) throw new IllegalArgumentException("Argument devourer " + devourer + " is not equal to this: " + this);
 
         if (!devourer.level.isClientSide && devourer.isAlive() && devourer.isEffectiveAi()) {
@@ -44,7 +44,7 @@ public interface IDevourer {
         }
     }
 
-    default <T extends MobEntity & IDevourer> void healUsingFood(T devourer, ItemStack itemBySlot) {
+    default <T extends Mob & IDevourer> void healUsingFood(T devourer, ItemStack itemBySlot) {
         if(this != devourer) throw new IllegalArgumentException("Argument devourer " + devourer + " is not equal to this: " + this);
 
         if(itemBySlot.isEdible()){
@@ -61,25 +61,25 @@ public interface IDevourer {
         return this.getStartEatTime() + 40;
     }
 
-    default EquipmentSlotType getSlotForFood() {
-        return EquipmentSlotType.MAINHAND;
+    default EquipmentSlot getSlotForFood() {
+        return EquipmentSlot.MAINHAND;
     }
 
     void onFinishedEating();
 
-    default <T extends MobEntity & IDevourer> void handleEatEvent(T devourer){
+    default <T extends Mob & IDevourer> void handleEatEvent(T devourer){
         if(this != devourer) throw new IllegalArgumentException("Argument devourer " + devourer + " is not equal to this: " + this);
 
         ItemStack itemBySlot = devourer.getItemBySlot(this.getSlotForFood());
         if (!itemBySlot.isEmpty()) {
             for(int i = 0; i < 8; ++i) {
-                Vector3d eatSpeedVector = (new Vector3d(((double)devourer.getRandom().nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D)).xRot(-devourer.xRot * ((float)Math.PI / 180F)).yRot(-devourer.yRot * ((float)Math.PI / 180F));
-                devourer.level.addParticle(new ItemParticleData(ParticleTypes.ITEM, itemBySlot), devourer.getX() + devourer.getLookAngle().x / 2.0D, devourer.getY(), devourer.getZ() + devourer.getLookAngle().z / 2.0D, eatSpeedVector.x, eatSpeedVector.y + 0.05D, eatSpeedVector.z);
+                Vec3 eatSpeedVector = (new Vec3(((double)devourer.getRandom().nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D)).xRot(-devourer.xRot * ((float)Math.PI / 180F)).yRot(-devourer.yRot * ((float)Math.PI / 180F));
+                devourer.level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, itemBySlot), devourer.getX() + devourer.getLookAngle().x / 2.0D, devourer.getY(), devourer.getZ() + devourer.getLookAngle().z / 2.0D, eatSpeedVector.x, eatSpeedVector.y + 0.05D, eatSpeedVector.z);
             }
         }
     }
 
-    default <T extends MobEntity & IDevourer> boolean canEat(T devourer, ItemStack stack) {
+    default <T extends Mob & IDevourer> boolean canEat(T devourer, ItemStack stack) {
         if(this != devourer) throw new IllegalArgumentException("Argument devourer " + devourer + " is not equal to this: " + this);
 
         return stack.getItem().isEdible()
@@ -87,7 +87,7 @@ public interface IDevourer {
                 && this.getEatCooldown() <= 0;
     }
 
-    default <T extends MobEntity & IDevourer> void handlePickUpItem(T devourer, ItemEntity itemEntity) {
+    default <T extends Mob & IDevourer> void handlePickUpItem(T devourer, ItemEntity itemEntity) {
         if(this != devourer) throw new IllegalArgumentException("Argument devourer " + devourer + " is not equal to this: " + this);
 
         ItemStack itemstack = itemEntity.getItem();
@@ -107,7 +107,7 @@ public interface IDevourer {
         }
     }
 
-    default <T extends MobEntity & IDevourer> void spitOutItem(T devourer, ItemStack stackToSpitOut) {
+    default <T extends Mob & IDevourer> void spitOutItem(T devourer, ItemStack stackToSpitOut) {
         if(this != devourer) throw new IllegalArgumentException("Argument devourer " + devourer + " is not equal to this: " + this);
 
         if (!stackToSpitOut.isEmpty() && !devourer.level.isClientSide) {
@@ -119,7 +119,7 @@ public interface IDevourer {
         }
     }
 
-    default <T extends MobEntity & IDevourer> boolean isHungry(T devourer) {
+    default <T extends Mob & IDevourer> boolean isHungry(T devourer) {
         if(this != devourer) throw new IllegalArgumentException("Argument devourer " + devourer + " is not equal to this: " + this);
 
         return !devourer.isAggressive()
@@ -128,7 +128,7 @@ public interface IDevourer {
 
     SoundEvent getSpitOutItemSound();
 
-    default <T extends MobEntity & IDevourer> void dropItemStack(T devourer, ItemStack stackToDrop) {
+    default <T extends Mob & IDevourer> void dropItemStack(T devourer, ItemStack stackToDrop) {
         if(this != devourer) throw new IllegalArgumentException("Argument devourer " + devourer + " is not equal to this: " + this);
 
         ItemEntity itemEntity = new ItemEntity(devourer.level, devourer.getX(), devourer.getY(), devourer.getZ(), stackToDrop);

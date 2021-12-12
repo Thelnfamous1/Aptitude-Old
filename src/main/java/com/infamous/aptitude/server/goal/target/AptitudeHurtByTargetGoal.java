@@ -1,11 +1,11 @@
 package com.infamous.aptitude.server.goal.target;
 
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.HurtByTargetGoal;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 
-public class AptitudeHurtByTargetGoal<T extends CreatureEntity> extends HurtByTargetGoal {
+public class AptitudeHurtByTargetGoal<T extends PathfinderMob> extends HurtByTargetGoal {
     private boolean babiesCanAttack;
     protected final T creatureAsGeneric;
 
@@ -28,7 +28,7 @@ public class AptitudeHurtByTargetGoal<T extends CreatureEntity> extends HurtByTa
 
     }
 
-    protected void alertOther(MobEntity toAlert, LivingEntity target) {
+    protected void alertOther(Mob toAlert, LivingEntity target) {
         if (!toAlert.isBaby() || this.babiesCanAttack) {
             super.alertOther(toAlert, target);
         }

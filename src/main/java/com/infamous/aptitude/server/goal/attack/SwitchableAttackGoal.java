@@ -1,9 +1,9 @@
 package com.infamous.aptitude.server.goal.attack;
 
 import com.infamous.aptitude.common.entity.ISwitchCombatTask;
-import net.minecraft.entity.CreatureEntity;
+import net.minecraft.world.entity.PathfinderMob;
 
-public class SwitchableAttackGoal<T extends CreatureEntity & ISwitchCombatTask> extends AptitudeAttackGoal<T> {
+public class SwitchableAttackGoal<T extends PathfinderMob & ISwitchCombatTask> extends AptitudeAttackGoal<T> {
 
     public SwitchableAttackGoal(T creature, double speedModifierIn, boolean mustSee) {
         super(creature, speedModifierIn, mustSee);

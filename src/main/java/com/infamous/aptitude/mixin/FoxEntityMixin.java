@@ -4,20 +4,20 @@ import com.infamous.aptitude.common.entity.IAnimal;
 import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudePredicates;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.AvoidEntityGoal;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.GoalSelector;
-import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.FoxEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.util.NonNullList;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -31,16 +31,16 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-@Mixin(FoxEntity.class)
-public abstract class FoxEntityMixin extends AnimalEntity {
+@Mixin(Fox.class)
+public abstract class FoxEntityMixin extends Animal {
 
     @Final
     @Shadow
-    private static DataParameter<Optional<UUID>> DATA_TRUSTED_ID_0;
+    private static EntityDataAccessor<Optional<UUID>> DATA_TRUSTED_ID_0;
 
     @Final
     @Shadow
-    private static DataParameter<Optional<UUID>> DATA_TRUSTED_ID_1;
+    private static EntityDataAccessor<Optional<UUID>> DATA_TRUSTED_ID_1;
 
     @Final
     @Shadow
@@ -64,7 +64,7 @@ public abstract class FoxEntityMixin extends AnimalEntity {
 
     @Shadow protected abstract boolean isDefending();
 
-    protected FoxEntityMixin(EntityType<? extends AnimalEntity> p_i48568_1_, World p_i48568_2_) {
+    protected FoxEntityMixin(EntityType<? extends Animal> p_i48568_1_, Level p_i48568_2_) {
         super(p_i48568_1_, p_i48568_2_);
     }
 
@@ -90,7 +90,7 @@ public abstract class FoxEntityMixin extends AnimalEntity {
     }
 
     @Inject(at = @At("HEAD"), method = "usePlayerItem")
-    private void healWithFood(PlayerEntity player, ItemStack stack, CallbackInfo ci){
+    private void healWithFood(Player player, ItemStack stack, CallbackInfo ci){
         if(this.isFood(stack) && stack.isEdible()){
             this.heal(stack.getItem().getFoodProperties().getNutrition());
             AptitudeHelper.addEatEffect(stack, this.level, this);

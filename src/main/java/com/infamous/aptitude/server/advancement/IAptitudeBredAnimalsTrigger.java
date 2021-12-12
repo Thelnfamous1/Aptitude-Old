@@ -1,11 +1,11 @@
 package com.infamous.aptitude.server.advancement;
 
 import com.infamous.aptitude.common.entity.IAnimal;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.server.level.ServerPlayer;
 
 import javax.annotation.Nullable;
 
 public interface IAptitudeBredAnimalsTrigger {
-    <T extends MobEntity & IAnimal> void trigger(ServerPlayerEntity serverPlayer, T parent, T partner, @Nullable T child);
+    <T extends Mob & IAnimal> void trigger(ServerPlayer serverPlayer, T parent, T partner, @Nullable T child);
 }

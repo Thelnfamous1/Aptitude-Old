@@ -1,10 +1,10 @@
 package com.infamous.aptitude.server.goal.attack;
 
-import net.minecraft.entity.IRangedAttackMob;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.RangedAttackGoal;
+import net.minecraft.world.entity.monster.RangedAttackMob;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
 
-public class AptitudeRangedAttackGoal<T extends MobEntity & IRangedAttackMob> extends RangedAttackGoal {
+public class AptitudeRangedAttackGoal<T extends Mob & RangedAttackMob> extends RangedAttackGoal {
     protected final T rangedMob;
     private boolean babiesCanAttack;
 

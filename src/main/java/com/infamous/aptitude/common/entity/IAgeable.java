@@ -1,11 +1,11 @@
 package com.infamous.aptitude.common.entity;
 
-import net.minecraft.entity.AgeableEntity;
-import net.minecraft.entity.ILivingEntityData;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 
 import javax.annotation.Nullable;
 import java.util.Random;
@@ -20,12 +20,12 @@ public interface IAgeable {
 
     Random RANDOM = new Random();
 
-    default ILivingEntityData finalizeAgeableSpawn(@Nullable ILivingEntityData livingEntityData){
+    default SpawnGroupData finalizeAgeableSpawn(@Nullable SpawnGroupData livingEntityData){
         if (livingEntityData == null) {
-            livingEntityData = new AgeableEntity.AgeableData(true);
+            livingEntityData = new AgableMob.AgableMobGroupData(true);
         }
 
-        AgeableEntity.AgeableData ageableentity$ageabledata = (AgeableEntity.AgeableData)livingEntityData;
+        AgableMob.AgableMobGroupData ageableentity$ageabledata = (AgableMob.AgableMobGroupData)livingEntityData;
         if (ageableentity$ageabledata.isShouldSpawnBaby()
                 && ageableentity$ageabledata.getGroupSize() > 0
                 && RANDOM.nextFloat() <= ageableentity$ageabledata.getBabySpawnChance()) {
@@ -37,20 +37,20 @@ public interface IAgeable {
     }
 
     @Nullable
-    <T extends MobEntity & IAgeable> T getBreedOffspring(ServerWorld serverWorld, T ageable);
+    <T extends Mob & IAgeable> T getBreedOffspring(ServerLevel serverWorld, T ageable);
 
     default boolean canBreed(){
         return false;
     }
 
-    default <T extends MobEntity & IAgeable> void addAgeableData(T ageable, CompoundNBT compoundNBT){
+    default <T extends Mob & IAgeable> void addAgeableData(T ageable, CompoundTag compoundNBT){
         if(this != ageable) throw new IllegalArgumentException("Argument ageable " + ageable + " is not equal to this: " + this);
 
         compoundNBT.putInt("Age", this.getAge(ageable));
         compoundNBT.putInt("ForcedAge", this.getForcedAge());
     }
 
-    default void readAgeableData(CompoundNBT compoundNBT){
+    default void readAgeableData(CompoundTag compoundNBT){
         this.setAge(compoundNBT.getInt("Age"));
         this.setForcedAge(compoundNBT.getInt("ForcedAge"));
     }
@@ -70,7 +70,7 @@ public interface IAgeable {
 
     int getForcedAge();
 
-    default <T extends MobEntity & IAgeable> int getAge(T ageable){
+    default <T extends Mob & IAgeable> int getAge(T ageable){
         if(this != ageable) throw new IllegalArgumentException("Argument ageable " + ageable + " is not equal to this: " + this);
 
         if (ageable.level.isClientSide) {
@@ -84,7 +84,7 @@ public interface IAgeable {
 
     int getAgeRaw();
 
-    default <T extends MobEntity & IAgeable> void ageUp(T ageable, int ageIn, boolean forceAge) {
+    default <T extends Mob & IAgeable> void ageUp(T ageable, int ageIn, boolean forceAge) {
         if(this != ageable) throw new IllegalArgumentException("Argument ageable " + ageable + " is not equal to this: " + this);
 
         int age = this.getAge(ageable);
@@ -112,11 +112,11 @@ public interface IAgeable {
 
     int getForcedAgeTimer();
 
-    default <T extends MobEntity & IAgeable> void ageUp(T ageable, int ageIn) {
+    default <T extends Mob & IAgeable> void ageUp(T ageable, int ageIn) {
         this.ageUp(ageable, ageIn, false);
     }
 
-    default <T extends MobEntity & IAgeable> void ageableAiStep(T ageable){
+    default <T extends Mob & IAgeable> void ageableAiStep(T ageable){
         if(this != ageable) throw new IllegalArgumentException("Argument ageable " + ageable + " is not equal to this: " + this);
 
         if (ageable.level.isClientSide) {

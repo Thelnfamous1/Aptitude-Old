@@ -1,13 +1,13 @@
 package com.infamous.aptitude.server.goal.target;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 
 import javax.annotation.Nullable;
 import java.util.function.Predicate;
 
-public class AptitudeNearestAttackableTargetGoal<T extends LivingEntity, A extends MobEntity> extends NearestAttackableTargetGoal<T> {
+public class AptitudeNearestAttackableTargetGoal<T extends LivingEntity, A extends Mob> extends NearestAttackableTargetGoal<T> {
     protected final A attacker;
     private boolean babiesCanAttack;
 

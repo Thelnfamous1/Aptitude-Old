@@ -1,10 +1,10 @@
 package com.infamous.aptitude.server.goal.misc;
 
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
 
 public class AptitudePanicGoal extends PanicGoal {
-    public AptitudePanicGoal(CreatureEntity creatureIn, double speedModifierIn) {
+    public AptitudePanicGoal(PathfinderMob creatureIn, double speedModifierIn) {
         super(creatureIn, speedModifierIn);
     }
 

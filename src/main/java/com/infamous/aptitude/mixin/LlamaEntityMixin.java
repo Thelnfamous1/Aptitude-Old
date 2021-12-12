@@ -11,18 +11,18 @@ import com.infamous.aptitude.server.goal.attack.SwitchableRangedAttackGoal;
 import com.infamous.aptitude.server.goal.target.AptitudeDefendTargetGoal;
 import com.infamous.aptitude.server.goal.target.CanSpitHurtByTargetGoal;
 import com.infamous.aptitude.server.goal.attack.SwitchableRearingAttackGoal;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.IRangedAttackMob;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.RangedAttackMob;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.*;
-import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.entity.passive.WolfEntity;
-import net.minecraft.entity.passive.horse.LlamaEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,8 +34,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.function.Predicate;
 
-@Mixin(LlamaEntity.class)
-public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implements ICanSpit, ISwitchCombatTask, IRangedAttackMob {
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+
+@Mixin(Llama.class)
+public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implements ICanSpit, ISwitchCombatTask, RangedAttackMob {
     //private static final Ingredient LLAMA_FOOD_ITEMS = Ingredient.of(AptitudeResources.LLAMAS_EAT);
     private static final Predicate<ItemStack> LLAMA_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.LLAMAS_EAT);
 
@@ -50,7 +57,7 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
 
     @Shadow private boolean didSpit;
 
-    protected LlamaEntityMixin(EntityType<? extends AnimalEntity> p_i48568_1_, World p_i48568_2_) {
+    protected LlamaEntityMixin(EntityType<? extends Animal> p_i48568_1_, Level p_i48568_2_) {
         super(p_i48568_1_, p_i48568_2_);
     }
 
@@ -97,7 +104,7 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
      * @reason Replacing hardcoded food checks with tags
      */
     @Overwrite
-    protected boolean handleEating(PlayerEntity player, ItemStack stack) {
+    protected boolean handleEating(Player player, ItemStack stack) {
         int ageBoost = 0;
         int temperBoost = 0;
         float healAmount = 0.0F;

@@ -1,13 +1,13 @@
 package com.infamous.aptitude.server.goal.misc;
 
 import com.infamous.aptitude.common.entity.IDevourer;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Predicate;
 
-public class DevourerFindItemsGoal<M extends MobEntity, D extends MobEntity & IDevourer> extends AptitudeFindItemsGoal<M> {
+public class DevourerFindItemsGoal<M extends Mob, D extends Mob & IDevourer> extends AptitudeFindItemsGoal<M> {
     protected final D devourer;
 
     public DevourerFindItemsGoal(M mob, Predicate<ItemEntity> predicate, int randomInterval) {

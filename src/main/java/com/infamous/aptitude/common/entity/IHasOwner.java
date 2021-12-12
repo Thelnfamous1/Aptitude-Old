@@ -1,6 +1,6 @@
 package com.infamous.aptitude.common.entity;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.util.SoundEvent;
 
 import javax.annotation.Nullable;

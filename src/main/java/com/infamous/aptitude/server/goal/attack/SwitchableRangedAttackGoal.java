@@ -1,10 +1,10 @@
 package com.infamous.aptitude.server.goal.attack;
 
 import com.infamous.aptitude.common.entity.ISwitchCombatTask;
-import net.minecraft.entity.IRangedAttackMob;
-import net.minecraft.entity.MobEntity;
+import net.minecraft.world.entity.monster.RangedAttackMob;
+import net.minecraft.world.entity.Mob;
 
-public class SwitchableRangedAttackGoal<T extends MobEntity & IRangedAttackMob & ISwitchCombatTask> extends AptitudeRangedAttackGoal<T> {
+public class SwitchableRangedAttackGoal<T extends Mob & RangedAttackMob & ISwitchCombatTask> extends AptitudeRangedAttackGoal<T> {
 
     public SwitchableRangedAttackGoal(T rangedAttackMob, double speedModifierIn, int attackInterval, float attackRadius) {
         super(rangedAttackMob, speedModifierIn, attackInterval, attackRadius);

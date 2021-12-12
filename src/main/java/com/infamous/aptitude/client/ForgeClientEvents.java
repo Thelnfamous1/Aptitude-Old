@@ -3,10 +3,10 @@ package com.infamous.aptitude.client;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.entity.IAnimal;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.LivingRenderer;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.ParrotEntity;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Parrot;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -27,7 +27,7 @@ public class ForgeClientEvents {
     public static void onRenderLiving(final RenderLivingEvent.Pre event){
         LivingEntity renderedEntity = event.getEntity();
         if(shouldScaleForBaby(renderedEntity)){
-            LivingRenderer renderer = event.getRenderer();
+            LivingEntityRenderer renderer = event.getRenderer();
             float adultShadowRadius;
 
             if(CACHED_ADULT_SHADOW_RADII.containsKey(renderedEntity.getType())){
@@ -52,10 +52,10 @@ public class ForgeClientEvents {
 
     private static boolean shouldScaleForBaby(LivingEntity living){
         return living instanceof IAnimal
-                || living instanceof ParrotEntity;
+                || living instanceof Parrot;
     }
 
-    private static float getShadowRadius(LivingRenderer renderer){
+    private static float getShadowRadius(LivingEntityRenderer renderer){
         if(shadowRadiusField == null){
             shadowRadiusField = ObfuscationReflectionHelper.findField(EntityRenderer.class, "field_76989_e");
         }
@@ -67,9 +67,9 @@ public class ForgeClientEvents {
         }
     }
 
-    private static void setShadowRadius(LivingRenderer renderer, float shadowRadiusIn){
+    private static void setShadowRadius(LivingEntityRenderer renderer, float shadowRadiusIn){
         if(shadowRadiusField == null){
-            shadowRadiusField = ObfuscationReflectionHelper.findField(LivingRenderer.class, "field_76989_e");
+            shadowRadiusField = ObfuscationReflectionHelper.findField(LivingEntityRenderer.class, "field_76989_e");
         }
         try {
             shadowRadiusField.set(renderer, shadowRadiusIn);

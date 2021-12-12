@@ -1,23 +1,23 @@
 package com.infamous.aptitude.mixin;
 
 import com.infamous.aptitude.common.util.AptitudePredicates;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.AvoidEntityGoal;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.GoalSelector;
-import net.minecraft.entity.monster.AbstractSkeletonEntity;
-import net.minecraft.entity.monster.MonsterEntity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(AbstractSkeletonEntity.class)
-public abstract class AbstractSkeletonEntityMixin extends MonsterEntity {
+@Mixin(AbstractSkeleton.class)
+public abstract class AbstractSkeletonEntityMixin extends Monster {
     private boolean addedAvoidReplacements;
 
-    protected AbstractSkeletonEntityMixin(EntityType<? extends MonsterEntity> p_i48553_1_, World p_i48553_2_) {
+    protected AbstractSkeletonEntityMixin(EntityType<? extends Monster> p_i48553_1_, Level p_i48553_2_) {
         super(p_i48553_1_, p_i48553_2_);
     }
 

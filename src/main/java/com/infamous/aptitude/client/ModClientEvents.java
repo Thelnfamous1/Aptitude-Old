@@ -7,7 +7,7 @@ import com.infamous.aptitude.client.renderer.layer.OcelotHeldItemLayer;
 import com.infamous.aptitude.client.renderer.layer.PolarBearHeldItemLayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.*;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -21,7 +21,7 @@ public class ModClientEvents {
     @SubscribeEvent
     public static void onClientSetup(final FMLClientSetupEvent event){
         Minecraft minecraft = Minecraft.getInstance();
-        EntityRendererManager manager = minecraft.getEntityRenderDispatcher();
+        EntityRenderDispatcher manager = minecraft.getEntityRenderDispatcher();
         Map<EntityType<?>, EntityRenderer<?>> renderers = manager.renderers;
         for(EntityRenderer<?> entityRenderer : renderers.values()){
             if(entityRenderer instanceof OcelotRenderer){

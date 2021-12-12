@@ -2,19 +2,19 @@ package com.infamous.aptitude.common.entity;
 
 import com.infamous.aptitude.server.advancement.IAptitudeBredAnimalsTrigger;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.criterion.BredAnimalsTrigger;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.item.ExperienceOrbEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.particles.ParticleTypes;
+import net.minecraft.advancements.critereon.BredAnimalsTrigger;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.server.level.ServerLevel;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -26,7 +26,7 @@ public interface IAnimal extends IAgeable {
     int BREED_COOLDOWN = 6000;
     int LOVE_TICKS = 600;
 
-    default <T extends MobEntity & IAnimal> void animalCustomServerAiStep(T animal){
+    default <T extends Mob & IAnimal> void animalCustomServerAiStep(T animal){
         if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
 
         if (this.getAge(animal) != 0) {
@@ -36,7 +36,7 @@ public interface IAnimal extends IAgeable {
 
     void setInLoveTime(int inLoveTicks);
 
-    default  <T extends MobEntity & IAnimal> void animalAiStep(T animal){
+    default  <T extends Mob & IAnimal> void animalAiStep(T animal){
         if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
 
         if (this.getAge(animal) != ADULT_AGE) {
@@ -56,14 +56,14 @@ public interface IAnimal extends IAgeable {
 
     int getInLoveTime();
 
-    default void addAnimalData(CompoundNBT compoundNBT){
+    default void addAnimalData(CompoundTag compoundNBT){
         compoundNBT.putInt("InLove", this.getInLoveTime());
         if (this.getLoveCause() != null) {
             compoundNBT.putUUID("LoveCause", this.getLoveCause());
         }
     }
 
-    default void readAnimalData(CompoundNBT compoundNBT){
+    default void readAnimalData(CompoundTag compoundNBT){
         this.setInLoveTime(compoundNBT.getInt("InLove"));
         this.setLoveCause(compoundNBT.hasUUID("LoveCause") ? compoundNBT.getUUID("LoveCause") : null);
 
@@ -75,7 +75,7 @@ public interface IAnimal extends IAgeable {
 
     boolean isFood(ItemStack stack);
 
-    default  <T extends MobEntity & IAnimal> void handleBreedEvent(T animal){
+    default  <T extends Mob & IAnimal> void handleBreedEvent(T animal){
         if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
 
         for(int i = 0; i < 7; ++i) {
@@ -86,7 +86,7 @@ public interface IAnimal extends IAgeable {
         }
     }
 
-    default  <T extends MobEntity & IAnimal> void spawnChildFromBreeding(ServerWorld serverWorld, T parent, T partner) {
+    default  <T extends Mob & IAnimal> void spawnChildFromBreeding(ServerLevel serverWorld, T parent, T partner) {
         if(this != parent) throw new IllegalArgumentException("Argument parent " + parent + " is not equal to this: " + this);
 
         T child = this.getBreedOffspring(serverWorld, partner);
@@ -104,7 +104,7 @@ public interface IAnimal extends IAgeable {
         }
          */
         if (child != null) {
-            ServerPlayerEntity serverplayerentity = getLoveCausePlayer(parent);
+            ServerPlayer serverplayerentity = getLoveCausePlayer(parent);
             if (serverplayerentity == null && partner.getLoveCause() != null) {
                 serverplayerentity = getLoveCausePlayer(partner);
             }
@@ -126,7 +126,7 @@ public interface IAnimal extends IAgeable {
             serverWorld.addFreshEntityWithPassengers(child);
             serverWorld.broadcastEntityEvent(parent, (byte)LOVE_ID);
             if (serverWorld.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-                serverWorld.addFreshEntity(new ExperienceOrbEntity(serverWorld, parent.getX(), parent.getY(), parent.getZ(), parent.getRandom().nextInt(7) + 1));
+                serverWorld.addFreshEntity(new ExperienceOrb(serverWorld, parent.getX(), parent.getY(), parent.getZ(), parent.getRandom().nextInt(7) + 1));
             }
 
         }
@@ -137,14 +137,14 @@ public interface IAnimal extends IAgeable {
     }
 
     @Nullable
-    default <T extends MobEntity & IAnimal> ServerPlayerEntity getLoveCausePlayer(T animal){
+    default <T extends Mob & IAnimal> ServerPlayer getLoveCausePlayer(T animal){
         if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
 
         if (this.getLoveCause() == null) {
             return null;
         } else {
-            PlayerEntity playerentity = animal.level.getPlayerByUUID(this.getLoveCause());
-            return playerentity instanceof ServerPlayerEntity ? (ServerPlayerEntity)playerentity : null;
+            Player playerentity = animal.level.getPlayerByUUID(this.getLoveCause());
+            return playerentity instanceof ServerPlayer ? (ServerPlayer)playerentity : null;
         }
     }
 
@@ -162,7 +162,7 @@ public interface IAnimal extends IAgeable {
         return this.getInLoveTime() > 0;
     }
 
-    default  <T extends MobEntity & IAnimal> ActionResultType animalInteract(T animal, PlayerEntity player, Hand hand){
+    default  <T extends Mob & IAnimal> InteractionResult animalInteract(T animal, Player player, InteractionHand hand){
         if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
 
         ItemStack itemInHand = player.getItemInHand(hand);
@@ -173,29 +173,29 @@ public interface IAnimal extends IAgeable {
                     && this.canFallInLove()) {
                 this.usePlayerItem(player, itemInHand);
                 this.setInLove(animal, player);
-                return ActionResultType.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
 
             if (animal.isBaby()) {
                 this.usePlayerItem(player, itemInHand);
                 this.ageUp(animal, (int)((float)(-age / 20) * 0.1F), true);
-                return ActionResultType.sidedSuccess(animal.level.isClientSide);
+                return InteractionResult.sidedSuccess(animal.level.isClientSide);
             }
 
             if (animal.level.isClientSide) {
-                return ActionResultType.CONSUME;
+                return InteractionResult.CONSUME;
             }
         }
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 
-    default <T extends MobEntity & IAnimal> boolean canAcceptFood(T animal, ItemStack stack){
+    default <T extends Mob & IAnimal> boolean canAcceptFood(T animal, ItemStack stack){
         if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
 
         return !animal.isAggressive() && !animal.isSleeping();
     }
 
-    default void usePlayerItem(PlayerEntity player, ItemStack stack) {
+    default void usePlayerItem(Player player, ItemStack stack) {
         if (!player.abilities.instabuild) {
             stack.shrink(1);
         }
@@ -205,7 +205,7 @@ public interface IAnimal extends IAgeable {
         return this.getInLoveTime() <= 0;
     }
 
-    default <T extends MobEntity & IAnimal> void setInLove(T animal, @Nullable PlayerEntity playerEntity) {
+    default <T extends Mob & IAnimal> void setInLove(T animal, @Nullable Player playerEntity) {
         if(this != animal) throw new IllegalArgumentException("Argument animal " + animal + " is not equal to this: " + this);
 
         this.setInLoveTime(LOVE_TICKS);

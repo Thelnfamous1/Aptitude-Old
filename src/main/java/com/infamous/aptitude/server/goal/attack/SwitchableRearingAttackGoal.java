@@ -2,10 +2,10 @@ package com.infamous.aptitude.server.goal.attack;
 
 import com.infamous.aptitude.common.entity.IRearing;
 import com.infamous.aptitude.common.entity.ISwitchCombatTask;
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.LivingEntity;
 
-public class SwitchableRearingAttackGoal<T extends CreatureEntity & IRearing & ISwitchCombatTask> extends RearingAttackGoal<T> {
+public class SwitchableRearingAttackGoal<T extends PathfinderMob & IRearing & ISwitchCombatTask> extends RearingAttackGoal<T> {
 
     public SwitchableRearingAttackGoal(T horse, double speedModifierIn, boolean mustSee) {
         super(horse, speedModifierIn, mustSee);

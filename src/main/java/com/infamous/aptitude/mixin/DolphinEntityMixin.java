@@ -6,25 +6,25 @@ import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.server.goal.misc.DevourerPlayWithItemsGoal;
 import com.infamous.aptitude.server.goal.target.AptitudeHurtByTargetGoal;
 import net.minecraft.entity.*;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.GoalSelector;
-import net.minecraft.entity.ai.goal.HurtByTargetGoal;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.monster.GuardianEntity;
-import net.minecraft.entity.passive.DolphinEntity;
-import net.minecraft.entity.passive.WaterMobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Guardian;
+import net.minecraft.world.entity.animal.Dolphin;
+import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.*;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.IServerWorld;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -35,11 +35,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-@Mixin(DolphinEntity.class)
-public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnimal, IPredator, IDevourer, IPlaysWithItems {
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnGroupData;
+
+@Mixin(Dolphin.class)
+public abstract class DolphinEntityMixin extends WaterAnimal implements IAnimal, IPredator, IDevourer, IPlaysWithItems {
     //private static final Ingredient DOLPHIN_FOOD_ITEMS = Ingredient.of(AptitudeResources.DOLPHINS_EAT);
 
-    private static final DataParameter<Boolean> DATA_BABY_ID = EntityDataManager.defineId(DolphinEntity.class, DataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(Dolphin.class, EntityDataSerializers.BOOLEAN);
     protected int age;
     protected int forcedAge;
     protected int forcedAgeTimer;
@@ -51,7 +62,7 @@ public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnim
     private boolean addedHurtByReplacements;
     private boolean addedPlayWithItemsReplacement;
 
-    protected DolphinEntityMixin(EntityType<? extends WaterMobEntity> entityType, World world) {
+    protected DolphinEntityMixin(EntityType<? extends WaterAnimal> entityType, Level world) {
         super(entityType, world);
     }
 
@@ -60,7 +71,7 @@ public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnim
             method = "registerGoals")
     private void onAboutToAddGoal(GoalSelector goalSelector, int priority, Goal goal){
         if(goalSelector == this.targetSelector && priority == 1 && goal instanceof HurtByTargetGoal && !this.addedHurtByReplacements){
-            goalSelector.addGoal(priority, new AptitudeHurtByTargetGoal<>(this, GuardianEntity.class).setAlertOthers());
+            goalSelector.addGoal(priority, new AptitudeHurtByTargetGoal<>(this, Guardian.class).setAlertOthers());
             this.addedHurtByReplacements = true;
         } else if(goalSelector == this.goalSelector && priority == 8 && !this.addedPlayWithItemsReplacement){
             goalSelector.addGoal(priority, new DevourerPlayWithItemsGoal<>(this, AptitudePredicates.ALLOWED_ITEMS, 100));
@@ -77,13 +88,13 @@ public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnim
 
 
     @Inject(at = @At("RETURN"), method = "addAdditionalSaveData")
-    private void addSaveData(CompoundNBT compoundNBT, CallbackInfo ci){
+    private void addSaveData(CompoundTag compoundNBT, CallbackInfo ci){
         this.addAnimalData(compoundNBT);
         this.addAgeableData(this, compoundNBT);
     }
 
     @Inject(at = @At("RETURN"), method = "readAdditionalSaveData")
-    private void readSaveData(CompoundNBT compoundNBT, CallbackInfo ci){
+    private void readSaveData(CompoundTag compoundNBT, CallbackInfo ci){
         this.readAnimalData(compoundNBT);
         this.readAgeableData(compoundNBT);
     }
@@ -103,15 +114,15 @@ public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnim
     }
 
     @Inject(at = @At("RETURN"), method = "finalizeSpawn", cancellable = true)
-    private void finalize(IServerWorld serverWorld, DifficultyInstance difficultyInstance, SpawnReason spawnReason, ILivingEntityData livingEntityData, CompoundNBT compoundNBT, CallbackInfoReturnable<ILivingEntityData> cir){
-        ILivingEntityData ageableData = this.finalizeAgeableSpawn(livingEntityData);
+    private void finalize(ServerLevelAccessor serverWorld, DifficultyInstance difficultyInstance, MobSpawnType spawnReason, SpawnGroupData livingEntityData, CompoundTag compoundNBT, CallbackInfoReturnable<SpawnGroupData> cir){
+        SpawnGroupData ageableData = this.finalizeAgeableSpawn(livingEntityData);
         this.setHuntCooldown(getHuntInterval());
         cir.setReturnValue(super.finalizeSpawn(serverWorld, difficultyInstance, spawnReason, ageableData, compoundNBT));
     }
 
     @Inject(at = @At("HEAD"), method = "mobInteract", cancellable = true)
-    private void handleAnimalInteract(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResultType> cir){
-        ActionResultType animalInteractResult = this.animalInteract(this, player, hand);
+    private void handleAnimalInteract(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir){
+        InteractionResult animalInteractResult = this.animalInteract(this, player, hand);
         if(animalInteractResult.consumesAction()){
             this.setPersistenceRequired();
             cir.setReturnValue(animalInteractResult);
@@ -125,7 +136,7 @@ public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnim
     }
 
     @Override
-    public void onSyncedDataUpdated(DataParameter<?> dataParameter) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> dataParameter) {
         if (DATA_BABY_ID.equals(dataParameter)) {
             this.refreshDimensions();
         }
@@ -143,7 +154,7 @@ public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnim
     }
 
     @Override
-    public void killed(ServerWorld serverWorld, LivingEntity killedEntity) {
+    public void killed(ServerLevel serverWorld, LivingEntity killedEntity) {
         super.killed(serverWorld, killedEntity);
         this.onHuntedPrey(killedEntity);
     }
@@ -205,7 +216,7 @@ public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnim
     @SuppressWarnings("unchecked")
     @Nullable
     @Override
-    public <T extends MobEntity & IAgeable> T getBreedOffspring(ServerWorld serverWorld, T ageable) {
+    public <T extends Mob & IAgeable> T getBreedOffspring(ServerLevel serverWorld, T ageable) {
         T dolphin = (T) EntityType.DOLPHIN.create(serverWorld);
         if(dolphin != null & ageable instanceof IAnimal && ((IAnimal) ageable).wasBredRecently()){
             dolphin.setPersistenceRequired();
@@ -315,7 +326,7 @@ public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnim
     }
 
     @Override
-    public <T extends MobEntity & IDevourer> boolean canEat(T devourer, ItemStack stack) {
+    public <T extends Mob & IDevourer> boolean canEat(T devourer, ItemStack stack) {
         return stack.getItem().isEdible()
                 && this.getEatCooldown() <= 0
                 && this.isFood(stack);
@@ -332,7 +343,7 @@ public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnim
     }
 
     @Override
-    public void usePlayerItem(PlayerEntity player, ItemStack stack) {
+    public void usePlayerItem(Player player, ItemStack stack) {
         if(this.isFood(stack)){
             this.playSound(this.getEatingSound(stack), 1.0F, 1.0F);
             if(stack.isEdible()) {
@@ -346,7 +357,7 @@ public abstract class DolphinEntityMixin extends WaterMobEntity implements IAnim
     }
 
     @Override
-    public <T extends MobEntity & IAnimal> boolean canAcceptFood(T animal, ItemStack stack) {
+    public <T extends Mob & IAnimal> boolean canAcceptFood(T animal, ItemStack stack) {
         return this.isHungry(this);
     }
 

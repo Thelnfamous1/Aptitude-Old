@@ -1,16 +1,16 @@
 package com.infamous.aptitude.server.goal.misc;
 
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class AptitudeFindItemsGoal<T extends MobEntity> extends Goal {
+public class AptitudeFindItemsGoal<T extends Mob> extends Goal {
     protected final T mob;
     private final Predicate<ItemEntity> itemEntityPredicate;
     protected final int randomInterval;
@@ -44,7 +44,7 @@ public class AptitudeFindItemsGoal<T extends MobEntity> extends Goal {
     }
 
     protected ItemStack getFoundItemBySlot() {
-        return this.mob.getItemBySlot(EquipmentSlotType.MAINHAND);
+        return this.mob.getItemBySlot(EquipmentSlot.MAINHAND);
     }
 
     protected boolean canMove() {

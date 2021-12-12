@@ -7,21 +7,21 @@ import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudeResources;
 import com.infamous.aptitude.server.goal.misc.AptitudePanicGoal;
 import com.infamous.aptitude.server.goal.attack.RearingAttackGoal;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.GoalSelector;
-import net.minecraft.entity.ai.goal.PanicGoal;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.horse.AbstractHorseEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.scores.Team;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,8 +34,8 @@ import javax.annotation.Nullable;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-@Mixin(AbstractHorseEntity.class)
-public abstract class AbstractHorseEntityMixin extends AnimalEntity implements IHasOwner, IRearing {
+@Mixin(AbstractHorse.class)
+public abstract class AbstractHorseEntityMixin extends Animal implements IHasOwner, IRearing {
 
     //private static final Ingredient HORSE_FOOD_ITEMS = Ingredient.of(AptitudeResources.HORSES_EAT);
     private static final Predicate<ItemStack> FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.HORSES_EAT);
@@ -44,7 +44,7 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
 
     private boolean addedPanicReplacements;
 
-    protected AbstractHorseEntityMixin(EntityType<? extends AnimalEntity> p_i48568_1_, World p_i48568_2_) {
+    protected AbstractHorseEntityMixin(EntityType<? extends Animal> p_i48568_1_, Level p_i48568_2_) {
         super(p_i48568_1_, p_i48568_2_);
     }
 
@@ -85,7 +85,7 @@ public abstract class AbstractHorseEntityMixin extends AnimalEntity implements I
      * @reason Replacing hardcoded food checks with tags
      */
     @Overwrite
-    protected boolean handleEating(PlayerEntity player, ItemStack stack){
+    protected boolean handleEating(Player player, ItemStack stack){
         boolean handled = false;
         float healAmount = 0.0F;
         int ageBoost = 0;
