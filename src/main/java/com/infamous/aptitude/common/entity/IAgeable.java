@@ -1,11 +1,11 @@
 package com.infamous.aptitude.common.entity;
 
-import net.minecraft.world.entity.AgableMob;
-import net.minecraft.world.entity.SpawnGroupData;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.SpawnGroupData;
 
 import javax.annotation.Nullable;
 import java.util.Random;
@@ -22,10 +22,10 @@ public interface IAgeable {
 
     default SpawnGroupData finalizeAgeableSpawn(@Nullable SpawnGroupData livingEntityData){
         if (livingEntityData == null) {
-            livingEntityData = new AgableMob.AgableMobGroupData(true);
+            livingEntityData = new AgeableMob.AgeableMobGroupData(true);
         }
 
-        AgableMob.AgableMobGroupData ageableentity$ageabledata = (AgableMob.AgableMobGroupData)livingEntityData;
+        AgeableMob.AgeableMobGroupData ageableentity$ageabledata = (AgeableMob.AgeableMobGroupData)livingEntityData;
         if (ageableentity$ageabledata.isShouldSpawnBaby()
                 && ageableentity$ageabledata.getGroupSize() > 0
                 && RANDOM.nextFloat() <= ageableentity$ageabledata.getBabySpawnChance()) {

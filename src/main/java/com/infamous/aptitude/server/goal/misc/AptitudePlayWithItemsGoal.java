@@ -85,7 +85,7 @@ public class AptitudePlayWithItemsGoal<T extends Mob & IPlaysWithItems> extends 
             float f = 0.3F;
             float f1 = this.mob.getRandom().nextFloat() * ((float)Math.PI * 2F);
             float f2 = 0.02F * this.mob.getRandom().nextFloat();
-            itemEntity.setDeltaMovement((double)(0.3F * -Mth.sin(this.mob.yRot * ((float)Math.PI / 180F)) * Mth.cos(this.mob.xRot * ((float)Math.PI / 180F)) + Mth.cos(f1) * f2), (double)(0.3F * Mth.sin(this.mob.xRot * ((float)Math.PI / 180F)) * 1.5F), (double)(0.3F * Mth.cos(this.mob.yRot * ((float)Math.PI / 180F)) * Mth.cos(this.mob.xRot * ((float)Math.PI / 180F)) + Mth.sin(f1) * f2));
+            itemEntity.setDeltaMovement((double)(0.3F * -Mth.sin(this.mob.getYRot() * ((float)Math.PI / 180F)) * Mth.cos(this.mob.getXRot() * ((float)Math.PI / 180F)) + Mth.cos(f1) * f2), (double)(0.3F * Mth.sin(this.mob.getXRot() * ((float)Math.PI / 180F)) * 1.5F), (double)(0.3F * Mth.cos(this.mob.getYRot() * ((float)Math.PI / 180F)) * Mth.cos(this.mob.getXRot() * ((float)Math.PI / 180F)) + Mth.sin(f1) * f2));
             this.mob.level.addFreshEntity(itemEntity);
          }
     }

@@ -3,17 +3,16 @@ package com.infamous.aptitude.client.renderer.layer;
 import com.infamous.aptitude.client.renderer.IHeadAccessor;
 import com.infamous.aptitude.common.entity.IDevourer;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.model.AgeableListModel;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import com.mojang.math.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -58,8 +57,7 @@ public class AgeableHeldItemLayer<T extends LivingEntity, M extends AgeableListM
 
    protected void translateToHead(PoseStack matrixStack) {
       M parentModel = this.getParentModel();
-      if(parentModel instanceof IHeadAccessor){
-         IHeadAccessor headAccessor = (IHeadAccessor) parentModel;
+      if(parentModel instanceof IHeadAccessor headAccessor){
          if(headAccessor.getHead() != null){
             matrixStack.translate((double)(headAccessor.getHead().x / 16.0F), (double)(headAccessor.getHead().y / 16.0F), (double)(headAccessor.getHead().z / 16.0F));
          }

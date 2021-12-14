@@ -1,7 +1,6 @@
 package com.infamous.aptitude.server.goal.attack;
 
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 
 public class AptitudeAttackGoal<T extends PathfinderMob> extends MeleeAttackGoal {

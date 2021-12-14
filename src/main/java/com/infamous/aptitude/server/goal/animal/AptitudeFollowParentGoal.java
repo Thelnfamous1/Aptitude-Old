@@ -1,11 +1,10 @@
 package com.infamous.aptitude.server.goal.animal;
 
-import java.util.List;
-
 import com.infamous.aptitude.common.entity.IAnimal;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.entity.passive.AnimalEntity;
+
+import java.util.List;
 
 public class AptitudeFollowParentGoal<T extends Mob, A extends Mob & IAnimal> extends Goal {
    protected final A animal;
@@ -30,7 +29,7 @@ public class AptitudeFollowParentGoal<T extends Mob, A extends Mob & IAnimal> ex
       if (this.animal.getAge(this.animal) >= IAnimal.ADULT_AGE) {
          return false;
       } else {
-         List<Mob> list = this.animal.level.getEntitiesOfClass(this.animal.getClass(), this.animal.getBoundingBox().inflate(this.parentSearchDist, this.parentSearchDist / 2, this.parentSearchDist));
+         List<? extends Mob> list = this.animal.level.getEntitiesOfClass(this.animal.getClass(), this.animal.getBoundingBox().inflate(this.parentSearchDist, this.parentSearchDist / 2, this.parentSearchDist));
          A parentAnimal = null;
          double minDistSq = Double.MAX_VALUE;
 

@@ -1,14 +1,14 @@
 package com.infamous.aptitude.common.entity;
 
+import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.util.IntRange;
-import net.minecraft.util.TimeUtil;
 
 import java.util.Random;
 
 public interface IPredator {
-    IntRange TIME_BETWEEN_HUNTS = TimeUtil.rangeOfSeconds(30, 120);
+    UniformInt TIME_BETWEEN_HUNTS = TimeUtil.rangeOfSeconds(30, 120);
     Random RANDOM = new Random();
 
     default void onHuntedPrey(LivingEntity killedEntity) {
@@ -30,7 +30,7 @@ public interface IPredator {
     boolean isPrey(LivingEntity living);
 
     default int getHuntInterval(){
-        return TIME_BETWEEN_HUNTS.randomValue(RANDOM);
+        return TIME_BETWEEN_HUNTS.sample(RANDOM);
     }
 
 }

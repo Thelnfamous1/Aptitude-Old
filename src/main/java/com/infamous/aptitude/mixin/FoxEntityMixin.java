@@ -4,6 +4,7 @@ import com.infamous.aptitude.common.entity.IAnimal;
 import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudePredicates;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -45,7 +46,7 @@ public abstract class FoxEntityMixin extends Animal {
     @Final
     @Shadow
     @Mutable
-    private static Predicate<Entity> STALKABLE_PREY;
+    static Predicate<Entity> STALKABLE_PREY;
 
     static {
         STALKABLE_PREY = AptitudePredicates.FOXES_CAN_STALK;
@@ -62,14 +63,15 @@ public abstract class FoxEntityMixin extends Animal {
 
     @Shadow public abstract boolean isFood(ItemStack p_70877_1_);
 
-    @Shadow protected abstract boolean isDefending();
+    @Shadow
+    abstract boolean isDefending();
 
     protected FoxEntityMixin(EntityType<? extends Animal> p_i48568_1_, Level p_i48568_2_) {
         super(p_i48568_1_, p_i48568_2_);
     }
 
     @Redirect(at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/entity/ai/goal/Goal;)V"),
+            target = "Lnet/minecraft/world/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/world/entity/ai/goal/Goal;)V"),
             method = "registerGoals")
     private void replaceGoals(GoalSelector goalSelector, int priority, Goal goal){
         if(goalSelector == this.goalSelector && priority == 4 && goal instanceof AvoidEntityGoal && this.addedAvoidReplacementsCounter < 3){
@@ -90,7 +92,7 @@ public abstract class FoxEntityMixin extends Animal {
     }
 
     @Inject(at = @At("HEAD"), method = "usePlayerItem")
-    private void healWithFood(Player player, ItemStack stack, CallbackInfo ci){
+    private void healWithFood(Player player, InteractionHand hand, ItemStack stack, CallbackInfo ci){
         if(this.isFood(stack) && stack.isEdible()){
             this.heal(stack.getItem().getFoodProperties().getNutrition());
             AptitudeHelper.addEatEffect(stack, this.level, this);
@@ -112,7 +114,7 @@ public abstract class FoxEntityMixin extends Animal {
      * @reason Allows foxes to store more than 2 "trusted" uuids
      */
     @Overwrite
-    private void addTrustedUUID(@Nullable UUID uuid){
+    void addTrustedUUID(@Nullable UUID uuid){
         if (!this.entityData.get(DATA_TRUSTED_ID_0).isPresent()) {
             this.entityData.set(DATA_TRUSTED_ID_0, Optional.ofNullable(uuid));
         } else if(!this.entityData.get(DATA_TRUSTED_ID_1).isPresent()){
@@ -124,7 +126,8 @@ public abstract class FoxEntityMixin extends Animal {
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;finishUsingItem(Lnet/minecraft/world/World;Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/item/ItemStack;"),
+    @Inject(at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/item/ItemStack;finishUsingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;)Lnet/minecraft/world/item/ItemStack;"),
             method = "aiStep")
     private void finishEat(CallbackInfo ci){
         this.onFinishedEating();

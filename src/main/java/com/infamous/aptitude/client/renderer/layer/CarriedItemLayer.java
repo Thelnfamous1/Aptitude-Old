@@ -24,8 +24,8 @@ public class CarriedItemLayer<T extends Mob, M extends EntityModel<T>> extends R
       matrixStack.pushPose();
       float f = 1.0F;
       float f1 = -1.0F;
-      float f2 = Mth.abs(mob.xRot) / 60.0F;
-      if (mob.xRot < 0.0F) {
+      float f2 = Mth.abs(mob.getXRot()) / 60.0F;
+      if (mob.getXRot() < 0.0F) {
          matrixStack.translate(0.0D, (double)(1.0F - f2 * 0.5F), (double)(-1.0F + f2 * 0.5F));
       } else {
          matrixStack.translate(0.0D, (double)(1.0F + f2 * 0.8F), (double)(-1.0F + f2 * 0.2F));

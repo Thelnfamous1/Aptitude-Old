@@ -1,12 +1,13 @@
 package com.infamous.aptitude.mixin;
 
-import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.entity.IHasOwner;
 import com.infamous.aptitude.common.entity.IRearing;
 import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudeResources;
-import com.infamous.aptitude.server.goal.misc.AptitudePanicGoal;
 import com.infamous.aptitude.server.goal.attack.RearingAttackGoal;
+import com.infamous.aptitude.server.goal.misc.AptitudePanicGoal;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,10 +19,8 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.scores.Team;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.scores.Team;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,7 +37,7 @@ import java.util.function.Predicate;
 public abstract class AbstractHorseEntityMixin extends Animal implements IHasOwner, IRearing {
 
     //private static final Ingredient HORSE_FOOD_ITEMS = Ingredient.of(AptitudeResources.HORSES_EAT);
-    private static final Predicate<ItemStack> FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.HORSES_EAT);
+    private static final Predicate<ItemStack> FOOD_PREDICATE = stack -> stack.is(AptitudeResources.HORSES_EAT);
 
     private int angrySoundCooldown;
 
@@ -49,7 +48,7 @@ public abstract class AbstractHorseEntityMixin extends Animal implements IHasOwn
     }
 
     @Redirect(at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/entity/ai/goal/Goal;)V"),
+            target = "Lnet/minecraft/world/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/world/entity/ai/goal/Goal;)V"),
             method = "registerGoals")
     private void onAboutToAddPanicGoal(GoalSelector goalSelector, int priority, Goal goal){
         if(goalSelector == this.goalSelector && priority == 1 && goal instanceof PanicGoal && !this.addedPanicReplacements){
@@ -90,33 +89,32 @@ public abstract class AbstractHorseEntityMixin extends Animal implements IHasOwn
         float healAmount = 0.0F;
         int ageBoost = 0;
         int temperBoost = 0;
-        Item item = stack.getItem();
-        if (item.is(AptitudeResources.WHEAT_EQUIVALENTS)) {
+        if (stack.is(AptitudeResources.WHEAT_EQUIVALENTS)) {
             healAmount = 2.0F;
             ageBoost = 20;
             temperBoost = 3;
-        } else if (item.is(AptitudeResources.SUGAR_EQUIVALENTS)) {
+        } else if (stack.is(AptitudeResources.SUGAR_EQUIVALENTS)) {
             healAmount = 1.0F;
             ageBoost = 30;
             temperBoost = 3;
-        } else if (item.is(AptitudeResources.HAY_EQUIVALENTS)) {
+        } else if (stack.is(AptitudeResources.HAY_EQUIVALENTS)) {
             healAmount = 20.0F;
             ageBoost = 180;
-        } else if (item.is(AptitudeResources.APPLE_EQUIVALENTS)) {
+        } else if (stack.is(AptitudeResources.APPLE_EQUIVALENTS)) {
             healAmount = 3.0F;
             ageBoost = 60;
             temperBoost = 3;
-        } else if (item.is(AptitudeResources.GOLDEN_CARROT_EQUIVALENTS)) {
+        } else if (stack.is(AptitudeResources.GOLDEN_CARROT_EQUIVALENTS)) {
             healAmount = 4.0F;
             ageBoost = 60;
             temperBoost = 5;
-        } else if (item.is(AptitudeResources.GOLDEN_APPLE_EQUIVALENTS)) {
+        } else if (stack.is(AptitudeResources.GOLDEN_APPLE_EQUIVALENTS)) {
             healAmount = 10.0F;
             ageBoost = 240;
             temperBoost = 10;
         }
 
-        if(item.is(AptitudeResources.HORSES_BREED_WITH)){
+        if(stack.is(AptitudeResources.HORSES_BREED_WITH)){
             if (!this.level.isClientSide && this.isTamed() && this.getAge() == 0 && !this.isInLove()) {
                 handled = true;
                 this.setInLove(player);

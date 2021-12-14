@@ -5,44 +5,47 @@ import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.entity.IPredator;
 import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudePredicates;
-import com.infamous.aptitude.server.goal.target.HuntGoal;
+import com.infamous.aptitude.common.util.AptitudeResources;
 import com.infamous.aptitude.server.goal.target.UntamedHuntGoal;
-import net.minecraft.entity.*;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.GoalSelector;
-import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.world.entity.animal.Cat;
-import net.minecraft.world.entity.TamableAnimal;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
+import net.minecraft.world.entity.animal.Cat;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ServerLevelAccessor;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.SpawnGroupData;
-
 @Mixin(Cat.class)
 public abstract class CatEntityMixin extends TamableAnimal implements IPredator, IDevourer {
+
+    @Final
+    @Shadow
+    @Mutable
+    private static final Ingredient TEMPT_INGREDIENT;
+
+    static {
+        TEMPT_INGREDIENT = Ingredient.of(AptitudeResources.CATS_EAT);
+    }
 
     private int ticksSinceEaten;
     private int eatCooldown;
@@ -64,19 +67,20 @@ public abstract class CatEntityMixin extends TamableAnimal implements IPredator,
     }
 
     @Redirect(at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/entity/ai/goal/Goal;)V"),
+            target = "Lnet/minecraft/world/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/world/entity/ai/goal/Goal;)V"),
             method = "registerGoals")
     private void onAboutToAddGoal(GoalSelector goalSelector, int priority, Goal goal){
         if(goalSelector == this.targetSelector && priority == 1 && goal instanceof NonTameRandomTargetGoal && !this.addedNonTamedTargetReplacements){
             goalSelector.addGoal(priority, new UntamedHuntGoal<>(this, LivingEntity.class, 10, false, false, AptitudePredicates.CAT_PREY_PREDICATE));
             this.addedNonTamedTargetReplacements = true;
-        } else {
+        }
+        else{
             goalSelector.addGoal(priority, goal);
         }
     }
 
     @Inject(at = @At("HEAD"), method = "usePlayerItem")
-    private void addFoodEffects(Player player, ItemStack stack, CallbackInfo ci){
+    private void addFoodEffects(Player player, InteractionHand hand, ItemStack stack, CallbackInfo ci){
         if(this.isFood(stack) && stack.isEdible()){
             // when this is called in CatEntity#mobInteract, the cat subsequently calls LivingEntity#heal
             AptitudeHelper.addEatEffect(stack, this.level, this);

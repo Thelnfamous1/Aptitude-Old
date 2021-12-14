@@ -10,16 +10,16 @@ import java.util.function.Predicate;
 
 public class AptitudePredicates {
     public static final Predicate<LivingEntity> OCELOT_PREY_PREDICATE = living -> living.getType().is(AptitudeResources.OCELOTS_HUNT);
-    public static final Predicate<ItemStack> OCELOT_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.OCELOTS_EAT);
+    public static final Predicate<ItemStack> OCELOT_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.OCELOTS_EAT);
 
     public static final Predicate<LivingEntity> CAT_PREY_PREDICATE = living -> living.getType().is(AptitudeResources.CATS_HUNT) && !AptitudeHelper.isTamedAnimal(living);
-    public static final Predicate<ItemStack> CAT_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.CATS_EAT);
+    public static final Predicate<ItemStack> CAT_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.CATS_EAT);
 
     public static final Predicate<LivingEntity> DOLPHIN_PREY_PREDICATE = living -> living.getType().is(AptitudeResources.DOLPHINS_HUNT);
-    public static final Predicate<ItemStack> DOLPHIN_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.DOLPHINS_EAT);
+    public static final Predicate<ItemStack> DOLPHIN_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.DOLPHINS_EAT);
 
     public static final Predicate<LivingEntity> POLAR_BEAR_PREY_PREDICATE = living -> living.getType().is(AptitudeResources.POLAR_BEARS_HUNT);
-    public static final Predicate<ItemStack> POLAR_BEAR_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.POLAR_BEARS_EAT);
+    public static final Predicate<ItemStack> POLAR_BEAR_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.POLAR_BEARS_EAT);
 
     public static final Predicate<LivingEntity> WOLF_PREY_PREDICATE = living -> living.getType().is(AptitudeResources.WOLVES_HUNT);
 
@@ -27,18 +27,18 @@ public class AptitudePredicates {
     public static final Predicate<LivingEntity> FOXES_HUNT_IN_WATER = entity -> entity.getType().is(AptitudeResources.FOXES_HUNT_IN_WATER);
     public static final Predicate<Entity> FOXES_CAN_STALK = entity -> entity instanceof LivingEntity && FOXES_HUNT_ON_LAND.test((LivingEntity) entity);
 
-    public static final Predicate<ItemStack> PARROT_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.PARROTS_EAT);
-    public static final Predicate<ItemStack> COW_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.COWS_EAT);
-    public static final Predicate<ItemStack> PIG_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.PIGS_EAT);
-    public static final Predicate<ItemStack> CHICKEN_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.CHICKENS_EAT);
-    public static final Predicate<ItemStack> RABBIT_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.RABBITS_EAT);
-    public static final Predicate<ItemStack> SHEEP_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.SHEEP_EAT);
-    public static final Predicate<ItemStack> FOX_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.FOXES_EAT);
-    public static final Predicate<ItemStack> PANDA_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.PANDAS_EAT);
-    public static final Predicate<ItemStack> TURTLE_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.TURTLES_EAT);
-    public static final Predicate<ItemStack> STRIDER_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.STRIDERS_EAT);
+    public static final Predicate<ItemStack> PARROT_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.PARROTS_EAT);
+    public static final Predicate<ItemStack> COW_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.COWS_EAT);
+    public static final Predicate<ItemStack> PIG_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.PIGS_EAT);
+    public static final Predicate<ItemStack> CHICKEN_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.CHICKENS_EAT);
+    public static final Predicate<ItemStack> RABBIT_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.RABBITS_EAT);
+    public static final Predicate<ItemStack> SHEEP_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.SHEEP_EAT);
+    public static final Predicate<ItemStack> FOX_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.FOXES_EAT);
+    public static final Predicate<ItemStack> PANDA_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.PANDAS_EAT);
+    public static final Predicate<ItemStack> TURTLE_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.TURTLES_EAT);
+    public static final Predicate<ItemStack> STRIDER_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.STRIDERS_EAT);
     public static final Predicate<ItemStack> STRIDER_TEMPT_PREDICATE = stack -> STRIDER_FOOD_PREDICATE.test(stack) || stack.getItem() == Items.WARPED_FUNGUS_ON_A_STICK;
-    public static final Predicate<ItemStack> CAKE_PREDICATE = stack -> stack.getItem().is(AptitudeResources.CAKES);
+    public static final Predicate<ItemStack> CAKE_PREDICATE = stack -> stack.is(AptitudeResources.CAKES);
     public static final Predicate<ItemStack> PANDA_FOOD_OR_CAKE_PREDICATE = stack -> PANDA_FOOD_PREDICATE.test(stack) || CAKE_PREDICATE.test(stack);
 
     public static final Predicate<LivingEntity> CAT_DEFEND_PREDICATE = living -> living.getType().is(AptitudeResources.CATS_REPEL) && !AptitudeHelper.isTamedAnimal(living);

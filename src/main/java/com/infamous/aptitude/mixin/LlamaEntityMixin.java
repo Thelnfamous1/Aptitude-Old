@@ -1,27 +1,29 @@
 package com.infamous.aptitude.mixin;
 
-import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.entity.ICanSpit;
 import com.infamous.aptitude.common.entity.ISwitchCombatTask;
 import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.common.util.AptitudeResources;
-import com.infamous.aptitude.server.goal.misc.AptitudePanicGoal;
 import com.infamous.aptitude.server.goal.attack.SwitchableRangedAttackGoal;
+import com.infamous.aptitude.server.goal.attack.SwitchableRearingAttackGoal;
+import com.infamous.aptitude.server.goal.misc.AptitudePanicGoal;
 import com.infamous.aptitude.server.goal.target.AptitudeDefendTargetGoal;
 import com.infamous.aptitude.server.goal.target.CanSpitHurtByTargetGoal;
-import com.infamous.aptitude.server.goal.attack.SwitchableRearingAttackGoal;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.monster.RangedAttackMob;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.*;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.entity.passive.WolfEntity;
-import net.minecraft.world.entity.animal.horse.Llama;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.monster.RangedAttackMob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -34,17 +36,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.function.Predicate;
 
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.GoalSelector;
-import net.minecraft.world.entity.ai.goal.PanicGoal;
-import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-
 @Mixin(Llama.class)
 public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implements ICanSpit, ISwitchCombatTask, RangedAttackMob {
     //private static final Ingredient LLAMA_FOOD_ITEMS = Ingredient.of(AptitudeResources.LLAMAS_EAT);
-    private static final Predicate<ItemStack> LLAMA_FOOD_PREDICATE = stack -> stack.getItem().is(AptitudeResources.LLAMAS_EAT);
+    private static final Predicate<ItemStack> LLAMA_FOOD_PREDICATE = stack -> stack.is(AptitudeResources.LLAMAS_EAT);
 
     private static final int SPIT_INTERVAL = 40;
 
@@ -62,7 +57,7 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
     }
 
     @Redirect(at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/entity/ai/goal/Goal;)V"),
+            target = "Lnet/minecraft/world/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/world/entity/ai/goal/Goal;)V"),
             method = "registerGoals")
     private void onAboutToAddGoal(GoalSelector goalSelector, int priority, Goal goal){
         if(goalSelector == this.goalSelector && priority == 3 && goal instanceof PanicGoal && !this.addedPanicReplacements){
@@ -109,18 +104,17 @@ public abstract class LlamaEntityMixin extends AbstractHorseEntityMixin implemen
         int temperBoost = 0;
         float healAmount = 0.0F;
         boolean handled = false;
-        Item item = stack.getItem();
-        if (item.is(AptitudeResources.WHEAT_EQUIVALENTS)) {
+        if (stack.is(AptitudeResources.WHEAT_EQUIVALENTS)) {
             ageBoost = 10;
             temperBoost = 3;
             healAmount = 2.0F;
-        } else if (item.is(AptitudeResources.HAY_EQUIVALENTS)) {
+        } else if (stack.is(AptitudeResources.HAY_EQUIVALENTS)) {
             ageBoost = 90;
             temperBoost = 6;
             healAmount = 10.0F;
         }
 
-        if(item.is(AptitudeResources.LLAMAS_BREED_WITH)){
+        if(stack.is(AptitudeResources.LLAMAS_BREED_WITH)){
             if (!this.level.isClientSide && this.isTamed() && this.getAge() == 0 && !this.isInLove()) {
                 handled = true;
                 this.setInLove(player);

@@ -3,37 +3,32 @@ package com.infamous.aptitude.mixin;
 import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.common.util.AptitudeResources;
-import net.minecraft.world.entity.AgableMob;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.entity.passive.CatEntity;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.ShoulderRidingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.Level;
-import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
-
-import net.minecraft.world.entity.AgableMob.AgableMobGroupData;
 
 @Mixin(Parrot.class)
 public abstract class ParrotEntityMixin extends ShoulderRidingEntity {
@@ -48,9 +43,9 @@ public abstract class ParrotEntityMixin extends ShoulderRidingEntity {
 
     @ModifyVariable(at = @At("STORE"), method = "finalizeSpawn")
     private SpawnGroupData allowBabySpawn(@Nullable SpawnGroupData livingEntityData){
-        if (livingEntityData instanceof AgableMob.AgableMobGroupData
-                && !((AgableMobGroupData) livingEntityData).isShouldSpawnBaby()) {
-            livingEntityData = new AgableMob.AgableMobGroupData(true);
+        if (livingEntityData instanceof AgeableMob.AgeableMobGroupData
+                && !((AgeableMobGroupData) livingEntityData).isShouldSpawnBaby()) {
+            livingEntityData = new AgeableMob.AgeableMobGroupData(true);
         }
         return livingEntityData;
     }
@@ -66,7 +61,7 @@ public abstract class ParrotEntityMixin extends ShoulderRidingEntity {
     }
 
     @Inject(at = @At("RETURN"), method = "getBreedOffspring", cancellable = true)
-    private void getAnimalBreedOffspring(ServerLevel serverWorld, AgableMob ageable, CallbackInfoReturnable<AgableMob> cir){
+    private void getAnimalBreedOffspring(ServerLevel serverWorld, AgeableMob ageable, CallbackInfoReturnable<AgeableMob> cir){
         Parrot babyParrot = EntityType.PARROT.create(serverWorld);
 
         if(babyParrot != null){
@@ -101,7 +96,7 @@ public abstract class ParrotEntityMixin extends ShoulderRidingEntity {
         ItemStack itemstack = player.getItemInHand(hand);
         if (this.isFood(itemstack) && !this.isPoison(itemstack)) {
             if(!this.isTame()){
-                if (!player.abilities.instabuild) {
+                if (!player.getAbilities().instabuild) {
                     itemstack.shrink(1);
                 }
 
@@ -123,7 +118,7 @@ public abstract class ParrotEntityMixin extends ShoulderRidingEntity {
                 return super.mobInteract(player, hand);
             }
         } else if (this.isPoison(itemstack)) {
-            if (!player.abilities.instabuild) {
+            if (!player.getAbilities().instabuild) {
                 itemstack.shrink(1);
             }
 
@@ -145,11 +140,11 @@ public abstract class ParrotEntityMixin extends ShoulderRidingEntity {
     }
 
     private boolean isPoison(ItemStack itemstack) {
-        return itemstack.getItem().is(AptitudeResources.PARROTS_CANNOT_EAT);
+        return itemstack.is(AptitudeResources.PARROTS_CANNOT_EAT);
     }
 
     @Override
-    public void usePlayerItem(Player player, ItemStack stack) {
+    public void usePlayerItem(Player player, InteractionHand hand, ItemStack stack) {
         if(this.isFood(stack)){
             this.playSound(this.getEatingSound(stack), 1.0F, 1.0F);
             if(stack.isEdible()) {
@@ -157,7 +152,7 @@ public abstract class ParrotEntityMixin extends ShoulderRidingEntity {
                 AptitudeHelper.addEatEffect(stack, this.level, this);
             }
         }
-        super.usePlayerItem(player, stack);
+        super.usePlayerItem(player, hand, stack);
     }
 
     @Shadow

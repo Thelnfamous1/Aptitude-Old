@@ -2,6 +2,7 @@ package com.infamous.aptitude.common.entity;
 
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.util.AptitudeHelper;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -73,7 +74,7 @@ public interface IDevourer {
         ItemStack itemBySlot = devourer.getItemBySlot(this.getSlotForFood());
         if (!itemBySlot.isEmpty()) {
             for(int i = 0; i < 8; ++i) {
-                Vec3 eatSpeedVector = (new Vec3(((double)devourer.getRandom().nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D)).xRot(-devourer.xRot * ((float)Math.PI / 180F)).yRot(-devourer.yRot * ((float)Math.PI / 180F));
+                Vec3 eatSpeedVector = (new Vec3(((double)devourer.getRandom().nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D)).xRot(-devourer.getXRot() * ((float)Math.PI / 180F)).yRot(-devourer.getYRot() * ((float)Math.PI / 180F));
                 devourer.level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, itemBySlot), devourer.getX() + devourer.getLookAngle().x / 2.0D, devourer.getY(), devourer.getZ() + devourer.getLookAngle().z / 2.0D, eatSpeedVector.x, eatSpeedVector.y + 0.05D, eatSpeedVector.z);
             }
         }
@@ -102,7 +103,7 @@ public interface IDevourer {
             devourer.setItemSlot(this.getSlotForFood(), itemstack.split(1));
             devourer.setGuaranteedDrop(this.getSlotForFood());
             devourer.take(itemEntity, itemstack.getCount());
-            itemEntity.remove();
+            itemEntity.remove(Entity.RemovalReason.DISCARDED);
             this.setTicksSinceEaten(0);
         }
     }

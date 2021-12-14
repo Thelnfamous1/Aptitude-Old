@@ -13,28 +13,19 @@ import com.infamous.aptitude.server.goal.misc.DevourerFindItemsGoal;
 import com.infamous.aptitude.server.goal.target.AptitudeDefendTargetGoal;
 import com.infamous.aptitude.server.goal.target.AptitudeHurtByTargetGoal;
 import com.infamous.aptitude.server.goal.target.HuntGoal;
-import net.minecraft.entity.CreatureEntity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
-import net.minecraft.entity.passive.*;
-import net.minecraft.entity.passive.horse.*;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-
-import net.minecraft.world.entity.animal.Cat;
-import net.minecraft.world.entity.animal.Dolphin;
-import net.minecraft.world.entity.animal.Fox;
-import net.minecraft.world.entity.animal.Ocelot;
-import net.minecraft.world.entity.animal.Parrot;
-import net.minecraft.world.entity.animal.PolarBear;
+import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Donkey;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Mule;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = Aptitude.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeCommonEvents {

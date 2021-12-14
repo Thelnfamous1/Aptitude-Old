@@ -45,10 +45,6 @@ public class AptitudeHelper {
                 || (asHorse != null && asHorse.isTamed());
     }
 
-    public static InteractionHand getWeaponHoldingHand(LivingEntity living, Predicate<Item> itemPredicate) {
-        return itemPredicate.test(living.getMainHandItem().getItem()) ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
-    }
-
     public static void addEatEffect(ItemStack stack, Level world, LivingEntity living) {
         Item item = stack.getItem();
         if (item.isEdible()) {

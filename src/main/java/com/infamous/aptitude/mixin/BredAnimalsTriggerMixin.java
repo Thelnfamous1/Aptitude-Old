@@ -20,8 +20,6 @@ public abstract class BredAnimalsTriggerMixin extends SimpleCriterionTrigger<Bre
         LootContext parentContext = EntityPredicate.createContext(serverPlayer, parent);
         LootContext partnerContext = EntityPredicate.createContext(serverPlayer, partner);
         LootContext childContext = child != null ? EntityPredicate.createContext(serverPlayer, child) : null;
-        this.trigger(serverPlayer, (instance) -> {
-            return instance.matches(parentContext, partnerContext, childContext);
-        });
+        this.trigger(serverPlayer, (instance) -> instance.matches(parentContext, partnerContext, childContext));
     }
 }

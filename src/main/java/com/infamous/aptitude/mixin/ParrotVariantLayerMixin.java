@@ -36,7 +36,7 @@ public abstract class ParrotVariantLayerMixin<T extends Player> extends RenderLa
     }
 
     @Inject(at = @At(value = "HEAD"),
-            method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/entity/player/PlayerEntity;FFFFZ)V",
+            method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/player/Player;FFFFZ)V",
             cancellable = true)
     private void scaleForBaby(PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int p_229136_3_, T player, float p_229136_5_, float p_229136_6_, float p_229136_7_, float p_229136_8_, boolean leftShoulder, CallbackInfo ci){
         CompoundTag compoundnbt = leftShoulder ? player.getShoulderEntityLeft() : player.getShoulderEntityRight();

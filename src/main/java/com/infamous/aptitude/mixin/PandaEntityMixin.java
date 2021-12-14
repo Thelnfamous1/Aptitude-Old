@@ -5,18 +5,15 @@ import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.server.goal.misc.AptitudeTemptGoal;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.entity.passive.ChickenEntity;
 import net.minecraft.world.entity.animal.Panda;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Final;
@@ -50,7 +47,7 @@ public abstract class PandaEntityMixin extends Animal {
     }
 
     @Redirect(at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/entity/ai/goal/Goal;)V"),
+            target = "Lnet/minecraft/world/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/world/entity/ai/goal/Goal;)V"),
             method = "registerGoals")
     private void onAboutToAddGoal(GoalSelector goalSelector, int priority, Goal goal){
         if(goalSelector == this.goalSelector && priority == 4 && goal instanceof TemptGoal && !this.addedTemptReplacements){
@@ -71,7 +68,7 @@ public abstract class PandaEntityMixin extends Animal {
         cir.setReturnValue(AptitudePredicates.PANDA_FOOD_OR_CAKE_PREDICATE.test(stack));
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/PandaEntity;setItemSlot(Lnet/minecraft/inventory/EquipmentSlotType;Lnet/minecraft/item/ItemStack;)V"),
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/Panda;setItemSlot(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V"),
             method = "handleEating")
     private void setInLoveModeAfterEating(CallbackInfo ci){
         this.onFinishedEating();
@@ -98,7 +95,7 @@ public abstract class PandaEntityMixin extends Animal {
     }
 
     @Override
-    public void usePlayerItem(Player player, ItemStack stack) {
+    public void usePlayerItem(Player player, InteractionHand hand, ItemStack stack) {
         if(this.isFood(stack)){
             this.playSound(this.getEatingSound(stack), 1.0F, 1.0F);
             if(stack.isEdible()) {
@@ -106,6 +103,6 @@ public abstract class PandaEntityMixin extends Animal {
                 AptitudeHelper.addEatEffect(stack, this.level, this);
             }
         }
-        super.usePlayerItem(player, stack);
+        super.usePlayerItem(player, hand, stack);
     }
 }

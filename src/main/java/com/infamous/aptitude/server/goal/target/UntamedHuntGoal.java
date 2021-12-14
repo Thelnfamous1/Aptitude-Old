@@ -1,12 +1,11 @@
 package com.infamous.aptitude.server.goal.target;
 
-import java.util.function.Predicate;
-import javax.annotation.Nullable;
-
 import com.infamous.aptitude.common.entity.IPredator;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.world.entity.TamableAnimal;
+
+import javax.annotation.Nullable;
+import java.util.function.Predicate;
 
 public class UntamedHuntGoal<T extends LivingEntity, M extends TamableAnimal, P extends TamableAnimal & IPredator> extends HuntGoal<T, M, P> {
 

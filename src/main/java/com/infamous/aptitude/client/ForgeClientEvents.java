@@ -12,7 +12,7 @@ import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -22,12 +22,13 @@ import java.util.Map;
 public class ForgeClientEvents {
     private static final Map<EntityType<?>, Float> CACHED_ADULT_SHADOW_RADII = new HashMap<>();
     private static Field shadowRadiusField;
+    public static final float BABY_SCALE = 0.5F;
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onRenderLiving(final RenderLivingEvent.Pre event){
+    public static void onRenderLiving(final RenderLivingEvent.Pre<?, ?> event){
         LivingEntity renderedEntity = event.getEntity();
         if(shouldScaleForBaby(renderedEntity)){
-            LivingEntityRenderer renderer = event.getRenderer();
+            LivingEntityRenderer<?, ?> renderer = event.getRenderer();
             float adultShadowRadius;
 
             if(CACHED_ADULT_SHADOW_RADII.containsKey(renderedEntity.getType())){
@@ -41,8 +42,7 @@ public class ForgeClientEvents {
             }
 
             if(renderedEntity.isBaby()){
-                float babyScale = 0.5F;
-                event.getMatrixStack().scale(babyScale, babyScale, babyScale);
+                event.getPoseStack().scale(BABY_SCALE, BABY_SCALE, BABY_SCALE);
                 setShadowRadius(renderer, adultShadowRadius / 2);
             } else{
                 setShadowRadius(renderer, adultShadowRadius);
@@ -55,7 +55,7 @@ public class ForgeClientEvents {
                 || living instanceof Parrot;
     }
 
-    private static float getShadowRadius(LivingEntityRenderer renderer){
+    private static float getShadowRadius(LivingEntityRenderer<?, ?> renderer){
         if(shadowRadiusField == null){
             shadowRadiusField = ObfuscationReflectionHelper.findField(EntityRenderer.class, "field_76989_e");
         }
@@ -67,7 +67,7 @@ public class ForgeClientEvents {
         }
     }
 
-    private static void setShadowRadius(LivingEntityRenderer renderer, float shadowRadiusIn){
+    private static void setShadowRadius(LivingEntityRenderer<?, ?> renderer, float shadowRadiusIn){
         if(shadowRadiusField == null){
             shadowRadiusField = ObfuscationReflectionHelper.findField(LivingEntityRenderer.class, "field_76989_e");
         }

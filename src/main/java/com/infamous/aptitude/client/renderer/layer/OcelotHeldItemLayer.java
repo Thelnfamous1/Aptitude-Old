@@ -1,11 +1,9 @@
 package com.infamous.aptitude.client.renderer.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.model.OcelotModel;
-import net.minecraft.client.renderer.entity.model.PolarBearModel;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.world.entity.animal.Ocelot;
-import net.minecraft.entity.passive.PolarBearEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 

@@ -3,12 +3,12 @@ package com.infamous.aptitude.mixin;
 import com.infamous.aptitude.common.util.AptitudeHelper;
 import com.infamous.aptitude.common.util.AptitudePredicates;
 import com.infamous.aptitude.server.goal.misc.AptitudeTemptGoal;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.entity.passive.ChickenEntity;
 import net.minecraft.world.entity.monster.Strider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -30,7 +30,7 @@ public abstract class StriderEntityMixin extends Animal {
     }
 
     @Redirect(at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/entity/ai/goal/Goal;)V"),
+            target = "Lnet/minecraft/world/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/world/entity/ai/goal/Goal;)V"),
             method = "registerGoals")
     private void onAboutToAddGoal(GoalSelector goalSelector, int priority, Goal goal){
         if(goalSelector == this.goalSelector && priority == 3 && goal instanceof TemptGoal && !this.addedTemptReplacements){
@@ -53,7 +53,7 @@ public abstract class StriderEntityMixin extends Animal {
     }
 
     @Override
-    public void usePlayerItem(Player player, ItemStack stack) {
+    public void usePlayerItem(Player player, InteractionHand hand, ItemStack stack) {
         if(this.isFood(stack)){
             this.playSound(this.getEatingSound(stack), 1.0F, 1.0F);
             if(stack.isEdible()) {
@@ -61,6 +61,6 @@ public abstract class StriderEntityMixin extends Animal {
                 AptitudeHelper.addEatEffect(stack, this.level, this);
             }
         }
-        super.usePlayerItem(player, stack);
+        super.usePlayerItem(player, hand, stack);
     }
 }

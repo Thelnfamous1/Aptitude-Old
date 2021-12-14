@@ -196,7 +196,7 @@ public interface IAnimal extends IAgeable {
     }
 
     default void usePlayerItem(Player player, ItemStack stack) {
-        if (!player.abilities.instabuild) {
+        if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }
     }

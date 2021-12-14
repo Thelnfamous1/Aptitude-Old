@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
 
 public class AptitudeBreedGoal<T extends Mob, A extends Mob & IAnimal> extends Goal {
-   private static final TargetingConditions PARTNER_TARGETING = (new TargetingConditions()).range(8.0D).allowInvulnerable().allowSameTeam().allowUnseeable();
+   private static final TargetingConditions PARTNER_TARGETING = TargetingConditions.forNonCombat().range(8.0D).ignoreLineOfSight();
    protected final A animal;
    private final Class<? extends Mob> partnerClass;
    protected final Level level;
@@ -85,7 +85,7 @@ public class AptitudeBreedGoal<T extends Mob, A extends Mob & IAnimal> extends G
 
    @Nullable
    private A getFreePartner() {
-      List<Mob> list = this.level.getNearbyEntities(this.partnerClass, PARTNER_TARGETING, this.animal, this.animal.getBoundingBox().inflate(this.partnerSearchDist));
+      List<? extends Mob> list = this.level.getNearbyEntities(this.partnerClass, PARTNER_TARGETING, this.animal, this.animal.getBoundingBox().inflate(this.partnerSearchDist));
       double minDistSq = Double.MAX_VALUE;
       A freePartner = null;
 

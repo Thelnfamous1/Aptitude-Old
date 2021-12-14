@@ -1,12 +1,11 @@
 package com.infamous.aptitude.common.util;
 
 import com.infamous.aptitude.Aptitude;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
-import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.Tags;
 
 public class AptitudeResources {

@@ -1,18 +1,16 @@
 package com.infamous.aptitude.server.goal.misc;
 
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+
 import java.util.EnumSet;
 import java.util.function.Predicate;
 
-import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.Tags;
-
 public class AptitudeTemptGoal extends Goal {
-   private static final TargetingConditions TEMP_TARGETING = (new TargetingConditions()).range(10.0D).allowInvulnerable().allowSameTeam().allowNonAttackable().allowUnseeable();
+   private static final TargetingConditions TEMP_TARGETING = TargetingConditions.forNonCombat().range(10.0D).ignoreLineOfSight();
    protected final PathfinderMob mob;
    private final double speedModifier;
    private double px;
@@ -66,7 +64,7 @@ public class AptitudeTemptGoal extends Goal {
                return false;
             }
 
-            if (Math.abs((double)this.player.xRot - this.pRotX) > 5.0D || Math.abs((double)this.player.yRot - this.pRotY) > 5.0D) {
+            if (Math.abs((double)this.player.getXRot() - this.pRotX) > 5.0D || Math.abs((double)this.player.getYRot() - this.pRotY) > 5.0D) {
                return false;
             }
          } else {
@@ -75,8 +73,8 @@ public class AptitudeTemptGoal extends Goal {
             this.pz = this.player.getZ();
          }
 
-         this.pRotX = (double)this.player.xRot;
-         this.pRotY = (double)this.player.yRot;
+         this.pRotX = (double)this.player.getXRot();
+         this.pRotY = (double)this.player.getYRot();
       }
 
       return this.canUse();

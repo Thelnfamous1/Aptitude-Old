@@ -1,7 +1,6 @@
 package com.infamous.aptitude.client;
 
 import com.infamous.aptitude.Aptitude;
-import com.infamous.aptitude.client.renderer.layer.AgeableHeldItemLayer;
 import com.infamous.aptitude.client.renderer.layer.CatHeldItemLayer;
 import com.infamous.aptitude.client.renderer.layer.OcelotHeldItemLayer;
 import com.infamous.aptitude.client.renderer.layer.PolarBearHeldItemLayer;
@@ -20,22 +19,22 @@ public class ModClientEvents {
 
     @SubscribeEvent
     public static void onClientSetup(final FMLClientSetupEvent event){
-        Minecraft minecraft = Minecraft.getInstance();
-        EntityRenderDispatcher manager = minecraft.getEntityRenderDispatcher();
-        Map<EntityType<?>, EntityRenderer<?>> renderers = manager.renderers;
-        for(EntityRenderer<?> entityRenderer : renderers.values()){
-            if(entityRenderer instanceof OcelotRenderer){
-                OcelotRenderer ocelotRenderer = (OcelotRenderer) entityRenderer;
-                ocelotRenderer.addLayer(new OcelotHeldItemLayer<>(ocelotRenderer));
+        event.enqueueWork(() -> {
+            Minecraft minecraft = Minecraft.getInstance();
+            EntityRenderDispatcher manager = minecraft.getEntityRenderDispatcher();
+            Map<EntityType<?>, EntityRenderer<?>> renderers = manager.renderers;
+            for(EntityRenderer<?> entityRenderer : renderers.values()){
+                if(entityRenderer instanceof OcelotRenderer ocelotRenderer){
+                    ocelotRenderer.addLayer(new OcelotHeldItemLayer<>(ocelotRenderer));
+                }
+                else if(entityRenderer instanceof CatRenderer ocelotRenderer){
+                    ocelotRenderer.addLayer(new CatHeldItemLayer<>(ocelotRenderer));
+                }
+                else if(entityRenderer instanceof PolarBearRenderer polarBearRenderer){
+                    polarBearRenderer.addLayer(new PolarBearHeldItemLayer<>(polarBearRenderer));
+                }
             }
-            else if(entityRenderer instanceof CatRenderer){
-                CatRenderer ocelotRenderer = (CatRenderer) entityRenderer;
-                ocelotRenderer.addLayer(new CatHeldItemLayer<>(ocelotRenderer));
-            }
-            else if(entityRenderer instanceof PolarBearRenderer){
-                PolarBearRenderer polarBearRenderer = (PolarBearRenderer) entityRenderer;
-                polarBearRenderer.addLayer(new PolarBearHeldItemLayer<>(polarBearRenderer));
-            }
-        }
+        });
+
     }
 }
