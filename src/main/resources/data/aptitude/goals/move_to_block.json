@@ -1,0 +1,197 @@
+{
+  "priority": 0,
+  "interruptable": true,
+  "requiresUpdateEveryTick": false,
+  "flags": [
+    "MOVE",
+    "JUMP"
+  ],
+  "fields": [
+    {
+      "name": "speedModifier",
+      "type": "double",
+      "value": 0
+    },
+    {
+      "name": "nextStartTick",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "name": "tryTicks",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "name": "maxStayTicks",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "name": "blockPos",
+      "type": "BlockPos",
+      "value": "BlockPos.ZERO"
+    },
+    {
+      "name": "reachedTarget",
+      "type": "boolean",
+      "value": false
+    },
+    {
+      "name": "searchRange",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "name": "verticalSearchRange",
+      "type": "int",
+      "value": 0
+    },
+    {
+      "name": "verticalSearchStart",
+      "type": "int",
+      "value": 0
+    }
+  ],
+  "canUse": {
+    "if0":{
+      "condition":{
+        "field": "nextStartTick",
+        "operator": ">",
+        "value": 0
+      }
+    },
+    "then0": {
+      "operation":{
+        "field": "nextStartTick",
+        "operator": "--"
+      },
+      "return": false
+    },
+    "else0": {
+      "operation":{
+        "field": "nextStartTick",
+        "operator": "=",
+        "value": {
+          "function": "Goal.reducedTickDelay(200 + this.mob.getRandom().nextInt(200))"
+        }
+      },
+      "return": {
+        "function": "this.findNearestBlock()"
+      }
+    }
+  },
+  "start": {
+    "operations": [
+      {
+        "field": "mob",
+        "function": "getNavigation().moveTo((double)((float)this.blockPos.getX()) + 0.5D, (double)(this.blockPos.getY() + 1), (double)((float)this.blockPos.getZ()) + 0.5D, this.speedModifier)"
+      },
+      {
+        "field": "tryTicks",
+        "operator": "=",
+        "value": 0
+      },
+      {
+        "field": "maxStayTicks",
+        "operator": "=",
+        "value": {
+          "function": "this.mob.getRandom().nextInt(this.mob.getRandom().nextInt(1200) + 1200) + 1200"
+        }
+      }
+    ]
+  },
+  "tick": {
+    "variables": [
+      {
+        "name": "moveToTarget",
+        "type": "BlockPos",
+        "value": {
+          "function": "this.blockPos.above()"
+        }
+      }
+    ],
+    "if0": {
+      "condition": {
+        "variable": "moveToTarget",
+        "operator": "!",
+        "value": {
+          "function": "closerThan(this.mob.position(), this.acceptedDistance()"
+        }
+      }
+    },
+    "then0": {
+      "operations": [
+        {
+          "field": "reachedTarget",
+          "operation": "=",
+          "value": false
+        },
+        {
+          "field": "tryTicks",
+          "operation": "++"
+        }
+      ],
+      "if0": {
+        "condition": {
+          "field": "tryTicks",
+          "modifier": "% 40",
+          "operator": "==",
+          "value": 0
+        }
+      },
+      "operation": {
+        "field": "mob",
+        "function": "getNavigation().moveTo((double)((float)moveToTarget.getX()) + 0.5D, (double)moveToTarget.getY(), (double)((float)moveToTarget.getZ()) + 0.5D, this.speedModifier);"
+      }
+    },
+    "else0": {
+      "operations": [
+        {
+          "field": "reachedTarget",
+          "operation": "=",
+          "value": true
+        },
+        {
+          "field": "tryTicks",
+          "operation": "--"
+        }
+      ]
+    }
+  },
+  "canContinueToUse": {
+    "if0": {
+      "conditions": [
+        {
+          "required": true,
+          "field": "tryTicks",
+          "operator": ">=",
+          "value": {
+            "field": "maxStayTicks",
+            "modifier": "-"
+          }
+        },
+        {
+          "required": true,
+          "field": "tryTicks",
+          "operator": "<=",
+          "value": 1200
+        },
+        {
+          "required": true,
+          "field": "blockPos",
+          "function": "this.isValidTarget(this.mob.level, this.blockPos)"
+        }
+      ]
+    },
+    "then0": {
+      "return": true
+    },
+    "else0": {
+      "return": false
+    }
+  },
+  "stop": {
+
+  }
+}

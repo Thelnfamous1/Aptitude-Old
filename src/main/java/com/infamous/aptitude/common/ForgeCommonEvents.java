@@ -22,6 +22,7 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Donkey;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Mule;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -29,6 +30,12 @@ import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = Aptitude.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeCommonEvents {
+
+    @SubscribeEvent
+    public static void onReloadListener(AddReloadListenerEvent event){
+        //GoalManager goalManager = new GoalManager();
+        //event.addListener(goalManager);
+    }
 
     @SubscribeEvent
     public static void onEntityJoinWorld(EntityJoinWorldEvent event){
