@@ -1,4 +1,4 @@
-package com.infamous.aptitude.common;
+package com.infamous.aptitude.common.goal;
 
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;

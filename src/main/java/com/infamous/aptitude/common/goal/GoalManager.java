@@ -1,4 +1,4 @@
-package com.infamous.aptitude.common;
+package com.infamous.aptitude.common.goal;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

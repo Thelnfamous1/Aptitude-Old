@@ -1,0 +1,52 @@
+{
+  "memory_module_types": [
+    "minecraft:attack_target",
+    "minecraft:cant_reach_walk_target_since",
+    "minecraft:nearest_living_entities",
+    "minecraft:nearest_visible_living_entities",
+    "minecraft:breed_target",
+    "minecraft:walk_target",
+    "minecraft:look_target"
+  ],
+  "sensors": [
+    "minecraft:nearest_living_entities"
+  ],
+  "behaviors": [
+    {
+      "activity": "minecraft:fight",
+      "priority": 1,
+      "behavior": {
+        "type": "aptitude:start_attacking",
+        "canAttackPredicate": {
+          "requires": "all",
+          "checks": [
+            {
+              "type": "memory_module_type",
+              "memory_module_type": "minecraft:breed_target",
+              "value": "present"
+            },
+            {
+              "type": "memory_module_type",
+              "memory_module_type": "minecraft:pacified",
+              "value": "present"
+            },
+            {
+              "type": "state",
+              "state": "isBaby",
+              "value": false
+            }
+          ]
+        },
+        "targetFinderFunction": {
+          "requires": "all",
+          "checks": [
+            {
+              "type": "memory_module_type",
+              "memory_module_type": "minecraft:breed_target"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
