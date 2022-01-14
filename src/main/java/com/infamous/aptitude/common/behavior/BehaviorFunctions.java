@@ -1,5 +1,9 @@
 package com.infamous.aptitude.common.behavior;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
@@ -8,12 +12,10 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 
 public class BehaviorFunctions {
 
@@ -94,6 +96,54 @@ public class BehaviorFunctions {
         } else {
             return false;
         }
+    }
+
+    static Function<Mob, Optional<? extends LivingEntity>> functionFromJson(JsonObject targetFinderFunctionObj) {
+        JsonObject evaluateMemoryObj = GsonHelper.getAsJsonObject(targetFinderFunctionObj, "evaluate_memory");
+        MemoryModuleType<?> memoryType = BehaviorHelper.parseMemoryType(evaluateMemoryObj, "type");
+
+        Map<Set<EntityType<?>>, Boolean> entityTypeFilters = new HashMap<>();
+        JsonArray filters = GsonHelper.getAsJsonArray(evaluateMemoryObj, "filters");
+        filters.forEach(je -> {
+            JsonObject elementObject = je.getAsJsonObject();
+            String mode = GsonHelper.getAsString(elementObject, "mode", "");
+            Boolean negate = GsonHelper.getAsBoolean(elementObject, "negate", false);
+            JsonArray values = GsonHelper.getAsJsonArray(elementObject, "values");
+
+            if(mode.toLowerCase(Locale.ROOT).equals("entity_type")){
+                Set<EntityType<?>> typesForFilter = new HashSet<>();
+                values.forEach(je1 -> {
+                    EntityType<?> entityType = BehaviorHelper.parseEntityTypeFromElement(je1);
+                    typesForFilter.add(entityType);
+                });
+                entityTypeFilters.put(typesForFilter, negate);
+            }
+        });
+
+        return mob -> {
+            Optional<?> memory = mob.getBrain().getMemory(memoryType);
+            if(memory.isPresent()){
+                Object memoryValue = memory.get();
+                if(memoryValue instanceof NearestVisibleLivingEntities nvle){
+                    return nvle.findClosest(le -> {
+                        boolean entityTypeCheck = true;
+                        for(Map.Entry<Set<EntityType<?>>, Boolean> entry : entityTypeFilters.entrySet()){
+                            Set<EntityType<?>> typesToCheck = entry.getKey();
+                            Boolean negate = entry.getValue();
+                            boolean contained = typesToCheck.contains(le.getType());
+                            entityTypeCheck = negate != contained;
+                            if(!entityTypeCheck){
+                                break;
+                            }
+                        }
+                        return entityTypeCheck;
+                    });
+                } else if(memoryValue instanceof LivingEntity le){
+                    return Optional.of(le);
+                }
+            }
+            return Optional.empty();
+        };
     }
 
 }

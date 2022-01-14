@@ -1,0 +1,284 @@
+{
+  "memory_module_types": [
+    "minecraft:breed_target",
+    "minecraft:mobs",
+    "minecraft:visible_mobs",
+    "minecraft:nearest_visible_player",
+    "minecraft:nearest_visible_attackable_player",
+    "minecraft:look_target",
+    "minecraft:walk_target",
+    "minecraft:cant_reach_walk_target_since",
+    "minecraft:path",
+    "minecraft:attack_target",
+    "minecraft:attack_cooling_down",
+    "minecraft:nearest_visible_adult_piglin",
+    "minecraft:avoid_target",
+    "minecraft:visible_adult_piglin_count",
+    "minecraft:visible_adult_hoglin_count",
+    "minecraft:nearest_visible_adult_hoglins",
+    "minecraft:nearest_visible_adult",
+    "minecraft:nearest_repellent",
+    "minecraft:pacified"
+  ],
+  "sensors": [
+    "minecraft:nearest_living_entities",
+    "minecraft:nearest_player",
+    "minecraft:nearest_adult"
+  ],
+  "activities": [
+    {
+      "activity": "minecraft:core",
+      "priority_start": 0,
+      "behaviors": [
+        {
+          "behavior": {
+            "type": "aptitude:look_at_target_sink",
+            "minDuration": 45,
+            "maxDuration": 90
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:move_to_target_sink"
+          }
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:idle",
+      "priority_start": 10,
+      "behaviors": [
+        {
+          "behavior": {
+            "type": "aptitude:become_passive_if_memory_present",
+            "memoryType": "minecraft:nearest_repellent",
+            "pacifyDuration": 200
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:animal_make_love",
+            "partnerType": "minecraft:pig",
+            "speedModifier": 0.6
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:set_walk_target_away_from",
+            "walkAwayFromMemory": "minecraft:nearest_repellent",
+            "speedModifier": 1.0,
+            "desiredDistance": 8,
+            "ignoreWalkTarget": true
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:start_attacking",
+            "canAttackPredicate": {
+              "check_memories": [
+                {
+                  "type": "minecraft:breed_target",
+                  "value": "present"
+                }
+              ]
+            },
+            "targetFinderFunction": {
+              "evaluate_memory": {
+                "type": "minecraft:nearest_visible_living_entities",
+                "filters": [
+                  {
+                    "mode": "entity_type",
+                    "negate": true,
+                    "values": [
+                      "minecraft:creeper"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:run_if",
+            "predicate": "",
+            "checkWhileRunningAlso": false,
+            "wrappedBehavior": {
+              "type": "aptitude:set_walk_target_away_from",
+              "walkAwayFromMemory": "minecraft:nearest_visible_adult_piglin",
+              "speedModifier": 0.4,
+              "desiredDistance": 8,
+              "ignoreWalkTarget": false
+            }
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:run_sometimes",
+            "interval": {
+              "minInclusive": 30,
+              "maxInclusive": 60
+            },
+            "wrappedBehavior": {
+              "type": "aptitude:set_entity_look_target",
+              "maxDistSqr": 8.0
+            }
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:baby_follow_adult",
+            "interval": {
+              "minInclusive": 5,
+              "maxInclusive": 16
+            },
+            "speedModifier": 0.6
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:run_one",
+            "behaviors": [
+              {
+                "priority": 2,
+                "type": "aptitude:random_stroll",
+                "speedModifier": 0.4
+              },
+              {
+                "priority": 2,
+                "type": "aptitude:set_walk_target_from_look_target",
+                "speedModifier": 0.4,
+                "closeEnoughDistance": 3
+              },
+              {
+                "priority": 2,
+                "type": "aptitude:do_nothing",
+                "minDuration": 30,
+                "maxDuration": 60
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:fight",
+      "priority_start": 10,
+      "remove_when_stopped": "minecraft:attack_target",
+      "behaviors": [
+        {
+          "behavior": {
+            "type": "aptitude:become_passive_if_memory_present",
+            "memoryType": "minecraft:nearest_repellent",
+            "pacifyDuration": 200
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:animal_make_love",
+            "partnerType": "minecraft:pig",
+            "speedModifier": 0.6
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:set_walk_target_from_attack_target_if_target_out_of_reach",
+            "speedModifier": 1.0
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:run_if",
+            "predicate": "",
+            "wrappedBehavior": {
+              "type": "aptitude:melee_attack",
+              "cooldownBetweenAttacks": 40
+            }
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:run_if",
+            "predicate": "",
+            "wrappedBehavior": {
+              "type": "aptitude:melee_attack",
+              "cooldownBetweenAttacks": 15
+            }
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:stop_attacking_if_target_invalid"
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:erase_memory_if",
+            "predicate": "",
+            "memoryType": "minecraft:attack_target"
+          }
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:avoid",
+      "priority_start": 10,
+      "remove_when_stopped": "minecraft:avoid_target",
+      "behaviors": [
+        {
+          "behavior": {
+            "type": "aptitude:set_walk_target_away_from",
+            "walkAwayFromMemory": "minecraft:avoid_target",
+            "speedModifier": 1.3,
+            "desiredDistance": 15,
+            "ignoreWalkTarget": false
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:run_one",
+            "behaviors": [
+              {
+                "priority": 2,
+                "type": "aptitude:random_stroll",
+                "speedModifier": 0.4
+              },
+              {
+                "priority": 2,
+                "type": "aptitude:set_walk_target_from_look_target",
+                "speedModifier": 0.4,
+                "closeEnoughDistance": 3
+              },
+              {
+                "priority": 2,
+                "type": "aptitude:do_nothing",
+                "minDuration": 30,
+                "maxDuration": 60
+              }
+            ]
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:run_sometimes",
+            "interval": {
+              "minInclusive": 30,
+              "maxInclusive": 60
+            },
+            "wrappedBehavior": {
+              "type": "aptitude:set_entity_look_target",
+              "maxDistSqr": 8.0
+            }
+          }
+        },
+        {
+          "behavior": {
+            "type": "aptitude:erase_memory_if",
+            "predicate": "",
+            "memoryType": "minecraft:avoid_target"
+          }
+        }
+      ]
+    }
+  ]
+}
