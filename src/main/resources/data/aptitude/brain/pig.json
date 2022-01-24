@@ -75,25 +75,22 @@
           "behavior": {
             "type": "aptitude:start_attacking",
             "canAttackPredicate": {
-              "check_memories": [
+              "type": "aptitude:memory_checks",
+              "addContext": [
                 {
-                  "type": "minecraft:breed_target",
-                  "value": "present"
+                  "type": "aptitude:breed_target",
+                  "status": "absent"
+                },
+                {
+                  "type": "aptitude:pacified",
+                  "status": "absent"
                 }
               ]
             },
             "targetFinderFunction": {
-              "evaluate_memory": {
-                "type": "minecraft:nearest_visible_living_entities",
-                "filters": [
-                  {
-                    "mode": "entity_type",
-                    "negate": true,
-                    "values": [
-                      "minecraft:creeper"
-                    ]
-                  }
-                ]
+              "type": "aptitude:retrieve_memory",
+              "apply": {
+                "type": "minecraft:nearest_visible_attackable_player"
               }
             }
           }
@@ -101,7 +98,9 @@
         {
           "behavior": {
             "type": "aptitude:run_if",
-            "predicate": "",
+            "predicate": {
+              "type": "aptitude:is_baby"
+            },
             "checkWhileRunningAlso": false,
             "wrappedBehavior": {
               "type": "aptitude:set_walk_target_away_from",
@@ -189,7 +188,9 @@
         {
           "behavior": {
             "type": "aptitude:run_if",
-            "predicate": "",
+            "predicate": {
+              "type": "aptitude:is_adult"
+            },
             "wrappedBehavior": {
               "type": "aptitude:melee_attack",
               "cooldownBetweenAttacks": 40
@@ -199,7 +200,9 @@
         {
           "behavior": {
             "type": "aptitude:run_if",
-            "predicate": "",
+            "predicate": {
+              "type": "aptitude:is_baby"
+            },
             "wrappedBehavior": {
               "type": "aptitude:melee_attack",
               "cooldownBetweenAttacks": 15
@@ -214,7 +217,13 @@
         {
           "behavior": {
             "type": "aptitude:erase_memory_if",
-            "predicate": "",
+            "predicate": {
+              "type": "aptitude:memory_check",
+              "addContext": {
+                "type": "aptitude:breed_target",
+                "status": "present"
+              }
+            },
             "memoryType": "minecraft:attack_target"
           }
         }
@@ -274,7 +283,13 @@
         {
           "behavior": {
             "type": "aptitude:erase_memory_if",
-            "predicate": "",
+            "predicate": {
+              "type": "aptitude:outnumbered_adult",
+              "addContext": {
+                "same_type": "aptitude:visible_adult_pig_count",
+                "other_type": "aptitude:visible_adult_piglin_count"
+              }
+            },
             "memoryType": "minecraft:avoid_target"
           }
         }

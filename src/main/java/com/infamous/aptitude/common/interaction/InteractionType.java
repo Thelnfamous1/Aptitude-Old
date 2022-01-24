@@ -1,4 +1,4 @@
-package com.infamous.aptitude.common.behavior;
+package com.infamous.aptitude.common.interaction;
 
 import net.minecraftforge.registries.ForgeRegistryEntry;
 

@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.function.Function;
 
 public class BehaviorType<U extends Behavior<?>> extends ForgeRegistryEntry<BehaviorType<?>> {

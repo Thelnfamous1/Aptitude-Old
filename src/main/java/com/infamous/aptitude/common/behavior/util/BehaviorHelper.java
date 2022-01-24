@@ -1,9 +1,11 @@
-package com.infamous.aptitude.common.behavior;
+package com.infamous.aptitude.common.behavior.util;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.infamous.aptitude.common.behavior.AptitudeRegistries;
+import com.infamous.aptitude.common.behavior.BehaviorType;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -85,13 +87,14 @@ public class BehaviorHelper {
     public static Behavior<?> parseBehavior(JsonObject jsonObject, String memberName, String typeMemberName){
         JsonObject behaviorObject = GsonHelper.getAsJsonObject(jsonObject, memberName);
         BehaviorType<?> behaviorType = parseBehaviorType(behaviorObject, typeMemberName);
+
         return behaviorType.fromJson(behaviorObject);
     }
 
     public static BehaviorType<?> parseBehaviorType(JsonObject jsonObject, String memberName) {
         String behaviorTypeString = GsonHelper.getAsString(jsonObject, memberName, "");
-        ResourceLocation etLocation = new ResourceLocation(behaviorTypeString);
-        BehaviorType<?> behaviorType = AptitudeRegistries.BEHAVIOR_TYPES.getValue(etLocation);
+        ResourceLocation btLocation = new ResourceLocation(behaviorTypeString);
+        BehaviorType<?> behaviorType = AptitudeRegistries.BEHAVIOR_TYPES.getValue(btLocation);
         if(behaviorType == null) throw new JsonParseException("Invalid behavior type: " + behaviorTypeString);
         return behaviorType;
     }

@@ -1,5 +1,6 @@
 package com.infamous.aptitude.common.behavior;
 
+import com.infamous.aptitude.common.interaction.InteractionType;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
 
