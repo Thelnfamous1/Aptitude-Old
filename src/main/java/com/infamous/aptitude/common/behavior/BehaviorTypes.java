@@ -78,17 +78,14 @@ public class BehaviorTypes {
     }));
 
     public static final RegistryObject<BehaviorType<AptitudeStartAttacking<?>>> START_ATTACKING = register("start_attacking", (jsonObject) -> {
-        JsonObject canAttackPredicateObj = GsonHelper.getAsJsonObject(jsonObject, "canAttackPredicate");
-        JsonObject targetFinderFunctionObj = GsonHelper.getAsJsonObject(jsonObject, "targetFinderFunction");
-
-        Predicate<LivingEntity> canAttackPredicate = mob -> true;
-        Function<LivingEntity, Optional<? extends LivingEntity>> targetFinderFunction = mob -> Optional.empty();
+        Predicate<?> canAttackPredicate = BehaviorHelper.parsePredicate(jsonObject, "canAttackPredicate", "type");
+        Function<?, ?> targetFinderFunction = BehaviorHelper.parseFunction(jsonObject, "targetFinderFunction", "type");
 
         return new AptitudeStartAttacking<>(canAttackPredicate, targetFinderFunction);
     });
 
     public static final RegistryObject<BehaviorType<AptitudeRunIf<?>>> RUN_IF = register("run_if", (jsonObject) -> {
-        Predicate<LivingEntity> predicate = le -> true;
+        Predicate<?> predicate = BehaviorHelper.parsePredicate(jsonObject, "predicate", "type");
         Behavior<?> behavior = BehaviorHelper.parseBehavior(jsonObject, "wrappedBehavior", "type");
         boolean checkWhileRunningAlso = GsonHelper.getAsBoolean(jsonObject, "checkWhileRunningAlso", false);
 
@@ -156,7 +153,7 @@ public class BehaviorTypes {
 
 
     public static final RegistryObject<BehaviorType<EraseMemoryIf<?>>> ERASE_MEMORY_IF = register("erase_memory_if", (jsonObject) -> {
-        Predicate<LivingEntity> predicate = le -> true;
+        Predicate<?> predicate = BehaviorHelper.parsePredicate(jsonObject, "predicate", "type");
         MemoryModuleType<?> memoryType = BehaviorHelper.parseMemoryType(jsonObject, "memoryType");
 
         return new EraseMemoryIf<>(predicate, memoryType);

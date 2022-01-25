@@ -75,7 +75,7 @@
           "behavior": {
             "type": "aptitude:start_attacking",
             "canAttackPredicate": {
-              "type": "aptitude:memory_checks",
+              "type": "aptitude:memory_status_checks",
               "addContext": [
                 {
                   "type": "aptitude:breed_target",
@@ -88,8 +88,8 @@
               ]
             },
             "targetFinderFunction": {
-              "type": "aptitude:retrieve_memory",
-              "apply": {
+              "type": "aptitude:retrieve_target_from_memory",
+              "addContext": {
                 "type": "minecraft:nearest_visible_attackable_player"
               }
             }
@@ -218,7 +218,7 @@
           "behavior": {
             "type": "aptitude:erase_memory_if",
             "predicate": {
-              "type": "aptitude:memory_check",
+              "type": "aptitude:memory_status_checks",
               "addContext": {
                 "type": "aptitude:breed_target",
                 "status": "present"
@@ -286,8 +286,8 @@
             "predicate": {
               "type": "aptitude:outnumbered_adult",
               "addContext": {
-                "same_type": "aptitude:visible_adult_pig_count",
-                "other_type": "aptitude:visible_adult_piglin_count"
+                "sameType": "aptitude:visible_adult_pig_count",
+                "otherType": "aptitude:visible_adult_piglin_count"
               }
             },
             "memoryType": "minecraft:avoid_target"

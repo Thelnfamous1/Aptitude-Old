@@ -12,13 +12,17 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
 public class AptitudeRunIf<E extends LivingEntity> extends Behavior<E> {
    private final Predicate<E> predicate;
-   private final Behavior<?> wrappedBehavior;
+   private final Behavior<? super E> wrappedBehavior;
    private final boolean checkWhileRunningAlso;
 
    public AptitudeRunIf(Map<MemoryModuleType<?>, MemoryStatus> entryCondition, Predicate<E> predicate, Behavior<?> wrappedBehavior, boolean checkWhileRunningAlso) {
       super(mergeMaps(entryCondition, wrappedBehavior.entryCondition));
       this.predicate = predicate;
-      this.wrappedBehavior = wrappedBehavior;
+      try{
+         this.wrappedBehavior = (Behavior<? super E>) wrappedBehavior;
+      } catch (ClassCastException e){
+         throw new RuntimeException("Invalid behavior for AptitudeGateBehavior: " + wrappedBehavior);
+      }
       this.checkWhileRunningAlso = checkWhileRunningAlso;
    }
 
@@ -43,11 +47,11 @@ public class AptitudeRunIf<E extends LivingEntity> extends Behavior<E> {
       }, wrappedBehavior, false);
    }
 
-   protected boolean checkExtraStartConditions(ServerLevel serverLevel, E mob) {
+   public boolean checkExtraStartConditions(ServerLevel serverLevel, E mob) {
       return this.predicate.test(mob) && this.wrappedBehavior.checkExtraStartConditions(serverLevel, mob);
    }
 
-   protected boolean canStillUse(ServerLevel serverLevel, E mob, long gameTime) {
+   public boolean canStillUse(ServerLevel serverLevel, E mob, long gameTime) {
       return this.checkWhileRunningAlso && this.predicate.test(mob) && this.wrappedBehavior.canStillUse(serverLevel, mob, gameTime);
    }
 
@@ -55,15 +59,15 @@ public class AptitudeRunIf<E extends LivingEntity> extends Behavior<E> {
       return false;
    }
 
-   protected void start(ServerLevel serverLevel, E mob, long gameTime) {
+   public void start(ServerLevel serverLevel, E mob, long gameTime) {
       this.wrappedBehavior.start(serverLevel, mob, gameTime);
    }
 
-   protected void tick(ServerLevel serverLevel, E mob, long gameTime) {
+   public void tick(ServerLevel serverLevel, E mob, long gameTime) {
       this.wrappedBehavior.tick(serverLevel, mob, gameTime);
    }
 
-   protected void stop(ServerLevel serverLevel, E mob, long gameTime) {
+   public void stop(ServerLevel serverLevel, E mob, long gameTime) {
       this.wrappedBehavior.stop(serverLevel, mob, gameTime);
    }
 

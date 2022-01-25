@@ -1,4 +1,4 @@
-package com.infamous.aptitude.common.behavior.functions;
+package com.infamous.aptitude.common.codec.function;
 
 import com.infamous.aptitude.common.codec.Dispatchable;
 

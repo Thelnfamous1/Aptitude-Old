@@ -1,26 +1,13 @@
-package com.infamous.aptitude.common.behavior.functions;
+package com.infamous.aptitude.common.codec.function;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.infamous.aptitude.common.behavior.predicates.BehaviorPredicates;
-import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.infamous.aptitude.common.codec.state.BlockPredicate;
 import com.infamous.aptitude.common.codec.state.ConstantPredicate;
 import com.infamous.aptitude.common.codec.state.StatePredicate;
 import com.infamous.aptitude.common.codec.state.StatePredicateSerializer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
-
-import java.util.*;
-import java.util.function.Function;
 
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.codec.RegistryDispatcher;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;

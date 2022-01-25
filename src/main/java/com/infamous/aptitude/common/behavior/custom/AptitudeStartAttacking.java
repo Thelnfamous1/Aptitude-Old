@@ -27,7 +27,7 @@ public class AptitudeStartAttacking<E extends LivingEntity> extends Behavior<E> 
       }, targetFinderFunction);
    }
 
-   protected boolean checkExtraStartConditions(ServerLevel serverLevel, E mob) {
+   public boolean checkExtraStartConditions(ServerLevel serverLevel, E mob) {
       if (!this.canAttackPredicate.test(mob)) {
          return false;
       } else {
@@ -36,7 +36,7 @@ public class AptitudeStartAttacking<E extends LivingEntity> extends Behavior<E> 
       }
    }
 
-   protected void start(ServerLevel serverLevel, E mob, long gameTime) {
+   public void start(ServerLevel serverLevel, E mob, long gameTime) {
       this.targetFinderFunction.apply(mob).ifPresent((le) -> {
          this.setAttackTarget(mob, le);
       });

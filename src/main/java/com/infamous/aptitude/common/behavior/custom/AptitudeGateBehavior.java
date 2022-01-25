@@ -37,7 +37,7 @@ public class AptitudeGateBehavior<E extends LivingEntity> extends Behavior<E> {
    }
 
    @Override
-   protected boolean canStillUse(ServerLevel serverLevel, E mob, long gameTime) {
+   public boolean canStillUse(ServerLevel serverLevel, E mob, long gameTime) {
       return this.behaviors.stream().filter((behavior) -> {
          return behavior.getStatus() == Behavior.Status.RUNNING;
       }).anyMatch((behavior) -> {
@@ -51,13 +51,13 @@ public class AptitudeGateBehavior<E extends LivingEntity> extends Behavior<E> {
    }
 
    @Override
-   protected void start(ServerLevel serverLevel, E mob, long gameTime) {
+   public void start(ServerLevel serverLevel, E mob, long gameTime) {
       this.orderPolicy.apply(this.behaviors);
       this.runningPolicy.apply(this.behaviors.stream(), serverLevel, mob, gameTime);
    }
 
    @Override
-   protected void tick(ServerLevel serverLevel, E mob, long gameTime) {
+   public void tick(ServerLevel serverLevel, E mob, long gameTime) {
       this.behaviors.stream().filter((behavior) -> {
          return behavior.getStatus() == Behavior.Status.RUNNING;
       }).forEach((behavior) -> {
@@ -66,7 +66,7 @@ public class AptitudeGateBehavior<E extends LivingEntity> extends Behavior<E> {
    }
 
    @Override
-   protected void stop(ServerLevel serverLevel, E mob, long gameTime) {
+   public void stop(ServerLevel serverLevel, E mob, long gameTime) {
       this.behaviors.stream().filter((behavior) -> {
          return behavior.getStatus() == Behavior.Status.RUNNING;
       }).forEach((behavior) -> {
