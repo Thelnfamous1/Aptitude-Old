@@ -1,5 +1,5 @@
 {
-  "memory_module_types": [
+  "memory_types": [
     "minecraft:breed_target",
     "minecraft:mobs",
     "minecraft:visible_mobs",
@@ -14,18 +14,25 @@
     "minecraft:nearest_visible_adult_piglin",
     "minecraft:avoid_target",
     "minecraft:visible_adult_piglin_count",
-    "minecraft:visible_adult_hoglin_count",
-    "minecraft:nearest_visible_adult_hoglins",
+    "aptitude:visible_adult_pig_count",
+    "aptitude:nearest_visible_adult_pigs",
     "minecraft:nearest_visible_adult",
     "minecraft:nearest_repellent",
     "minecraft:pacified"
   ],
-  "sensors": [
+  "sensor_types": [
     "minecraft:nearest_living_entities",
     "minecraft:nearest_player",
     "minecraft:nearest_adult"
   ],
-  "activities": [
+  "core_activities": [
+    "minecraft:core"
+  ],
+  "default_activity": {
+    "type": "minecraft:idle",
+    "set_active": true
+  },
+  "activities_by_priority": [
     {
       "activity": "minecraft:core",
       "priority_start": 0,

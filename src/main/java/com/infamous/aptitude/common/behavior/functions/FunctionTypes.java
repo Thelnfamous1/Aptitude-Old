@@ -19,7 +19,7 @@ public class FunctionTypes {
 
     private static final DeferredRegister<FunctionType<?>> FUNCTION_TYPES = DeferredRegister.create(AptitudeRegistries.FUNCTION_TYPES, Aptitude.MOD_ID);
 
-    public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<LivingEntity>>>> RETRIEVE_TARGET_FROM_MEMORY = register("retrieve_target_from_memory",
+    public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<? extends LivingEntity>>>> RETRIEVE_TARGET_FROM_MEMORY = register("retrieve_target_from_memory",
             jsonObject -> {
                 return le -> {
                     Brain<?> brain = le.getBrain();

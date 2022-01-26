@@ -81,7 +81,19 @@ public class BehaviorTypes {
         Predicate<?> canAttackPredicate = BehaviorHelper.parsePredicate(jsonObject, "canAttackPredicate", "type");
         Function<?, ?> targetFinderFunction = BehaviorHelper.parseFunction(jsonObject, "targetFinderFunction", "type");
 
-        return new AptitudeStartAttacking<>(canAttackPredicate, targetFinderFunction);
+        Predicate<LivingEntity> predicateCast;
+        try{
+           predicateCast =  (Predicate<LivingEntity>) canAttackPredicate;
+        } catch (ClassCastException e){
+            throw new JsonParseException("Invalid predicate type for AptitudeStartAttacking: " + BehaviorHelper.parsePredicateType(jsonObject, "canAttackPredicate"));
+        }
+        Function<LivingEntity, Optional<? extends LivingEntity>> functionCast;
+        try{
+            functionCast = (Function<LivingEntity, Optional<? extends LivingEntity>>) targetFinderFunction;
+        } catch (ClassCastException e){
+            throw new JsonParseException("Invalid function type for AptitudeStartAttacking: " + BehaviorHelper.parseFunctionType(jsonObject, "targetFinderFunction"));
+        }
+        return new AptitudeStartAttacking<>(predicateCast, functionCast);
     });
 
     public static final RegistryObject<BehaviorType<AptitudeRunIf<?>>> RUN_IF = register("run_if", (jsonObject) -> {
@@ -89,7 +101,13 @@ public class BehaviorTypes {
         Behavior<?> behavior = BehaviorHelper.parseBehavior(jsonObject, "wrappedBehavior", "type");
         boolean checkWhileRunningAlso = GsonHelper.getAsBoolean(jsonObject, "checkWhileRunningAlso", false);
 
-        return new AptitudeRunIf<>(predicate, behavior, checkWhileRunningAlso);
+        Predicate<LivingEntity> predicateCast;
+        try{
+            predicateCast =  (Predicate<LivingEntity>) predicate;
+        } catch (ClassCastException e){
+            throw new JsonParseException("Invalid predicate type for AptitudeRunIf: " + BehaviorHelper.parsePredicateType(jsonObject, "predicate"));
+        }
+        return new AptitudeRunIf<>(predicateCast, behavior, checkWhileRunningAlso);
     });
 
     public static final RegistryObject<BehaviorType<RunSometimes<?>>> RUN_SOMETIMES = register("run_sometimes", (jsonObject) -> {
@@ -156,7 +174,13 @@ public class BehaviorTypes {
         Predicate<?> predicate = BehaviorHelper.parsePredicate(jsonObject, "predicate", "type");
         MemoryModuleType<?> memoryType = BehaviorHelper.parseMemoryType(jsonObject, "memoryType");
 
-        return new EraseMemoryIf<>(predicate, memoryType);
+        Predicate<LivingEntity> predicateCast;
+        try{
+            predicateCast =  (Predicate<LivingEntity>) predicate;
+        } catch (ClassCastException e){
+            throw new JsonParseException("Invalid predicate type for EraseMemoryIf: " + BehaviorHelper.parsePredicateType(jsonObject, "predicate"));
+        }
+        return new EraseMemoryIf<>(predicateCast, memoryType);
     });
 
     private static <U extends Behavior<?>> RegistryObject<BehaviorType<U>> register(String name, Function<JsonObject, U> jsonFactory) {

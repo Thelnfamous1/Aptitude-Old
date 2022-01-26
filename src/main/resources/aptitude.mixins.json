@@ -17,6 +17,7 @@
     "CreeperEntityMixin",
     "DolphinEntityMixin",
     "FoxEntityMixin",
+    "LivingEntityAccessor",
     "LlamaEntityMixin",
     "OcelotEntityMixin",
     "PandaEntityMixin",

@@ -8,15 +8,24 @@ import com.infamous.aptitude.common.behavior.AptitudeRegistries;
 import com.infamous.aptitude.common.behavior.BehaviorType;
 import com.infamous.aptitude.common.behavior.functions.FunctionType;
 import com.infamous.aptitude.common.behavior.predicates.PredicateType;
+import com.infamous.aptitude.mixin.LivingEntityAccessor;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
@@ -166,5 +175,14 @@ public class BehaviorHelper {
         FunctionType<?> functionType = AptitudeRegistries.FUNCTION_TYPES.getValue(ftLocation);
         if(functionType == null) throw new JsonParseException("Invalid function type: " + functionTypeString);
         return functionType;
+    }
+
+    public static <E extends LivingEntity> void refreshBrain(E mob, ServerLevel serverLevel, Set<MemoryModuleType<?>> memoryTypes, Set<SensorType<? extends Sensor<? super E>>> sensorTypes, Map<Integer, Map<Activity, Set<BehaviorType<?>>>> activitiesByPriority){
+        Brain<E> brain = (Brain<E>) mob.getBrain();
+        brain.stopAll(serverLevel, mob);
+        ((LivingEntityAccessor)mob).setBrain(brain.copyWithoutBehaviors());
+        // Add custom memory module types
+        // Add custom sensors
+        // Add custom behaviors
     }
 }

@@ -2,6 +2,7 @@ package com.infamous.aptitude.common.behavior;
 
 import com.google.gson.JsonObject;
 import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import java.lang.reflect.ParameterizedType;
@@ -20,4 +21,9 @@ public class BehaviorType<U extends Behavior<?>> extends ForgeRegistryEntry<Beha
         return this.jsonFactory.apply(jsonObject);
     }
 
+    @SuppressWarnings("unchecked")
+    public <X extends Behavior<?>> BehaviorType<X> cast()
+    {
+        return (BehaviorType<X>)this;
+    }
 }

@@ -17,4 +17,10 @@ public class PredicateType<U extends Predicate<?>> extends ForgeRegistryEntry<Pr
     public U fromJson(JsonObject jsonObject) {
         return this.jsonFactory.apply(jsonObject);
     }
+
+    @SuppressWarnings("unchecked")
+    public <X extends Predicate<?>> PredicateType<X> cast()
+    {
+        return (PredicateType<X>)this;
+    }
 }

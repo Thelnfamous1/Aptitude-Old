@@ -1,5 +1,9 @@
 package com.infamous.aptitude;
 
+import com.infamous.aptitude.common.behavior.BehaviorTypes;
+import com.infamous.aptitude.common.behavior.BrainManager;
+import com.infamous.aptitude.common.behavior.functions.FunctionTypes;
+import com.infamous.aptitude.common.behavior.predicates.PredicateTypes;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -14,11 +18,15 @@ public class Aptitude
     // Directly reference a log4j logger.
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MOD_ID = "aptitude";
+    public static BrainManager brainManager;
 
     public Aptitude() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
+        PredicateTypes.register(modEventBus);
+        FunctionTypes.register(modEventBus);
+        BehaviorTypes.register(modEventBus);
     }
 }

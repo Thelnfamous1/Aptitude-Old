@@ -1,6 +1,9 @@
 package com.infamous.aptitude.common;
 
 import com.infamous.aptitude.Aptitude;
+import com.infamous.aptitude.common.behavior.BehaviorType;
+import com.infamous.aptitude.common.behavior.BrainManager;
+import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.infamous.aptitude.common.entity.ICanSpit;
 import com.infamous.aptitude.common.entity.IDevourer;
 import com.infamous.aptitude.common.entity.IPredator;
@@ -13,28 +16,40 @@ import com.infamous.aptitude.server.goal.misc.DevourerFindItemsGoal;
 import com.infamous.aptitude.server.goal.target.AptitudeDefendTargetGoal;
 import com.infamous.aptitude.server.goal.target.AptitudeHurtByTargetGoal;
 import com.infamous.aptitude.server.goal.target.HuntGoal;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Donkey;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Mule;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.Map;
+import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = Aptitude.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeCommonEvents {
 
     @SubscribeEvent
     public static void onReloadListener(AddReloadListenerEvent event){
-        //GoalManager goalManager = new GoalManager();
-        //event.addListener(goalManager);
+        Aptitude.brainManager = new BrainManager();
+        event.addListener(Aptitude.brainManager);
     }
 
     @SubscribeEvent
@@ -45,6 +60,16 @@ public class ForgeCommonEvents {
 
         Mob eventMob = event.getEntity() instanceof Mob ? ((Mob) event.getEntity()) : null;
         if(eventMob == null) return;
+
+        if(eventMob instanceof Pig pig && eventMob.getType() == EntityType.PIG){
+            eventMob.goalSelector.removeAllGoals();
+            eventMob.targetSelector.removeAllGoals();
+            ResourceLocation pigLocation = ForgeRegistries.ENTITIES.getKey(EntityType.PIG);
+            Set<MemoryModuleType<?>> memoryTypes = Aptitude.brainManager.getMemoryTypes(pigLocation);
+            Set<SensorType<? extends Sensor<? super Pig>>> sensorTypes = Aptitude.brainManager.getSensorTypesUnchecked(pigLocation);
+            Map<Integer, Map<Activity, Set<BehaviorType<?>>>> activitiesByPriority = Aptitude.brainManager.getActivitiesByPriority(pigLocation);
+            BehaviorHelper.refreshBrain(pig, (ServerLevel) event.getWorld(), memoryTypes, sensorTypes, activitiesByPriority);
+        }
 
         if(eventMob instanceof Cat){
             Cat cat = (Cat) eventMob;

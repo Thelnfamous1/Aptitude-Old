@@ -1,12 +1,9 @@
 package com.infamous.aptitude.common.behavior.functions;
 
 import com.google.gson.JsonObject;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class FunctionType<U extends Function<?, ?>> extends ForgeRegistryEntry<FunctionType<?>> {
 
@@ -18,5 +15,11 @@ public class FunctionType<U extends Function<?, ?>> extends ForgeRegistryEntry<F
 
     public U fromJson(JsonObject jsonObject) {
         return this.jsonFactory.apply(jsonObject);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <X extends Function<?, ?>> FunctionType<X> cast()
+    {
+        return (FunctionType<X>)this;
     }
 }
