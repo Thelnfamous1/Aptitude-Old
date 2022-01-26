@@ -20,6 +20,7 @@
     "FoxEntityMixin",
     "LivingEntityAccessor",
     "LlamaEntityMixin",
+    "MobMixin",
     "OcelotEntityMixin",
     "PandaEntityMixin",
     "ParrotEntityMixin",
