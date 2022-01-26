@@ -2,6 +2,8 @@ package com.infamous.aptitude;
 
 import com.infamous.aptitude.common.behavior.BehaviorTypes;
 import com.infamous.aptitude.common.behavior.BrainManager;
+import com.infamous.aptitude.common.behavior.custom.AptitudeMemoryModuleTypes;
+import com.infamous.aptitude.common.behavior.custom.AptitudeSensorTypes;
 import com.infamous.aptitude.common.behavior.functions.FunctionTypes;
 import com.infamous.aptitude.common.behavior.predicates.PredicateTypes;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,5 +30,7 @@ public class Aptitude
         PredicateTypes.register(modEventBus);
         FunctionTypes.register(modEventBus);
         BehaviorTypes.register(modEventBus);
+        AptitudeMemoryModuleTypes.register(modEventBus);
+        AptitudeSensorTypes.register(modEventBus);
     }
 }
