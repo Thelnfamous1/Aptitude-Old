@@ -33,16 +33,14 @@ public class PigSpecificSensor extends Sensor<Pig> {
         for(LivingEntity livingentity : nearestvisiblelivingentities.findAll((livingEntity) -> {
             return !livingEntity.isBaby() && (livingEntity instanceof Piglin || livingEntity instanceof Pig);
         })) {
-            if (livingentity instanceof Piglin) {
-                Piglin piglin = (Piglin)livingentity;
+            if (livingentity instanceof Piglin piglin) {
                 ++i;
                 if (optional.isEmpty()) {
                     optional = Optional.of(piglin);
                 }
             }
 
-            if (livingentity instanceof Pig) {
-                Pig pig = (Pig)livingentity;
+            if (livingentity instanceof Pig pig) {
                 list.add(pig);
             }
         }

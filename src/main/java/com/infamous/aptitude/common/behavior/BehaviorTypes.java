@@ -5,10 +5,12 @@ import com.google.gson.JsonParseException;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.custom.AptitudeRunIf;
 import com.infamous.aptitude.common.behavior.custom.AptitudeRunOne;
+import com.infamous.aptitude.common.behavior.custom.AptitudeSetWalkTargetAwayFrom;
 import com.infamous.aptitude.common.behavior.custom.AptitudeStartAttacking;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
@@ -17,18 +19,35 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.*;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class BehaviorTypes {
 
-    private static final DeferredRegister<BehaviorType<?>> BEHAVIOR_TYPES = DeferredRegister.create(AptitudeRegistries.BEHAVIOR_TYPES, Aptitude.MOD_ID);
+    private static final DeferredRegister<BehaviorType<?>> BEHAVIOR_TYPES = DeferredRegister.create((Class<BehaviorType<?>>) (Class) BehaviorType.class, Aptitude.MOD_ID);
+
+    public static Supplier<IForgeRegistry<BehaviorType<?>>> BEHAVIOR_TYPE_REGISTRY = BEHAVIOR_TYPES.makeRegistry("behavior_types", () ->
+            new RegistryBuilder<BehaviorType<?>>().setMaxID(Integer.MAX_VALUE - 1).onAdd((owner, stage, id, obj, old) ->
+                    Aptitude.LOGGER.info("BehaviorType Added: " + obj.getRegistryName().toString() + " ")
+            ).setDefaultKey(new ResourceLocation(Aptitude.MOD_ID, "do_nothing"))
+    );
+
+    public static final RegistryObject<BehaviorType<DoNothing>> DO_NOTHING = register("do_nothing", (jsonObject) -> {
+        Pair<Integer, Integer> baseBehaviorDuration = BehaviorHelper.parseBaseBehaviorDuration(jsonObject);
+
+        return new DoNothing(baseBehaviorDuration.getFirst(), baseBehaviorDuration.getSecond());
+    });
 
     public static final RegistryObject<BehaviorType<MoveToTargetSink>> MOVE_TO_TARGET_SINK = register("move_to_target_sink", (jsonObject -> {
         Pair<Integer, Integer> baseBehaviorDuration = BehaviorHelper.parseBaseBehaviorDuration(jsonObject);
@@ -61,20 +80,14 @@ public class BehaviorTypes {
         }
     }));
 
-    public static final RegistryObject<BehaviorType<SetWalkTargetAwayFrom<?>>> SET_WALK_TARGET_AWAY_FROM = register("set_walk_target_away_from", (jsonObject -> {
+    public static final RegistryObject<BehaviorType<AptitudeSetWalkTargetAwayFrom<?>>> SET_WALK_TARGET_AWAY_FROM = register("set_walk_target_away_from", (jsonObject -> {
         MemoryModuleType<?> walkAwayFromMemory = BehaviorHelper.parseMemoryType(jsonObject, "walkAwayFromMemory");
         float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
         int desiredDistance = GsonHelper.getAsInt(jsonObject, "desiredDistance", 0);
         boolean ignoreWalkTarget = GsonHelper.getAsBoolean(jsonObject, "ignoreWalkTarget", true);
-        try{
-            return SetWalkTargetAwayFrom.entity((MemoryModuleType<? extends Entity>) walkAwayFromMemory, speedModifier, desiredDistance, ignoreWalkTarget);
-        } catch (ClassCastException e){
-            try{
-                return SetWalkTargetAwayFrom.pos((MemoryModuleType<BlockPos>) walkAwayFromMemory, speedModifier, desiredDistance, ignoreWalkTarget);
-            } catch (ClassCastException e1){
-                throw new JsonParseException("Invalid memory type for SetWalkTargetAwayFrom: " + walkAwayFromMemory);
-            }
-        }
+        Function<?, ?> toPosition = BehaviorHelper.parseFunction(jsonObject, "toPosition", "type");
+        Function<?, Vec3> toPositionCast = (Function<?, Vec3>) toPosition;
+        return new AptitudeSetWalkTargetAwayFrom<>(walkAwayFromMemory, speedModifier, desiredDistance, ignoreWalkTarget, toPositionCast);
     }));
 
     public static final RegistryObject<BehaviorType<AptitudeStartAttacking<?>>> START_ATTACKING = register("start_attacking", (jsonObject) -> {
@@ -147,12 +160,6 @@ public class BehaviorTypes {
         return new SetWalkTargetFromLookTarget(speedModifier, closeEnoughDistance);
     });
 
-    public static final RegistryObject<BehaviorType<DoNothing>> DO_NOTHING = register("do_nothing", (jsonObject) -> {
-        Pair<Integer, Integer> baseBehaviorDuration = BehaviorHelper.parseBaseBehaviorDuration(jsonObject);
-
-        return new DoNothing(baseBehaviorDuration.getFirst(), baseBehaviorDuration.getSecond());
-    });
-
     public static final RegistryObject<BehaviorType<SetWalkTargetFromAttackTargetIfTargetOutOfReach>> SET_WALK_TARGET_FROM_ATTACK_TARGET_IF_TARGET_OUT_OF_REACH = register("set_walk_target_from_attack_target_if_target_out_of_reach", (jsonObject) -> {
         float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
 
@@ -189,5 +196,9 @@ public class BehaviorTypes {
 
     public static void register(IEventBus bus){
         BEHAVIOR_TYPES.register(bus);
+    }
+
+    public static BehaviorType<?> getBehaviorType(ResourceLocation name) {
+        return BEHAVIOR_TYPE_REGISTRY.get().getValue(name);
     }
 }

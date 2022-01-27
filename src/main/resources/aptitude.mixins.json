@@ -8,32 +8,10 @@
   },
   "minVersion": "0.8.5",
   "mixins": [
-    "AbstractHorseEntityMixin",
-    "AbstractSkeletonEntityMixin",
     "BrainAccessor",
-    "BredAnimalsTriggerMixin",
-    "CatEntityMixin",
-    "ChickenEntityMixin",
-    "CowEntityMixin",
-    "CreeperEntityMixin",
-    "DolphinEntityMixin",
-    "FoxEntityMixin",
     "LivingEntityAccessor",
-    "LlamaEntityMixin",
-    "MobMixin",
-    "OcelotEntityMixin",
-    "PandaEntityMixin",
-    "ParrotEntityMixin",
-    "PigEntityMixin",
-    "PolarBearEntityMixin",
-    "RabbitEntityMixin",
-    "SheepEntityMixin",
-    "StriderEntityMixin",
-    "TurtleEntityMixin",
-    "WolfEntityMixin"
+    "MobMixin"
   ],
   "client": [
-    "AgeableModelMixin",
-    "ParrotVariantLayerMixin"
   ]
 }

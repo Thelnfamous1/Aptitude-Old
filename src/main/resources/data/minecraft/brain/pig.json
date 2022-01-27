@@ -23,10 +23,16 @@
   "sensor_types": [
     "minecraft:nearest_living_entities",
     "minecraft:nearest_player",
-    "minecraft:nearest_adult"
+    "minecraft:nearest_adult",
+    "aptitude:pig_specific_sensor"
   ],
   "core_activities": [
     "minecraft:core"
+  ],
+  "rotating_activities": [
+    "minecraft:fight",
+    "minecraft:avoid",
+    "minecraft:idle"
   ],
   "default_activity": {
     "type": "minecraft:idle",
@@ -66,7 +72,11 @@
             "walkAwayFromMemory": "minecraft:nearest_repellent",
             "speedModifier": 1.0,
             "desiredDistance": 8,
-            "ignoreWalkTarget": true
+            "ignoreWalkTarget": true,
+            "toPosition": {
+              "type": "aptitude:block_position_vector"
+            }
+
         },
         {
             "type": "aptitude:start_attacking",
@@ -75,11 +85,11 @@
               "addContext": [
                 {
                   "type": "aptitude:breed_target",
-                  "status": "absent"
+                  "status": "value_absent"
                 },
                 {
                   "type": "aptitude:pacified",
-                  "status": "absent"
+                  "status": "value_absent"
                 }
               ]
             },
@@ -101,7 +111,10 @@
               "walkAwayFromMemory": "minecraft:nearest_visible_adult_piglin",
               "speedModifier": 0.4,
               "desiredDistance": 8,
-              "ignoreWalkTarget": false
+              "ignoreWalkTarget": false,
+              "toPosition": {
+                "type": "aptitude:entity_position_vector"
+              }
             }
         },
         {
@@ -117,7 +130,7 @@
         },
         {
             "type": "aptitude:baby_follow_adult",
-            "interval": {
+            "followRange": {
               "minInclusive": 5,
               "maxInclusive": 16
             },
@@ -197,7 +210,7 @@
               "type": "aptitude:memory_status_checks",
               "addContext": {
                 "type": "aptitude:breed_target",
-                "status": "present"
+                "status": "value_present"
               }
             },
             "memoryType": "minecraft:attack_target"
@@ -216,7 +229,10 @@
             "walkAwayFromMemory": "minecraft:avoid_target",
             "speedModifier": 1.3,
             "desiredDistance": 15,
-            "ignoreWalkTarget": false
+            "ignoreWalkTarget": false,
+            "toPosition": {
+              "type": "aptitude:entity_position_vector"
+            }
         },
         {
             "type": "aptitude:run_one",

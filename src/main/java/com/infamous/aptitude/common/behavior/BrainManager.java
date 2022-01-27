@@ -1,6 +1,5 @@
 package com.infamous.aptitude.common.behavior;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.*;
@@ -11,8 +10,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
@@ -33,6 +30,7 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
     private Map<ResourceLocation, Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>>> activityRequirements = ImmutableMap.of();
     private Map<ResourceLocation, Set<Activity>> coreActivities = ImmutableMap.of();
     private Map<ResourceLocation, Pair<Activity, Boolean>> defaultActivities = ImmutableMap.of();
+    private Map<ResourceLocation, List<Activity>> rotatingActivities = ImmutableMap.of();
 
     public BrainManager() {
         super(GSON, "brain");
@@ -42,8 +40,8 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
         return this.memoryTypes.getOrDefault(location, ImmutableSet.of());
     }
 
-    public <E extends LivingEntity> Set<SensorType<? extends Sensor<? super E>>> getSensorTypesUnchecked(ResourceLocation location) {
-        return (Set<SensorType<? extends Sensor<? super E>>>) this.sensorTypes.getOrDefault(location, ImmutableSet.of());
+    public Set<SensorType<? extends Sensor<?>>> getSensorTypes(ResourceLocation location) {
+        return this.sensorTypes.getOrDefault(location, ImmutableSet.of());
     }
 
     public Map<Activity, List<Pair<Integer, JsonObject>>> getPrioritizedBehaviorsByActivity(ResourceLocation location) {
@@ -66,6 +64,10 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
         return this.activityRequirements.getOrDefault(location, ImmutableMap.of());
     }
 
+    public List<Activity> getRotatingActivities(ResourceLocation etLocation) {
+        return rotatingActivities.get(etLocation);
+    }
+
     protected void apply(Map<ResourceLocation, JsonElement> locationElementMap, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         ImmutableMap.Builder<ResourceLocation, Set<MemoryModuleType<?>>> memoryTypesBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<ResourceLocation, Set<SensorType<?>>> sensorTypesBuilder = ImmutableMap.builder();
@@ -74,6 +76,7 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
         ImmutableMap.Builder<ResourceLocation, Map<Activity, Set<MemoryModuleType<?>>>> activityMemoriesToEraseWhenStoppedBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<ResourceLocation, Set<Activity>> coreActivitiesBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<ResourceLocation, Pair<Activity, Boolean>> defaultActivitiesBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<ResourceLocation, List<Activity>> rotatingActivitiesBuilder = ImmutableMap.builder();
 
         locationElementMap.forEach((location, jsonElement) -> {
             try {
@@ -82,21 +85,30 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
                 JsonArray coreActivitiesArr = GsonHelper.getAsJsonArray(topElement, "core_activities");
                 JsonObject defaultActivityObj = GsonHelper.getAsJsonObject(topElement, "default_activity");
                 JsonArray activitiesByPriorityArr = GsonHelper.getAsJsonArray(topElement, "activities_by_priority");
+                JsonArray rotatingActivitiesObj = GsonHelper.getAsJsonArray(topElement, "rotating_activities");
 
                 this.buildMemoryTypes(memoryTypesBuilder, location, topElement);
                 this.buildSensorTypes(sensorTypesBuilder, location, topElement);
                 this.buildCoreActivities(coreActivitiesBuilder, location, coreActivitiesArr);
                 this.buildDefaultActivity(defaultActivitiesBuilder, location, defaultActivityObj);
+                this.buildRotatingActivities(rotatingActivitiesBuilder, location, rotatingActivitiesObj);
 
+                Map<Activity, List<Pair<Integer, JsonObject>>> prioritizedBehaviorsByActivity = new HashMap<>();
+                Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>> activityRequirements = new HashMap<>();
+                Map<Activity, Set<MemoryModuleType<?>>> activityMemoriesToEraseWhenStopped = new HashMap<>();
                 activitiesByPriorityArr.forEach(je -> {
                     JsonObject elementObj = je.getAsJsonObject();
                     Activity activity = BehaviorHelper.parseActivity(elementObj, "activity");
 
-                    this.buildActivityMemoriesToEraseWhenStopped(activityMemoriesToEraseWhenStoppedBuilder, location, elementObj, activity);
-                    this.buildActivityRequirements(activityRequirementsBuilder, location, elementObj, activity);
-                    this.buildPrioritizedBehaviorsByActivity(prioritizedBehaviorsByActivityBuilder, location, elementObj, activity);
+                    this.buildActivityMemoriesToEraseWhenStopped(activityMemoriesToEraseWhenStopped, elementObj, activity);
+                    this.buildActivityRequirements(activityRequirements, elementObj, activity);
+                    this.buildPrioritizedBehaviorsByActivity(prioritizedBehaviorsByActivity, elementObj, activity);
 
                 });
+
+                activityMemoriesToEraseWhenStoppedBuilder.put(location, activityMemoriesToEraseWhenStopped);
+                activityRequirementsBuilder.put(location, activityRequirements);
+                prioritizedBehaviorsByActivityBuilder.put(location, prioritizedBehaviorsByActivity);
 
             } catch (Exception exception) {
                 LOGGER.error("Couldn't parse brain for {}", location, exception);
@@ -110,9 +122,20 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
         this.activityMemoriesToEraseWhenStopped = activityMemoriesToEraseWhenStoppedBuilder.build();
         this.coreActivities = coreActivitiesBuilder.build();
         this.defaultActivities = defaultActivitiesBuilder.build();
+        this.rotatingActivities = rotatingActivitiesBuilder.build();
     }
 
-    private void buildPrioritizedBehaviorsByActivity(ImmutableMap.Builder<ResourceLocation, Map<Activity, List<Pair<Integer, JsonObject>>>> prioritizedBehaviorsByActivityBuilder, ResourceLocation location, JsonObject elementObj, Activity activity) {
+    private void buildRotatingActivities(ImmutableMap.Builder<ResourceLocation, List<Activity>> rotatingActivitiesBuilder, ResourceLocation location, JsonArray rotatingActivitiesObj) {
+        List<Activity> rotatingActivities = new ArrayList<>();
+        rotatingActivitiesObj.forEach(je1 -> {
+            Activity activity = BehaviorHelper.parseActivity(je1);
+            rotatingActivities.add(activity);
+        });
+
+        rotatingActivitiesBuilder.put(location, rotatingActivities);
+    }
+
+    private void buildPrioritizedBehaviorsByActivity(Map<Activity, List<Pair<Integer, JsonObject>>> prioritizedBehaviorsByActivityBuilder, JsonObject elementObj, Activity activity) {
         List<Pair<Integer, JsonObject>> prioritizedBehaviors;
         JsonArray behaviorArr = GsonHelper.getAsJsonArray(elementObj, "behaviors");
         if(elementObj.has("priority_start")){
@@ -126,9 +149,7 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
                 prioritizedBehaviors.add(Pair.of(priority, elementObj1));
             });
         }
-        Map<Activity, List<Pair<Integer, JsonObject>>> prioritizedBehaviorsForActivity = new HashMap<>();
-        prioritizedBehaviorsForActivity.put(activity, prioritizedBehaviors);
-        prioritizedBehaviorsByActivityBuilder.put(location, prioritizedBehaviorsForActivity);
+        prioritizedBehaviorsByActivityBuilder.put(activity, prioritizedBehaviors);
     }
 
     private List<Pair<Integer, JsonObject>> createPriorityPairs(int priorityStart, JsonArray behaviorJsons) {
@@ -142,7 +163,7 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
         return priorityPairs;
     }
 
-    private void buildActivityRequirements(ImmutableMap.Builder<ResourceLocation, Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>>> activityRequirementsBuilder, ResourceLocation location, JsonObject elementObj, Activity activity) {
+    private void buildActivityRequirements(Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>> activityRequirementsBuilder, JsonObject elementObj, Activity activity) {
         Set<Pair<MemoryModuleType<?>, MemoryStatus>> requirements = new HashSet<>();
         if(elementObj.has("requirements")){
             JsonArray requirementArr = GsonHelper.getAsJsonArray(elementObj, "requirements");
@@ -153,12 +174,10 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
                 requirements.add(Pair.of(memoryRequirement, statusRequirement));
             });
         }
-        Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>> requirementsForActivity = new HashMap<>();
-        requirementsForActivity.put(activity, requirements);
-        activityRequirementsBuilder.put(location, requirementsForActivity);
+        activityRequirementsBuilder.put(activity, requirements);
     }
 
-    private void buildActivityMemoriesToEraseWhenStopped(ImmutableMap.Builder<ResourceLocation, Map<Activity, Set<MemoryModuleType<?>>>> activityMemoriesToEraseWhenStoppedBuilder, ResourceLocation location, JsonObject elementObj, Activity activity) {
+    private void buildActivityMemoriesToEraseWhenStopped(Map<Activity, Set<MemoryModuleType<?>>> activityMemoriesToEraseWhenStoppedBuilder, JsonObject elementObj, Activity activity) {
         Set<MemoryModuleType<?>> removeWhenStopped = new HashSet<>();
         if(elementObj.has("remove_when_stopped")){
             JsonArray memoryArray = GsonHelper.getAsJsonArray(elementObj, "remove_when_stopped");
@@ -167,9 +186,7 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
                 removeWhenStopped.add(memoryToRemove);
             });
         }
-        Map<Activity, Set<MemoryModuleType<?>>> removeForActivity = new HashMap<>();
-        removeForActivity.put(activity, removeWhenStopped);
-        activityMemoriesToEraseWhenStoppedBuilder.put(location, removeForActivity);
+        activityMemoriesToEraseWhenStoppedBuilder.put(activity, removeWhenStopped);
     }
 
     private void buildDefaultActivity(ImmutableMap.Builder<ResourceLocation, Pair<Activity, Boolean>> defaultActivitiesBuilder, ResourceLocation location, JsonObject defaultActivityObj) {

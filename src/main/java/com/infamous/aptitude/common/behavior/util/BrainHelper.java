@@ -30,7 +30,7 @@ public class BrainHelper {
         ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(mob.getType());
 
         Set<MemoryModuleType<?>> memoryTypes = Aptitude.brainManager.getMemoryTypes(etLocation);
-        Set<SensorType<? extends Sensor<? super E>>> sensorTypes = Aptitude.brainManager.getSensorTypesUnchecked(etLocation);
+        Set<SensorType<? extends Sensor<?>>> sensorTypes = Aptitude.brainManager.getSensorTypes(etLocation);
         Map<Activity, List<Pair<Integer, JsonObject>>> prioritizedBehaviorsByActivity = Aptitude.brainManager.getPrioritizedBehaviorsByActivity(etLocation);
         Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>> activityRequirements = Aptitude.brainManager.getActivityRequirements(etLocation);
         Map<Activity, Set<MemoryModuleType<?>>> activityMemoriesToEraseWhenStopped = Aptitude.brainManager.getActivityMemoriesToEraseWhenStopped(etLocation);
@@ -50,6 +50,19 @@ public class BrainHelper {
         if(defaultActivity.getSecond()){
             newBrain.useDefaultActivity();
         }
+
+        /*
+        Aptitude.LOGGER.info("New brain created for {}!", mob);
+        Aptitude.LOGGER.info("Printing memory types!");
+        newBrain.getMemories().keySet().forEach(Aptitude.LOGGER::info);
+        Aptitude.LOGGER.info("Printing sensor types!");
+        Map<SensorType<? extends Sensor<?>>, Sensor<?>> sensors = ((BrainAccessor<E>) newBrain).getSensors();
+        sensors.keySet().forEach(st -> Aptitude.LOGGER.info(st.getRegistryName().toString()));
+        Aptitude.LOGGER.info("Printing activities!");
+        Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>> currentActivityReqs = ((BrainAccessor<E>) newBrain).getActivityRequirements();
+        currentActivityReqs.keySet().forEach(Aptitude.LOGGER::info);
+         */
+
     }
 
     private static <E extends LivingEntity> void remakeWithCustomBehaviors(Map<Activity, List<Pair<Integer, JsonObject>>> prioritizedBehaviorsByActivity, Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>> activityRequirements, Map<Activity, Set<MemoryModuleType<?>>> activityMemoriesToEraseWhenStopped, Brain<E> newBrain) {
@@ -69,17 +82,17 @@ public class BrainHelper {
         }
     }
 
-    private static <E extends LivingEntity> void remakeWithCustomMemoriesAndSensors(Set<MemoryModuleType<?>> memoryTypes, Set<SensorType<? extends Sensor<? super E>>> sensorTypes, Brain<E> brain) {
+    private static <E extends LivingEntity> void remakeWithCustomMemoriesAndSensors(Set<MemoryModuleType<?>> memoryTypes, Set<SensorType<? extends Sensor<?>>> sensorTypes, Brain<E> brain) {
         Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> originalMemories = brain.getMemories();
         for(MemoryModuleType<?> memoryType : memoryTypes){
             if(!originalMemories.containsKey(memoryType)) originalMemories.put(memoryType, Optional.empty());
         }
         BrainAccessor<E> brainAccessor = (BrainAccessor<E>) brain;
-        Map<SensorType<? extends Sensor<? super E>>, Sensor<? super E>> originalSensors = brainAccessor.getSensors();
-        for(SensorType<? extends Sensor<? super E>> sensorType : sensorTypes){
+        Map<SensorType<? extends Sensor<?>>, Sensor<?>> originalSensors = brainAccessor.getSensors();
+        for(SensorType<? extends Sensor<?>> sensorType : sensorTypes){
             if(!originalSensors.containsKey(sensorType)) originalSensors.put(sensorType, sensorType.create());
         }
-        for(Sensor<? super E> sensor : originalSensors.values()) {
+        for(Sensor<?> sensor : originalSensors.values()) {
             for(MemoryModuleType<?> requiredMemoryType : sensor.requires()) {
                 if(!originalMemories.containsKey(requiredMemoryType)) originalMemories.put(requiredMemoryType, Optional.empty());
             }

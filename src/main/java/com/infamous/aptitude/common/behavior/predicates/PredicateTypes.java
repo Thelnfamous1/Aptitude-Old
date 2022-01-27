@@ -1,9 +1,11 @@
 package com.infamous.aptitude.common.behavior.predicates;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
-import com.infamous.aptitude.common.behavior.AptitudeRegistries;
+import com.infamous.aptitude.common.behavior.functions.FunctionType;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
@@ -11,20 +13,34 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class PredicateTypes {
 
-    private static final DeferredRegister<PredicateType<?>> PREDICATE_TYPES = DeferredRegister.create(AptitudeRegistries.PREDICATE_TYPES, Aptitude.MOD_ID);
+    private static final DeferredRegister<PredicateType<?>> PREDICATE_TYPES = DeferredRegister.create((Class<PredicateType<?>>)(Class)PredicateType.class, Aptitude.MOD_ID);
+
+    public static Supplier<IForgeRegistry<PredicateType<?>>> PREDICATE_TYPE_REGISTRY = PREDICATE_TYPES.makeRegistry("predicate_types", () ->
+            new RegistryBuilder<PredicateType<?>>().setMaxID(Integer.MAX_VALUE - 1).onAdd((owner, stage, id, obj, old) ->
+                    Aptitude.LOGGER.info("PredicateType Added: " + obj.getRegistryName().toString() + " ")
+            ).setDefaultKey(new ResourceLocation(Aptitude.MOD_ID, "always_true"))
+    );
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ALWAYS_TRUE = register("always_true",
+            jsonObject -> {
+                return livingEntity -> true;
+            });
 
     public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> MEMORY_STATUS_CHECKS = register("memory_status_checks",
             jsonObject -> {
-                JsonObject addContextObj = GsonHelper.getAsJsonObject(jsonObject, "addContext");
+                JsonElement addContextObj = jsonObject.get("addContext");
                 Map<MemoryModuleType<?>, MemoryStatus> memoriesToStatus = BehaviorHelper.parseMemoriesToStatus(addContextObj);
                 return le -> {
                     Brain<?> brain = le.getBrain();
@@ -76,4 +92,7 @@ public class PredicateTypes {
         PREDICATE_TYPES.register(bus);
     }
 
+    public static PredicateType<?> getPredicateType(ResourceLocation ptLocation) {
+        return PREDICATE_TYPE_REGISTRY.get().getValue(ptLocation);
+    }
 }

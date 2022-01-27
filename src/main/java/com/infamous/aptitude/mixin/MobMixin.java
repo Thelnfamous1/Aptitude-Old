@@ -45,8 +45,8 @@ public abstract class MobMixin extends LivingEntity {
     private <E extends Mob> void updateActivity() {
         Brain<E> brain = this.getBrainCast();
         ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(this.getType());
-        List<Activity> activities = Aptitude.brainManager.getPrioritizedBehaviorsByActivity(etLocation).keySet().stream().toList();
-        brain.setActiveActivityToFirstValid(activities);
+        List<Activity> rotatingActivities = Aptitude.brainManager.getRotatingActivities(etLocation);
+        brain.setActiveActivityToFirstValid(rotatingActivities);
         this.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
     }
 

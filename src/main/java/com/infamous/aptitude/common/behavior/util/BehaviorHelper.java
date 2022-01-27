@@ -4,10 +4,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.infamous.aptitude.common.behavior.AptitudeRegistries;
 import com.infamous.aptitude.common.behavior.BehaviorType;
+import com.infamous.aptitude.common.behavior.BehaviorTypes;
 import com.infamous.aptitude.common.behavior.functions.FunctionType;
+import com.infamous.aptitude.common.behavior.functions.FunctionTypes;
 import com.infamous.aptitude.common.behavior.predicates.PredicateType;
+import com.infamous.aptitude.common.behavior.predicates.PredicateTypes;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -85,7 +87,7 @@ public class BehaviorHelper {
         behaviorArray.forEach(je -> {
                     JsonObject elementObject = je.getAsJsonObject();
                     int priority = GsonHelper.getAsInt(elementObject, "priority", 0);
-                    Behavior<?> behavior = parseBehavior(elementObject, "behavior", "type");
+                    Behavior<?> behavior = parseBehavior(elementObject, "type");
                     Pair<Behavior<?>, Integer> pair = Pair.of(behavior, priority);
                     prioritizedBehaviors.add(pair);
                 }
@@ -107,7 +109,7 @@ public class BehaviorHelper {
     public static BehaviorType<?> parseBehaviorType(JsonObject jsonObject, String memberName) {
         String behaviorTypeString = GsonHelper.getAsString(jsonObject, memberName, "");
         ResourceLocation btLocation = new ResourceLocation(behaviorTypeString);
-        BehaviorType<?> behaviorType = AptitudeRegistries.BEHAVIOR_TYPES.getValue(btLocation);
+        BehaviorType<?> behaviorType = BehaviorTypes.getBehaviorType(btLocation);
         if(behaviorType == null) throw new JsonParseException("Invalid behavior type: " + behaviorTypeString);
         return behaviorType;
     }
@@ -129,17 +131,17 @@ public class BehaviorHelper {
         return Pair.of(minDuration, maxDuration);
     }
 
-    public static Map<MemoryModuleType<?>, MemoryStatus> parseMemoriesToStatus(JsonObject addContextObj) {
+    public static Map<MemoryModuleType<?>, MemoryStatus> parseMemoriesToStatus(JsonElement addContextElement) {
         Map<MemoryModuleType<?>, MemoryStatus> memoriesToStatus = new HashMap<>();
 
-        if(addContextObj.isJsonArray()){
-            JsonArray addContextArray = addContextObj.getAsJsonArray();
+        if(addContextElement.isJsonArray()){
+            JsonArray addContextArray = addContextElement.getAsJsonArray();
             addContextArray.forEach(jsonElement -> {
                 JsonObject elementAsObj = jsonElement.getAsJsonObject();
                 buildMemoriesToStatus(memoriesToStatus, elementAsObj);
             });
-        } else{
-            buildMemoriesToStatus(memoriesToStatus, addContextObj);
+        } else if(addContextElement.isJsonObject()){
+            buildMemoriesToStatus(memoriesToStatus, addContextElement.getAsJsonObject());
         }
         return memoriesToStatus;
     }
@@ -160,7 +162,7 @@ public class BehaviorHelper {
     public static PredicateType<?> parsePredicateType(JsonObject jsonObject, String memberName){
         String predicateTypeString = GsonHelper.getAsString(jsonObject, memberName, "");
         ResourceLocation ptLocation = new ResourceLocation(predicateTypeString);
-        PredicateType<?> predicateType = AptitudeRegistries.PREDICATE_TYPES.getValue(ptLocation);
+        PredicateType<?> predicateType = PredicateTypes.getPredicateType(ptLocation);
         if(predicateType == null) throw new JsonParseException("Invalid predicate type: " + predicateTypeString);
         return predicateType;
     }
@@ -175,7 +177,7 @@ public class BehaviorHelper {
     public static FunctionType<?> parseFunctionType(JsonObject jsonObject, String memberName){
         String functionTypeString = GsonHelper.getAsString(jsonObject, memberName, "");
         ResourceLocation ftLocation = new ResourceLocation(functionTypeString);
-        FunctionType<?> functionType = AptitudeRegistries.FUNCTION_TYPES.getValue(ftLocation);
+        FunctionType<?> functionType = FunctionTypes.getFunctionType(ftLocation);
         if(functionType == null) throw new JsonParseException("Invalid function type: " + functionTypeString);
         return functionType;
     }
