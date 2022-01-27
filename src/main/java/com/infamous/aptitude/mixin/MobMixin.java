@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
+import java.util.Locale;
 
 @Mixin(Mob.class)
 public abstract class MobMixin extends LivingEntity {
@@ -33,7 +34,7 @@ public abstract class MobMixin extends LivingEntity {
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;customServerAiStep()V", shift = At.Shift.AFTER), method = "serverAiStep")
     private void handleBrainStep(CallbackInfo ci){
         if(this.getType() == EntityType.PIG){
-            String name = this.getTypeName().getString();
+            String name = this.getTypeName().getString().toLowerCase(Locale.ROOT);
             this.level.getProfiler().push("aptitude." + name + "Brain");
             this.getBrainCast().tick((ServerLevel) this.level, this.cast());
             this.level.getProfiler().pop();
