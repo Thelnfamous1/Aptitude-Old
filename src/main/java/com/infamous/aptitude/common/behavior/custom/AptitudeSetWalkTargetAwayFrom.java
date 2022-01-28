@@ -28,7 +28,7 @@ public class AptitudeSetWalkTargetAwayFrom<T> extends Behavior<PathfinderMob> {
    }
 
    @Override
-   public boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
+   protected boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
       return !this.alreadyWalkingAwayFromPosWithSameSpeed(pathfinderMob) && pathfinderMob.position().closerThan(this.getPosToAvoid(pathfinderMob), (double) this.desiredDistance);
    }
 
@@ -52,7 +52,7 @@ public class AptitudeSetWalkTargetAwayFrom<T> extends Behavior<PathfinderMob> {
    }
 
    @Override
-   public void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long p_24005_) {
+   protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long p_24005_) {
       moveAwayFrom(pathfinderMob, this.getPosToAvoid(pathfinderMob), this.speedModifier);
    }
 

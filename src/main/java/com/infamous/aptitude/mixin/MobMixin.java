@@ -1,6 +1,5 @@
 package com.infamous.aptitude.mixin;
 
-import com.google.common.collect.ImmutableList;
 import com.infamous.aptitude.Aptitude;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -12,7 +11,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -46,7 +44,11 @@ public abstract class MobMixin extends LivingEntity {
         Brain<E> brain = this.getBrainCast();
         ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(this.getType());
         List<Activity> rotatingActivities = Aptitude.brainManager.getRotatingActivities(etLocation);
+
+        Aptitude.LOGGER.info("Updating activity for {}, rotation is below", this);
+        rotatingActivities.forEach(Aptitude.LOGGER::info);
         brain.setActiveActivityToFirstValid(rotatingActivities);
+        Aptitude.LOGGER.info("Chose activity: {}", brain.getActiveNonCoreActivity());
         this.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
     }
 

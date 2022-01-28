@@ -1,5 +1,6 @@
 package com.infamous.aptitude.common.behavior.custom;
 
+import com.infamous.aptitude.mixin.BehaviorAccessor;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -37,11 +38,11 @@ public class AptitudeGateBehavior<E extends LivingEntity> extends Behavior<E> {
    }
 
    @Override
-   public boolean canStillUse(ServerLevel serverLevel, E mob, long gameTime) {
+   protected boolean canStillUse(ServerLevel serverLevel, E mob, long gameTime) {
       return this.behaviors.stream().filter((behavior) -> {
          return behavior.getStatus() == Behavior.Status.RUNNING;
       }).anyMatch((behavior) -> {
-         return behavior.canStillUse(serverLevel, mob, gameTime);
+         return ((BehaviorAccessor<E>)behavior).callCanStillUse(serverLevel, mob, gameTime);
       });
    }
 
@@ -51,13 +52,13 @@ public class AptitudeGateBehavior<E extends LivingEntity> extends Behavior<E> {
    }
 
    @Override
-   public void start(ServerLevel serverLevel, E mob, long gameTime) {
+   protected void start(ServerLevel serverLevel, E mob, long gameTime) {
       this.orderPolicy.apply(this.behaviors);
       this.runningPolicy.apply(this.behaviors.stream(), serverLevel, mob, gameTime);
    }
 
    @Override
-   public void tick(ServerLevel serverLevel, E mob, long gameTime) {
+   protected void tick(ServerLevel serverLevel, E mob, long gameTime) {
       this.behaviors.stream().filter((behavior) -> {
          return behavior.getStatus() == Behavior.Status.RUNNING;
       }).forEach((behavior) -> {
@@ -66,7 +67,7 @@ public class AptitudeGateBehavior<E extends LivingEntity> extends Behavior<E> {
    }
 
    @Override
-   public void stop(ServerLevel serverLevel, E mob, long gameTime) {
+   protected void stop(ServerLevel serverLevel, E mob, long gameTime) {
       this.behaviors.stream().filter((behavior) -> {
          return behavior.getStatus() == Behavior.Status.RUNNING;
       }).forEach((behavior) -> {

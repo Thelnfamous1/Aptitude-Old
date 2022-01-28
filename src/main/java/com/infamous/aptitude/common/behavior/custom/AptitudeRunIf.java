@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.function.Predicate;
+
+import com.infamous.aptitude.mixin.BehaviorAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -16,7 +18,7 @@ public class AptitudeRunIf<E extends LivingEntity> extends Behavior<E> {
    private final boolean checkWhileRunningAlso;
 
    public AptitudeRunIf(Map<MemoryModuleType<?>, MemoryStatus> entryCondition, Predicate<E> predicate, Behavior<?> wrappedBehavior, boolean checkWhileRunningAlso) {
-      super(mergeMaps(entryCondition, wrappedBehavior.entryCondition));
+      super(mergeMaps(entryCondition, ((BehaviorAccessor<E>)wrappedBehavior).getEntryCondition()));
       this.predicate = predicate;
       try{
          this.wrappedBehavior = (Behavior<? super E>) wrappedBehavior;
@@ -47,12 +49,12 @@ public class AptitudeRunIf<E extends LivingEntity> extends Behavior<E> {
       }, wrappedBehavior, false);
    }
 
-   public boolean checkExtraStartConditions(ServerLevel serverLevel, E mob) {
-      return this.predicate.test(mob) && this.wrappedBehavior.checkExtraStartConditions(serverLevel, mob);
+   protected boolean checkExtraStartConditions(ServerLevel serverLevel, E mob) {
+      return this.predicate.test(mob) && ((BehaviorAccessor<E>)this.wrappedBehavior).callCheckExtraStartConditions(serverLevel, mob);
    }
 
-   public boolean canStillUse(ServerLevel serverLevel, E mob, long gameTime) {
-      return this.checkWhileRunningAlso && this.predicate.test(mob) && this.wrappedBehavior.canStillUse(serverLevel, mob, gameTime);
+   protected boolean canStillUse(ServerLevel serverLevel, E mob, long gameTime) {
+      return this.checkWhileRunningAlso && this.predicate.test(mob) && ((BehaviorAccessor<E>)this.wrappedBehavior).callCanStillUse(serverLevel, mob, gameTime);
    }
 
    protected boolean timedOut(long gameTime) {
@@ -60,15 +62,15 @@ public class AptitudeRunIf<E extends LivingEntity> extends Behavior<E> {
    }
 
    public void start(ServerLevel serverLevel, E mob, long gameTime) {
-      this.wrappedBehavior.start(serverLevel, mob, gameTime);
+      ((BehaviorAccessor<E>)this.wrappedBehavior).callStart(serverLevel, mob, gameTime);
    }
 
-   public void tick(ServerLevel serverLevel, E mob, long gameTime) {
-      this.wrappedBehavior.tick(serverLevel, mob, gameTime);
+   protected void tick(ServerLevel serverLevel, E mob, long gameTime) {
+      ((BehaviorAccessor<E>)this.wrappedBehavior).callTick(serverLevel, mob, gameTime);
    }
 
-   public void stop(ServerLevel serverLevel, E mob, long gameTime) {
-      this.wrappedBehavior.stop(serverLevel, mob, gameTime);
+   protected void stop(ServerLevel serverLevel, E mob, long gameTime) {
+      ((BehaviorAccessor<E>)this.wrappedBehavior).callStop(serverLevel, mob, gameTime);
    }
 
    public String toString() {
