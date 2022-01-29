@@ -21,10 +21,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class BrainHelper {
 
@@ -66,9 +63,6 @@ public class BrainHelper {
         Aptitude.LOGGER.info("Printing sensor types!");
         Map<SensorType<? extends Sensor<?>>, Sensor<?>> sensors = ((BrainAccessor<E>) newBrain).getSensors();
         sensors.keySet().forEach(st -> Aptitude.LOGGER.info(st.getRegistryName().toString()));
-        Aptitude.LOGGER.info("Printing activities!");
-        Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>> currentActivityReqs = ((BrainAccessor<E>) newBrain).getActivityRequirements();
-        currentActivityReqs.keySet().forEach(Aptitude.LOGGER::info);
 
     }
 
@@ -78,6 +72,7 @@ public class BrainHelper {
             List<Pair<Integer, JsonObject>> prioritizedBehaviorJsons = entry.getValue();
             ImmutableList.Builder<Pair<Integer, Behavior<? super E>>> prioritizedBehaviorsBuilder = ImmutableList.builder();
             prioritizedBehaviorJsons.forEach(p -> {
+                //Aptitude.LOGGER.info("Reading in behavior object to make brain: {}", p.getSecond());
                 Integer priority = p.getFirst();
                 Behavior<?> behavior = BehaviorHelper.parseBehavior(p.getSecond(), "type");
                 Behavior<? super E> behaviorCast = (Behavior<? super E>)behavior;
@@ -85,7 +80,20 @@ public class BrainHelper {
             });
 
             ImmutableList<Pair<Integer, Behavior<? super E>>> prioritzedBehaviors = prioritizedBehaviorsBuilder.build();
+            prioritzedBehaviors.forEach(pb -> Aptitude.LOGGER.info("Adding {} with priority {} for activity {}", pb.getSecond(), pb.getFirst(), activity));
             newBrain.addActivityAndRemoveMemoriesWhenStopped(activity, prioritzedBehaviors, activityRequirements.getOrDefault(activity, Sets.newHashSet()), activityMemoriesToEraseWhenStopped.getOrDefault(activity, Sets.newHashSet()));
+
+            /*
+            Map<Integer, Map<Activity, Set<Behavior<?>>>> availableBehaviorsByPriority = ((BrainAccessor<E>) newBrain).getAvailableBehaviorsByPriority();
+            for(Map.Entry<Integer, Map<Activity, Set<Behavior<?>>>> abbpEntry : availableBehaviorsByPriority.entrySet()){
+                Aptitude.LOGGER.info("Checking available behaviors for priority: {}", abbpEntry.getKey());
+                Map<Activity, Set<Behavior<?>>> activitiesToBehaviors = abbpEntry.getValue();
+                if(activitiesToBehaviors.containsKey(activity)){
+                    Set<Behavior<?>> behaviors = activitiesToBehaviors.get(activity);
+                    behaviors.forEach(b -> Aptitude.LOGGER.info("Activity {} has behavior: {}", activity, b));
+                }
+            }
+             */
         }
     }
 

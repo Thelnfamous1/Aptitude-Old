@@ -47,17 +47,6 @@ public abstract class MobMixin extends LivingEntity {
         List<Activity> rotatingActivities = Aptitude.brainManager.getRotatingActivities(etLocation);
         brain.setActiveActivityToFirstValid(rotatingActivities);
         this.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
-
-        Optional<Activity> currentActivity = brain.getActiveNonCoreActivity();
-        Map<Integer, Map<Activity, Set<Behavior<?>>>> availableBehaviorsByPriority = ((BrainAccessor<E>) brain).getAvailableBehaviorsByPriority();
-        currentActivity.ifPresent(a -> {
-            Aptitude.LOGGER.info("Current activity: {}", a);
-            Collection<Map<Activity, Set<Behavior<?>>>> map = availableBehaviorsByPriority.values();
-            map.stream().filter(entry -> entry.containsKey(a)).findFirst().ifPresent(s -> {
-                Set<Behavior<?>> behaviors = Optional.ofNullable(s.get(a)).orElse(Sets.newHashSet());
-                behaviors.forEach(Aptitude.LOGGER::info);
-            });
-        });
     }
 
     private <E extends Mob> Brain<E> getBrainCast() {

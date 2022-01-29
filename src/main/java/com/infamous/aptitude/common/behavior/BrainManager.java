@@ -3,6 +3,7 @@ package com.infamous.aptitude.common.behavior;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.*;
+import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
@@ -144,6 +145,7 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
         } else{
             prioritizedBehaviors = new ArrayList<>();
             behaviorArr.forEach(je1 -> {
+                //Aptitude.LOGGER.info("Reading in behavior object from data: {}", je1);
                 JsonObject elementObj1 = je1.getAsJsonObject();
                 int priority = GsonHelper.getAsInt(elementObj1, "priority", 0);
                 prioritizedBehaviors.add(Pair.of(priority, elementObj1));
@@ -157,6 +159,7 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
         List<Pair<Integer, JsonObject>> priorityPairs = new ArrayList<>();
 
         for(JsonElement behaviorJson : behaviorJsons) {
+            //Aptitude.LOGGER.info("Reading in behavior object from data: {}", behaviorJson);
             priorityPairs.add(Pair.of(i++, behaviorJson.getAsJsonObject()));
         }
 
