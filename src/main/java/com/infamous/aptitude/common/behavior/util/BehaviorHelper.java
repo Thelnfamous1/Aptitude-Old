@@ -81,18 +81,18 @@ public class BehaviorHelper {
         return entityType;
     }
 
-    public static List<Pair<Behavior<?>, Integer>> parsePrioritizedBehaviors(JsonObject jsonObject, String memberName){
-        List<Pair<Behavior<?>, Integer>> prioritizedBehaviors = new ArrayList<>();
+    public static List<Pair<Behavior<?>, Integer>> parseWeightedBehaviors(JsonObject jsonObject, String memberName){
+        List<Pair<Behavior<?>, Integer>> weightedBehaviors = new ArrayList<>();
         JsonArray behaviorArray = GsonHelper.getAsJsonArray(jsonObject, memberName);
         behaviorArray.forEach(je -> {
                     JsonObject elementObject = je.getAsJsonObject();
-                    int priority = GsonHelper.getAsInt(elementObject, "priority", 0);
+                    int weight = GsonHelper.getAsInt(elementObject, "weight", 0);
                     Behavior<?> behavior = parseBehavior(elementObject, "type");
-                    Pair<Behavior<?>, Integer> pair = Pair.of(behavior, priority);
-                    prioritizedBehaviors.add(pair);
+                    Pair<Behavior<?>, Integer> pair = Pair.of(behavior, weight);
+                    weightedBehaviors.add(pair);
                 }
         );
-        return prioritizedBehaviors;
+        return weightedBehaviors;
     }
 
     public static Behavior<?> parseBehavior(JsonObject jsonObject, String memberName, String typeMemberName){

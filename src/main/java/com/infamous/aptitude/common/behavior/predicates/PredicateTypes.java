@@ -93,6 +93,8 @@ public class PredicateTypes {
     }
 
     public static PredicateType<?> getPredicateType(ResourceLocation ptLocation) {
-        return PREDICATE_TYPE_REGISTRY.get().getValue(ptLocation);
+        PredicateType<?> value = PREDICATE_TYPE_REGISTRY.get().getValue(ptLocation);
+        Aptitude.LOGGER.info("Attempting to get predicate type {}, got {}", ptLocation, value.getRegistryName());
+        return value;
     }
 }

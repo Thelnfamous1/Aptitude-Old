@@ -9,11 +9,9 @@ import com.infamous.aptitude.common.behavior.custom.AptitudeSetWalkTargetAwayFro
 import com.infamous.aptitude.common.behavior.custom.AptitudeStartAttacking;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.*;
@@ -27,7 +25,6 @@ import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -142,7 +139,7 @@ public class BehaviorTypes {
     });
 
     public static final RegistryObject<BehaviorType<AptitudeRunOne<?>>> RUN_ONE = register("run_one", (jsonObject) -> {
-        List<Pair<Behavior<?>, Integer>> behaviors = BehaviorHelper.parsePrioritizedBehaviors(jsonObject, "behaviors");
+        List<Pair<Behavior<?>, Integer>> behaviors = BehaviorHelper.parseWeightedBehaviors(jsonObject, "behaviors");
         return new AptitudeRunOne<>(behaviors);
     });
 
@@ -199,6 +196,8 @@ public class BehaviorTypes {
     }
 
     public static BehaviorType<?> getBehaviorType(ResourceLocation name) {
-        return BEHAVIOR_TYPE_REGISTRY.get().getValue(name);
+        BehaviorType<?> value = BEHAVIOR_TYPE_REGISTRY.get().getValue(name);
+        Aptitude.LOGGER.info("Attempting to get behavior type {}, got {}", name, value.getRegistryName());
+        return value;
     }
 }

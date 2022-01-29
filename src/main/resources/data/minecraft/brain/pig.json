@@ -140,18 +140,18 @@
             "type": "aptitude:run_one",
             "behaviors": [
               {
-                "priority": 2,
+                "weight": 2,
                 "type": "aptitude:random_stroll",
                 "speedModifier": 0.4
               },
               {
-                "priority": 2,
+                "weight": 2,
                 "type": "aptitude:set_walk_target_from_look_target",
                 "speedModifier": 0.4,
                 "closeEnoughDistance": 3
               },
               {
-                "priority": 1,
+                "weight": 1,
                 "type": "aptitude:do_nothing",
                 "minDuration": 30,
                 "maxDuration": 60
@@ -238,18 +238,18 @@
             "type": "aptitude:run_one",
             "behaviors": [
               {
-                "priority": 2,
+                "weight": 2,
                 "type": "aptitude:random_stroll",
                 "speedModifier": 0.4
               },
               {
-                "priority": 2,
+                "weight": 2,
                 "type": "aptitude:set_walk_target_from_look_target",
                 "speedModifier": 0.4,
                 "closeEnoughDistance": 3
               },
               {
-                "priority": 1,
+                "weight": 1,
                 "type": "aptitude:do_nothing",
                 "minDuration": 30,
                 "maxDuration": 60

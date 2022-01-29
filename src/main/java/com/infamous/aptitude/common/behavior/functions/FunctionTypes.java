@@ -74,6 +74,8 @@ public class FunctionTypes {
     }
 
     public static FunctionType<?> getFunctionType(ResourceLocation ftLocation) {
-        return FUNCTION_TYPE_REGISTRY.get().getValue(ftLocation);
+        FunctionType<?> value = FUNCTION_TYPE_REGISTRY.get().getValue(ftLocation);
+        Aptitude.LOGGER.info("Attempting to get function type {}, got {}", ftLocation, value.getRegistryName());
+        return value;
     }
 }

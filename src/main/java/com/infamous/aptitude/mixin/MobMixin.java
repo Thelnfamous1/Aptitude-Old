@@ -35,7 +35,16 @@ public abstract class MobMixin extends LivingEntity {
         if(this.getType() == EntityType.PIG){
             String name = this.getTypeName().getString().toLowerCase(Locale.ROOT);
             this.level.getProfiler().push("aptitude." + name + "Brain");
+
+            Aptitude.LOGGER.info("Checking memory values for {} before ticking brain:", this);
+            this.getBrainCast().getMemories().forEach((mt, mv) -> Aptitude.LOGGER.info("Brain has value {} for memory {}", mv, mt));
+
             this.getBrainCast().tick((ServerLevel) this.level, this.cast());
+
+            Aptitude.LOGGER.info("Checking memory values for {} after ticking brain:", this);
+            this.getBrainCast().getMemories().forEach((mt, mv) -> Aptitude.LOGGER.info("Brain has value {} for memory {}", mv, mt));
+            Aptitude.LOGGER.info("Memory check complete for {}", this);
+
             this.level.getProfiler().pop();
             this.updateActivity();
         }
@@ -46,13 +55,13 @@ public abstract class MobMixin extends LivingEntity {
         ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(this.getType());
         List<Activity> rotatingActivities = Aptitude.brainManager.getRotatingActivities(etLocation);
 
-        brain.getActiveActivities().forEach(a -> Aptitude.LOGGER.info("Was running activity: {}", a));
-        brain.getRunningBehaviors().forEach(b -> Aptitude.LOGGER.info("Running behavior: {}", b));
+        //brain.getActiveActivities().forEach(a -> Aptitude.LOGGER.info("Was running activity: {}", a));
+        //brain.getRunningBehaviors().forEach(b -> Aptitude.LOGGER.info("Running behavior: {}", b));
 
         brain.setActiveActivityToFirstValid(rotatingActivities);
         this.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
 
-        brain.getActiveActivities().forEach(a -> Aptitude.LOGGER.info("Now running activity: {}", a));
+        //brain.getActiveActivities().forEach(a -> Aptitude.LOGGER.info("Now running activity: {}", a));
     }
 
     private <E extends Mob> Brain<E> getBrainCast() {

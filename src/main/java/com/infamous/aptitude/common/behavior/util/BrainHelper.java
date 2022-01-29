@@ -20,6 +20,7 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -42,10 +43,7 @@ public class BrainHelper {
         Set<Activity> coreActivities = Aptitude.brainManager.getCoreActivities(etLocation);
         Pair<Activity, Boolean> defaultActivity = Aptitude.brainManager.getDefaultActivity(etLocation);
 
-        Brain<E> originalBrain = (Brain<E>) mob.getBrain();
-        originalBrain.stopAll(serverLevel, mob);
-        ((LivingEntityAccessor)mob).setBrain(originalBrain.copyWithoutBehaviors());
-        Brain<E> newBrain = (Brain<E>)mob.getBrain();
+        Brain<E> newBrain = replaceBrain(mob, serverLevel);
         // Add custom memory module types and sensor types
         remakeWithCustomMemoriesAndSensors(memoryTypes, sensorTypes, newBrain);
         // Add custom behaviors
@@ -64,6 +62,14 @@ public class BrainHelper {
         Map<SensorType<? extends Sensor<?>>, Sensor<?>> sensors = ((BrainAccessor<E>) newBrain).getSensors();
         sensors.keySet().forEach(st -> Aptitude.LOGGER.info(st.getRegistryName().toString()));
 
+    }
+
+    private static <E extends LivingEntity> Brain<E> replaceBrain(E mob, ServerLevel serverLevel) {
+        Brain<E> originalBrain = (Brain<E>) mob.getBrain();
+        originalBrain.stopAll(serverLevel, mob);
+        ((LivingEntityAccessor) mob).setBrain(originalBrain.copyWithoutBehaviors());
+        Brain<E> newBrain = (Brain<E>) mob.getBrain();
+        return newBrain;
     }
 
     private static <E extends LivingEntity> void remakeWithCustomBehaviors(Map<Activity, List<Pair<Integer, JsonObject>>> prioritizedBehaviorsByActivity, Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>> activityRequirements, Map<Activity, Set<MemoryModuleType<?>>> activityMemoriesToEraseWhenStopped, Brain<E> newBrain) {
