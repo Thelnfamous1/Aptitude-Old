@@ -4,7 +4,7 @@
     "minecraft:mobs",
     "minecraft:visible_mobs",
     "minecraft:nearest_visible_player",
-    "minecraft:nearest_visible_attackable_player",
+    "minecraft:nearest_visible_targetable_player",
     "minecraft:look_target",
     "minecraft:walk_target",
     "minecraft:cant_reach_walk_target_since",
@@ -22,7 +22,7 @@
   ],
   "sensor_types": [
     "minecraft:nearest_living_entities",
-    "minecraft:nearest_player",
+    "minecraft:nearest_players",
     "minecraft:nearest_adult",
     "aptitude:pig_specific_sensor"
   ],

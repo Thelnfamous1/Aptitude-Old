@@ -1,5 +1,6 @@
 package com.infamous.aptitude.mixin;
 
+import com.google.common.collect.Sets;
 import com.infamous.aptitude.Aptitude;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -7,6 +8,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.Level;
@@ -17,8 +19,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 @Mixin(Mob.class)
 public abstract class MobMixin extends LivingEntity {
@@ -44,12 +45,19 @@ public abstract class MobMixin extends LivingEntity {
         Brain<E> brain = this.getBrainCast();
         ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(this.getType());
         List<Activity> rotatingActivities = Aptitude.brainManager.getRotatingActivities(etLocation);
-
-        Aptitude.LOGGER.info("Updating activity for {}, rotation is below", this);
-        rotatingActivities.forEach(Aptitude.LOGGER::info);
         brain.setActiveActivityToFirstValid(rotatingActivities);
-        Aptitude.LOGGER.info("Chose activity: {}", brain.getActiveNonCoreActivity());
         this.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
+
+        Optional<Activity> currentActivity = brain.getActiveNonCoreActivity();
+        Map<Integer, Map<Activity, Set<Behavior<?>>>> availableBehaviorsByPriority = ((BrainAccessor<E>) brain).getAvailableBehaviorsByPriority();
+        currentActivity.ifPresent(a -> {
+            Aptitude.LOGGER.info("Current activity: {}", a);
+            Collection<Map<Activity, Set<Behavior<?>>>> map = availableBehaviorsByPriority.values();
+            map.stream().filter(entry -> entry.containsKey(a)).findFirst().ifPresent(s -> {
+                Set<Behavior<?>> behaviors = Optional.ofNullable(s.get(a)).orElse(Sets.newHashSet());
+                behaviors.forEach(Aptitude.LOGGER::info);
+            });
+        });
     }
 
     private <E extends Mob> Brain<E> getBrainCast() {

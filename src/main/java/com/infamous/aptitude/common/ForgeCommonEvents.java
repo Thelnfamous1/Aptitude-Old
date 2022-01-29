@@ -3,11 +3,11 @@ package com.infamous.aptitude.common;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.BrainManager;
 import com.infamous.aptitude.common.behavior.util.BrainHelper;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.Pig;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -29,11 +29,10 @@ public class ForgeCommonEvents {
         }
 
         if(event.getEntity() instanceof Mob mob && mob.getType() == EntityType.PIG){
-            event.getWorld().getServer().addTickable(new TickTask(1, () -> {
-                mob.goalSelector.removeAllGoals();
-                mob.targetSelector.removeAllGoals();
-                BrainHelper.remakeBrain(mob, (ServerLevel) event.getWorld());
-            }));
+            ServerLevel serverLevel = (ServerLevel) event.getWorld();
+            MinecraftServer server = serverLevel.getServer();
+            server.tell(new TickTask(server.getTickCount() + 1, () -> BrainHelper.clearAIAndRemakeBrain(mob, serverLevel)));
         }
     }
+
 }

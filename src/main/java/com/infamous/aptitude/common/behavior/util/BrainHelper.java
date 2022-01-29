@@ -10,6 +10,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
@@ -26,6 +27,13 @@ import java.util.Optional;
 import java.util.Set;
 
 public class BrainHelper {
+
+    public static void clearAIAndRemakeBrain(Mob mob, ServerLevel serverLevel) {
+        mob.goalSelector.removeAllGoals();
+        mob.targetSelector.removeAllGoals();
+        remakeBrain(mob, serverLevel);
+    }
+
     public static <E extends LivingEntity> void remakeBrain(E mob, ServerLevel serverLevel){
         ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(mob.getType());
 
@@ -51,7 +59,7 @@ public class BrainHelper {
             newBrain.useDefaultActivity();
         }
 
-        /*
+
         Aptitude.LOGGER.info("New brain created for {}!", mob);
         Aptitude.LOGGER.info("Printing memory types!");
         newBrain.getMemories().keySet().forEach(Aptitude.LOGGER::info);
@@ -61,7 +69,6 @@ public class BrainHelper {
         Aptitude.LOGGER.info("Printing activities!");
         Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>> currentActivityReqs = ((BrainAccessor<E>) newBrain).getActivityRequirements();
         currentActivityReqs.keySet().forEach(Aptitude.LOGGER::info);
-         */
 
     }
 
