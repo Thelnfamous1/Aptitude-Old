@@ -119,4 +119,22 @@ public class BrainHelper {
             }
         }
     }
+
+    public static <E extends Mob> void updateActivity(E mob) {
+        Brain<E> brain = getBrainCast(mob);
+        ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(mob.getType());
+        List<Activity> rotatingActivities = Aptitude.brainManager.getRotatingActivities(etLocation);
+
+        //brain.getActiveActivities().forEach(a -> Aptitude.LOGGER.info("Was running activity: {}", a));
+        //brain.getRunningBehaviors().forEach(b -> Aptitude.LOGGER.info("Running behavior: {}", b));
+
+        brain.setActiveActivityToFirstValid(rotatingActivities);
+        mob.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
+
+        //brain.getActiveActivities().forEach(a -> Aptitude.LOGGER.info("Now running activity: {}", a));
+    }
+
+    public static<E extends Mob> Brain<E> getBrainCast(E mob) {
+        return (Brain<E>) mob.getBrain();
+    }
 }
