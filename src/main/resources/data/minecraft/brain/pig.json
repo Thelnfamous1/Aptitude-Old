@@ -84,11 +84,11 @@
               "type": "aptitude:memory_status_checks",
               "addContext": [
                 {
-                  "type": "aptitude:breed_target",
+                  "type": "minecraft:breed_target",
                   "status": "value_absent"
                 },
                 {
-                  "type": "aptitude:pacified",
+                  "type": "minecraft:pacified",
                   "status": "value_absent"
                 }
               ]
@@ -96,14 +96,14 @@
             "targetFinderFunction": {
               "type": "aptitude:retrieve_target_from_memory",
               "addContext": {
-                "type": "minecraft:nearest_visible_attackable_player"
+                "type": "minecraft:nearest_visible_targetable_player"
               }
             }
         },
         {
             "type": "aptitude:run_if",
             "predicate": {
-              "type": "aptitude:is_baby"
+              "type": "aptitude:is_adult"
             },
             "checkWhileRunningAlso": false,
             "wrappedBehavior": {
@@ -163,6 +163,12 @@
     {
       "activity": "minecraft:fight",
       "priority_start": 10,
+      "requirements": [
+        {
+          "type": "minecraft:attack_target",
+          "status": "value_present"
+        }
+      ],
       "remove_when_stopped": [
         "minecraft:attack_target"
       ],
@@ -209,7 +215,7 @@
             "predicate": {
               "type": "aptitude:memory_status_checks",
               "addContext": {
-                "type": "aptitude:breed_target",
+                "type": "minecraft:breed_target",
                 "status": "value_present"
               }
             },
@@ -220,6 +226,12 @@
     {
       "activity": "minecraft:avoid",
       "priority_start": 10,
+      "requirements": [
+        {
+          "type": "minecraft:avoid_target",
+          "status": "value_present"
+        }
+      ],
       "remove_when_stopped": [
         "minecraft:avoid_target"
       ],

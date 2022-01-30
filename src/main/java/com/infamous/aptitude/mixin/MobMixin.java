@@ -36,14 +36,14 @@ public abstract class MobMixin extends LivingEntity {
             String name = this.getTypeName().getString().toLowerCase(Locale.ROOT);
             this.level.getProfiler().push("aptitude." + name + "Brain");
 
-            Aptitude.LOGGER.info("Checking memory values for {} before ticking brain:", this);
-            this.getBrainCast().getMemories().forEach((mt, mv) -> Aptitude.LOGGER.info("Brain has value {} for memory {}", mv, mt));
+            //Aptitude.LOGGER.info("Checking memory values for {} before ticking brain:", this);
+            //this.getBrainCast().getMemories().forEach((mt, mv) -> Aptitude.LOGGER.info("Brain has value {} for memory {}", mv, mt));
 
             this.getBrainCast().tick((ServerLevel) this.level, this.cast());
 
-            Aptitude.LOGGER.info("Checking memory values for {} after ticking brain:", this);
-            this.getBrainCast().getMemories().forEach((mt, mv) -> Aptitude.LOGGER.info("Brain has value {} for memory {}", mv, mt));
-            Aptitude.LOGGER.info("Memory check complete for {}", this);
+            //Aptitude.LOGGER.info("Checking memory values for {} after ticking brain:", this);
+            //this.getBrainCast().getMemories().forEach((mt, mv) -> Aptitude.LOGGER.info("Brain has value {} for memory {}", mv, mt));
+            //Aptitude.LOGGER.info("Memory check complete for {}", this);
 
             this.level.getProfiler().pop();
             this.updateActivity();
