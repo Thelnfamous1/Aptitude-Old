@@ -1,7 +1,8 @@
-package com.infamous.aptitude.common.behavior.custom;
+package com.infamous.aptitude.common.behavior.custom.sensor;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.infamous.aptitude.common.behavior.custom.memory.AptitudeMemoryModuleTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -22,6 +23,7 @@ public class PigSpecificSensor extends Sensor<Pig> {
         return ImmutableSet.of(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_REPELLENT, MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, AptitudeMemoryModuleTypes.NEAREST_VISIBLE_ADULT_PIGS.get(), MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT, AptitudeMemoryModuleTypes.VISIBLE_ADULT_PIG_COUNT.get());
     }
 
+    @Override
     protected void doTick(ServerLevel serverLevel, Pig sensorPig) {
         Brain<?> brain = sensorPig.getBrain();
         brain.setMemory(MemoryModuleType.NEAREST_REPELLENT, this.findNearestRepellent(serverLevel, sensorPig));

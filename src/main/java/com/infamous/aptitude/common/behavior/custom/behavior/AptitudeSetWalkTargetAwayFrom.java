@@ -1,4 +1,4 @@
-package com.infamous.aptitude.common.behavior.custom;
+package com.infamous.aptitude.common.behavior.custom.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.function.Function;

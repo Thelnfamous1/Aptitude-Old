@@ -29,14 +29,22 @@
   "core_activities": [
     "minecraft:core"
   ],
+  "default_activity": {
+    "type": "minecraft:idle",
+    "set_active": true
+  },
   "rotating_activities": [
     "minecraft:fight",
     "minecraft:avoid",
     "minecraft:idle"
   ],
-  "default_activity": {
-    "type": "minecraft:idle",
-    "set_active": true
+  "update_activity_callback": {
+    "type": "aptitude:hoglinlike_update",
+    "additional": [
+      {
+        "type": "aptitude:update_aggression"
+      }
+    ]
   },
   "activities_by_priority": [
     {

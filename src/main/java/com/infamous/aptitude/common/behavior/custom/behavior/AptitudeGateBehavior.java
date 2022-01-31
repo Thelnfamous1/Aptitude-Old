@@ -1,4 +1,4 @@
-package com.infamous.aptitude.common.behavior.custom;
+package com.infamous.aptitude.common.behavior.custom.behavior;
 
 import com.infamous.aptitude.mixin.BehaviorAccessor;
 import com.mojang.datafixers.util.Pair;

@@ -6,12 +6,16 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.infamous.aptitude.common.behavior.BehaviorType;
 import com.infamous.aptitude.common.behavior.BehaviorTypes;
+import com.infamous.aptitude.common.behavior.consumer.ConsumerType;
+import com.infamous.aptitude.common.behavior.consumer.ConsumerTypes;
 import com.infamous.aptitude.common.behavior.functions.FunctionType;
 import com.infamous.aptitude.common.behavior.functions.FunctionTypes;
 import com.infamous.aptitude.common.behavior.predicates.PredicateType;
 import com.infamous.aptitude.common.behavior.predicates.PredicateTypes;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.EntityType;
@@ -20,9 +24,11 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -146,7 +152,7 @@ public class BehaviorHelper {
         return memoriesToStatus;
     }
 
-    private static void buildMemoriesToStatus(Map<MemoryModuleType<?>, MemoryStatus> memoriesToStatus, JsonObject elementAsObj) {
+    public static void buildMemoriesToStatus(Map<MemoryModuleType<?>, MemoryStatus> memoriesToStatus, JsonObject elementAsObj) {
         MemoryModuleType<?> memoryType = parseMemoryType(elementAsObj, "type");
         MemoryStatus memoryStatus = parseMemoryStatus(elementAsObj, "status");
         memoriesToStatus.put(memoryType, memoryStatus);
@@ -197,5 +203,35 @@ public class BehaviorHelper {
         Activity activity = ForgeRegistries.ACTIVITIES.getValue(activityLocation);
         if (activity == null) throw new JsonParseException("Invalid activity: " + activityString);
         return activity;
+    }
+
+    public static Consumer<?> parseConsumer(JsonObject jsonObject, String typeMemberName){
+        ConsumerType<?> consumerType = parseConsumerType(jsonObject, typeMemberName);
+        return consumerType.fromJson(jsonObject);
+    }
+
+    public static ConsumerType<?> parseConsumerType(JsonObject jsonObject, String memberName){
+        String consumerTypeString = GsonHelper.getAsString(jsonObject, memberName, "");
+        ResourceLocation ctLocation = new ResourceLocation(consumerTypeString);
+        ConsumerType<?> consumerType = ConsumerTypes.getConsumerType(ctLocation);
+        if(consumerType == null) throw new JsonParseException("Invalid consumer type: " + consumerTypeString);
+        return consumerType;
+    }
+
+    public static SoundEvent parseSoundEvent(JsonObject jsonObject, String memberName, String typeMemberName) {
+        JsonObject soundEventObj = GsonHelper.getAsJsonObject(jsonObject, memberName);
+        return parseSoundEventString(soundEventObj, typeMemberName);
+    }
+
+    public static SoundEvent parseSoundEventString(JsonObject jsonObject, String memberName){
+        String soundTypeString = GsonHelper.getAsString(jsonObject, memberName, "");
+        ResourceLocation seLocation = new ResourceLocation(soundTypeString);
+        SoundEvent soundEvent = ForgeRegistries.SOUND_EVENTS.getValue(seLocation);
+        if(soundEvent == null) throw new JsonParseException("Invalid sound event: " + soundTypeString);
+        return soundEvent;
+    }
+
+    public static Tags.IOptionalNamedTag<EntityType<?>> parseEntityTypeTag(JsonObject elementObj, String memberName) {
+        return EntityTypeTags.createOptional(new ResourceLocation(GsonHelper.getAsString(elementObj, memberName, "")));
     }
 }

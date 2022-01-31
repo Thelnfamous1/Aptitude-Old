@@ -1,4 +1,4 @@
-package com.infamous.aptitude.common.behavior.custom;
+package com.infamous.aptitude.common.behavior.custom.memory;
 
 import com.infamous.aptitude.Aptitude;
 import com.mojang.serialization.Codec;

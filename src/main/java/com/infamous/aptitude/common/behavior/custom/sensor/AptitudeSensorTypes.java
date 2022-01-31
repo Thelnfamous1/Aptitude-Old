@@ -1,19 +1,13 @@
-package com.infamous.aptitude.common.behavior.custom;
+package com.infamous.aptitude.common.behavior.custom.sensor;
 
 import com.infamous.aptitude.Aptitude;
-import com.mojang.serialization.Codec;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.sensing.PiglinSpecificSensor;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
-import net.minecraft.world.entity.animal.Pig;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public class AptitudeSensorTypes {

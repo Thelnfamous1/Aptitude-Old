@@ -40,7 +40,6 @@ public class ForgeCommonEvents {
         Mob mob = event.getMob();
 
         if(mob.getType() == EntityType.PIG){
-            event.setCanceled(true);
             BrainHelper.getBrainCast(mob).tick((ServerLevel) mob.level, mob);
             BrainHelper.updateActivity(mob);
         }

@@ -3,14 +3,15 @@ package com.infamous.aptitude.common.behavior;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.*;
-import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
@@ -20,6 +21,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 public class BrainManager extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
@@ -32,6 +35,7 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
     private Map<ResourceLocation, Set<Activity>> coreActivities = ImmutableMap.of();
     private Map<ResourceLocation, Pair<Activity, Boolean>> defaultActivities = ImmutableMap.of();
     private Map<ResourceLocation, List<Activity>> rotatingActivities = ImmutableMap.of();
+    private Map<ResourceLocation, Consumer<?>> updateActivityCallbacks = ImmutableMap.of();
 
     public BrainManager() {
         super(GSON, "brain");
@@ -78,6 +82,7 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
         ImmutableMap.Builder<ResourceLocation, Set<Activity>> coreActivitiesBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<ResourceLocation, Pair<Activity, Boolean>> defaultActivitiesBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<ResourceLocation, List<Activity>> rotatingActivitiesBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<ResourceLocation, Consumer<?>> updateActivityCallbacksBuilder = ImmutableMap.builder();
 
         locationElementMap.forEach((location, jsonElement) -> {
             try {
@@ -87,12 +92,14 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
                 JsonObject defaultActivityObj = GsonHelper.getAsJsonObject(topElement, "default_activity");
                 JsonArray activitiesByPriorityArr = GsonHelper.getAsJsonArray(topElement, "activities_by_priority");
                 JsonArray rotatingActivitiesObj = GsonHelper.getAsJsonArray(topElement, "rotating_activities");
+                JsonObject updateActivityCallbackObj = GsonHelper.getAsJsonObject(topElement, "update_activity_callback");
 
                 this.buildMemoryTypes(memoryTypesBuilder, location, topElement);
                 this.buildSensorTypes(sensorTypesBuilder, location, topElement);
                 this.buildCoreActivities(coreActivitiesBuilder, location, coreActivitiesArr);
                 this.buildDefaultActivity(defaultActivitiesBuilder, location, defaultActivityObj);
                 this.buildRotatingActivities(rotatingActivitiesBuilder, location, rotatingActivitiesObj);
+                this.buildUpdateActivityCallbacks(updateActivityCallbacksBuilder, location, updateActivityCallbackObj);
 
                 Map<Activity, List<Pair<Integer, JsonObject>>> prioritizedBehaviorsByActivity = new HashMap<>();
                 Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>> activityRequirements = new HashMap<>();
@@ -124,6 +131,12 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
         this.coreActivities = coreActivitiesBuilder.build();
         this.defaultActivities = defaultActivitiesBuilder.build();
         this.rotatingActivities = rotatingActivitiesBuilder.build();
+        this.updateActivityCallbacks = updateActivityCallbacksBuilder.build();
+    }
+
+    private void buildUpdateActivityCallbacks(ImmutableMap.Builder<ResourceLocation, Consumer<?>> updateActivityCallbacksBuilder, ResourceLocation location, JsonObject updateActivityCallbackObj){
+        Consumer<?> consumer = BehaviorHelper.parseConsumer(updateActivityCallbackObj, "type");
+        updateActivityCallbacksBuilder.put(location, consumer);
     }
 
     private void buildRotatingActivities(ImmutableMap.Builder<ResourceLocation, List<Activity>> rotatingActivitiesBuilder, ResourceLocation location, JsonArray rotatingActivitiesObj) {
@@ -145,7 +158,6 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
         } else{
             prioritizedBehaviors = new ArrayList<>();
             behaviorArr.forEach(je1 -> {
-                //Aptitude.LOGGER.info("Reading in behavior object from data: {}", je1);
                 JsonObject elementObj1 = je1.getAsJsonObject();
                 int priority = GsonHelper.getAsInt(elementObj1, "priority", 0);
                 prioritizedBehaviors.add(Pair.of(priority, elementObj1));
@@ -224,5 +236,9 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
             sensorTypeSet.add(sensorType);
         });
         sensorTypesBuilder.put(location, sensorTypeSet);
+    }
+
+    public Consumer<?> getUpdateActivityCallback(ResourceLocation etLocation) {
+        return this.updateActivityCallbacks.getOrDefault(etLocation, livingEntity -> {});
     }
 }

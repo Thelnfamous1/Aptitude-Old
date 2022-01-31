@@ -1,7 +1,8 @@
-package com.infamous.aptitude.common.behavior.custom;
+package com.infamous.aptitude.common.behavior.custom.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.infamous.aptitude.common.behavior.custom.behavior.AptitudeGateBehavior;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import java.util.Map;
