@@ -2,6 +2,7 @@ package com.infamous.aptitude.common.behavior.custom.memory;
 
 import com.infamous.aptitude.Aptitude;
 import com.mojang.serialization.Codec;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -18,6 +19,8 @@ public class AptitudeMemoryModuleTypes {
     public static final RegistryObject<MemoryModuleType<List<Pig>>> NEAREST_VISIBLE_ADULT_PIGS = register("nearest_visible_adult_pigs");
 
     public static final RegistryObject<MemoryModuleType<Integer>> VISIBLE_ADULT_PIG_COUNT = register("visible_adult_pig_count");
+
+    public static final RegistryObject<MemoryModuleType<LivingEntity>> BREED_TARGET = register("breed_target");
 
     private static <U> RegistryObject<MemoryModuleType<U>> register(String name, Codec<U> codec) {
         return MEMORY_MODULE_TYPES.register(name, () -> new MemoryModuleType<>(Optional.of(codec)));

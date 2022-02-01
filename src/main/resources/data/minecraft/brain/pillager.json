@@ -1,0 +1,251 @@
+{
+  "memory_types": [
+    "minecraft:look_target",
+    "minecraft:doors_to_close",
+    "minecraft:mobs",
+    "minecraft:visible_mobs",
+    "minecraft:nearest_visible_player",
+    "minecraft:nearest_visible_targetable_player",
+    "aptitude:nearest_visible_adult_illagers",
+    "aptitude:nearby_adult_illagers",
+    "aptitude:nearest_visible_wanted_item",
+    "aptitude:hurt_by",
+    "aptitude:hurt_by_entity",
+    "minecraft:walk_target",
+    "minecraft:cant_reach_walk_target_since",
+    "minecraft:attack_target",
+    "minecraft:attack_cooling_down",
+    "minecraft:interaction_target",
+    "minecraft:path",
+    "minecraft:angry_at",
+    "minecraft:universal_anger",
+    "minecraft:avoid_target",
+    "minecraft:admiring_item",
+    "minecraft:time_trying_to_reach_admire_item",
+    "minecraft:admiring_disabled",
+    "minecraft:disable_walk_to_admire_item",
+    "minecraft:celebrate_location",
+    "minecraft:dancing",
+    "minecraft:hunted_recently",
+    "minecraft:nearest_visible_baby_hoglin",
+    "minecraft:nearest_visible_nemesis",
+    "minecraft:nearest_visible_zombified",
+    "minecraft:ride_target",
+    "aptitude:visible_adult_illager_count",
+    "minecraft:visible_adult_hoglin_count",
+    "minecraft:nearest_visible_huntable_hoglin",
+    "minecraft:nearest_targetable_player_not_wearing_gold",
+    "minecraft:nearest_player_holding_wanted_item",
+    "minecraft:ate_recently",
+    "minecraft:nearest_repellent"
+  ],
+  "sensor_types": [
+    "minecraft:nearest_living_entities",
+    "minecraft:nearest_players",
+    "minecraft:nearest_items",
+    "minecraft:hurt_by",
+    "aptitude:illager_specific_sensor"
+  ],
+  "core_activities": [
+    "minecraft:core"
+  ],
+  "default_activity": {
+    "type": "minecraft:idle",
+    "set_active": true
+  },
+  "rotating_activities": [
+    "minecraft:admire_item",
+    "minecraft:fight",
+    "minecraft:avoid",
+    "minecraft:celebrate",
+    "minecraft:ride",
+    "minecraft:idle"
+  ],
+  "update_activity_callback": {
+    "type": "aptitude:update_activity",
+    "on_changed_callback": {
+      "type": "aptitude:play_activity_sound",
+      "play_first_valid": [
+        {
+          "predicate": {
+            "type": "aptitude:active_non_core_activity_check",
+            "activity": "minecraft:fight"
+          },
+          "sound_event": "minecraft:entity.piglin.angry"
+        },
+        {
+          "predicate": {
+            "type": "aptitude:active_non_core_activity_check",
+            "activity": "minecraft:avoid"
+          },
+          "sound_event": "minecraft:entity.piglin.retreat"
+        },
+        {
+          "predicate": {
+            "type": "aptitude:active_non_core_activity_check",
+            "activity": "minecraft:admire_item"
+          },
+          "sound_event": "minecraft:entity.piglin.admiring_item"
+        },
+        {
+          "predicate": {
+            "type": "aptitude:active_non_core_activity_check",
+            "activity": "minecraft:celebrate"
+          },
+          "sound_event": "minecraft:entity.piglin.celebrate"
+        },
+        {
+          "predicate": {
+            "type": "aptitude:memory_status_check",
+            "addContext": [
+              {
+                "type": "minecraft:nearest_player_holding_wanted_item",
+                "status": "value_present"
+              }
+            ]
+          },
+          "sound_event": "minecraft:entity.piglin.jealous"
+        },
+        {
+          "predicate": {
+            "type": "aptitude:memory_status_check",
+            "addContext": [
+              {
+                "type": "minecraft:nearest_repellent",
+                "status": "value_present"
+              }
+            ]
+          },
+          "sound_event": "minecraft:entity.piglin.retreat"
+        },
+        {
+          "predicate": {
+            "type": "aptitude:always_true"
+          },
+          "sound_event": "minecraft:entity.piglin.ambient"
+        }
+      ]
+    },
+    "additional_callbacks": [
+      {
+        "type": "aptitude:update_aggression_flag",
+        "predicate": {
+          "type": "aptitude:memory_status_check",
+          "addContext": {
+              "type": "minecraft:attack_target",
+              "status": "value_present"
+          }
+        }
+      }
+    ]
+  },
+  "activities_by_priority": [
+    {
+      "activity": "minecraft:core",
+      "priority_start": 0,
+      "behaviors": [
+        {
+            "type": "aptitude:look_at_target_sink",
+            "minDuration": 45,
+            "maxDuration": 90
+        },
+        {
+            "type": "aptitude:move_to_target_sink"
+        },
+        {
+          "type": "aptitude:interact_with_door"
+        },
+        {
+          "type": "aptitude:copy_memory_with_expiry",
+          "predicate": {
+            "type": "aptitude:is_baby"
+          },
+          "sourceMemory": "minecraft:nearest_visible_nemesis",
+          "targetMemory": "minecraft:avoid_target",
+          "durationOfCopy": {
+            "minInclusive": 100,
+            "maxInclusive": 140
+          }
+        },
+        {
+          "type": "aptitude:copy_memory_with_expiry",
+          "predicate": {
+            "type": "aptitude:memory_status_check",
+            "addContext": {
+              "type": "minecraft:nearest_zombified",
+              "status": "value_present"
+            }
+          },
+          "sourceMemory": "minecraft:nearest_visible_zombified",
+          "targetMemory": "minecraft:avoid_target",
+          "durationOfCopy": {
+            "minInclusive": 100,
+            "maxInclusive": 140
+          }
+        },
+        {
+          "type": "aptitude:stop_holding_item_if_no_longer_admiring",
+          "shouldStopHoldingItem": {
+            "type": "aptitude:should_stop_holding_offhand"
+          },
+          "stopHoldingItem": {
+            "type": "aptitude:stop_holding_offhand"
+          }
+        },
+        {
+          "type": "aptitude:start_admiring_item_if_seen",
+          "lovedItems": {
+            "tag": "minecraft:piglin_loved"
+          },
+          "admireDuration": 120
+        },
+        {
+          "type": "aptitude:start_celebrating_if_target_dead",
+          "celebrateDuration": 300,
+          "dancePredicate": {
+            "type": "aptitude:wants_to_dance"
+          }
+        },
+        {
+          "type": "aptitude:stop_being_angry_if_target_dead"
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:idle",
+      "priority_start": 10,
+      "behaviors": [
+      ]
+    },
+    {
+      "activity": "minecraft:fight",
+      "priority_start": 10,
+      "requirements": [
+        {
+          "type": "minecraft:attack_target",
+          "status": "value_present"
+        }
+      ],
+      "remove_when_stopped": [
+        "minecraft:attack_target"
+      ],
+      "behaviors": [
+      ]
+    },
+    {
+      "activity": "minecraft:avoid",
+      "priority_start": 10,
+      "requirements": [
+        {
+          "type": "minecraft:avoid_target",
+          "status": "value_present"
+        }
+      ],
+      "remove_when_stopped": [
+        "minecraft:avoid_target"
+      ],
+      "behaviors": [
+      ]
+    }
+  ]
+}

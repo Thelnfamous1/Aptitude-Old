@@ -3,10 +3,8 @@ package com.infamous.aptitude.common.behavior;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.infamous.aptitude.Aptitude;
-import com.infamous.aptitude.common.behavior.custom.behavior.AptitudeRunIf;
-import com.infamous.aptitude.common.behavior.custom.behavior.AptitudeRunOne;
-import com.infamous.aptitude.common.behavior.custom.behavior.AptitudeSetWalkTargetAwayFrom;
-import com.infamous.aptitude.common.behavior.custom.behavior.AptitudeStartAttacking;
+import com.infamous.aptitude.common.behavior.custom.behavior.AptitudeStartAdmiringItemIfSeen;
+import com.infamous.aptitude.common.behavior.custom.behavior.AptitudeStopHoldingItemIfNoLongerAdmiring;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +15,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.*;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -25,10 +25,7 @@ import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 public class BehaviorTypes {
 
@@ -77,47 +74,29 @@ public class BehaviorTypes {
         }
     }));
 
-    public static final RegistryObject<BehaviorType<AptitudeSetWalkTargetAwayFrom<?>>> SET_WALK_TARGET_AWAY_FROM = register("set_walk_target_away_from", (jsonObject -> {
+    public static final RegistryObject<BehaviorType<SetWalkTargetAwayFrom<?>>> SET_WALK_TARGET_AWAY_FROM = register("set_walk_target_away_from", (jsonObject -> {
         MemoryModuleType<?> walkAwayFromMemory = BehaviorHelper.parseMemoryType(jsonObject, "walkAwayFromMemory");
         float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
         int desiredDistance = GsonHelper.getAsInt(jsonObject, "desiredDistance", 0);
         boolean ignoreWalkTarget = GsonHelper.getAsBoolean(jsonObject, "ignoreWalkTarget", true);
         Function<?, ?> toPosition = BehaviorHelper.parseFunction(jsonObject, "toPosition", "type");
         Function<?, Vec3> toPositionCast = (Function<?, Vec3>) toPosition;
-        return new AptitudeSetWalkTargetAwayFrom<>(walkAwayFromMemory, speedModifier, desiredDistance, ignoreWalkTarget, toPositionCast);
+        return new SetWalkTargetAwayFrom(walkAwayFromMemory, speedModifier, desiredDistance, ignoreWalkTarget, toPositionCast);
     }));
 
-    public static final RegistryObject<BehaviorType<AptitudeStartAttacking<?>>> START_ATTACKING = register("start_attacking", (jsonObject) -> {
+    public static final RegistryObject<BehaviorType<StartAttacking<?>>> START_ATTACKING = register("start_attacking", (jsonObject) -> {
         Predicate<?> canAttackPredicate = BehaviorHelper.parsePredicate(jsonObject, "canAttackPredicate", "type");
         Function<?, ?> targetFinderFunction = BehaviorHelper.parseFunction(jsonObject, "targetFinderFunction", "type");
 
-        Predicate<LivingEntity> predicateCast;
-        try{
-           predicateCast =  (Predicate<LivingEntity>) canAttackPredicate;
-        } catch (ClassCastException e){
-            throw new JsonParseException("Invalid predicate type for AptitudeStartAttacking: " + BehaviorHelper.parsePredicateType(jsonObject, "canAttackPredicate"));
-        }
-        Function<LivingEntity, Optional<? extends LivingEntity>> functionCast;
-        try{
-            functionCast = (Function<LivingEntity, Optional<? extends LivingEntity>>) targetFinderFunction;
-        } catch (ClassCastException e){
-            throw new JsonParseException("Invalid function type for AptitudeStartAttacking: " + BehaviorHelper.parseFunctionType(jsonObject, "targetFinderFunction"));
-        }
-        return new AptitudeStartAttacking<>(predicateCast, functionCast);
+        return new StartAttacking(canAttackPredicate, targetFinderFunction);
     });
 
-    public static final RegistryObject<BehaviorType<AptitudeRunIf<?>>> RUN_IF = register("run_if", (jsonObject) -> {
+    public static final RegistryObject<BehaviorType<RunIf<?>>> RUN_IF = register("run_if", (jsonObject) -> {
         Predicate<?> predicate = BehaviorHelper.parsePredicate(jsonObject, "predicate", "type");
         Behavior<?> behavior = BehaviorHelper.parseBehavior(jsonObject, "wrappedBehavior", "type");
         boolean checkWhileRunningAlso = GsonHelper.getAsBoolean(jsonObject, "checkWhileRunningAlso", false);
 
-        Predicate<LivingEntity> predicateCast;
-        try{
-            predicateCast =  (Predicate<LivingEntity>) predicate;
-        } catch (ClassCastException e){
-            throw new JsonParseException("Invalid predicate type for AptitudeRunIf: " + BehaviorHelper.parsePredicateType(jsonObject, "predicate"));
-        }
-        return new AptitudeRunIf<>(predicateCast, behavior, checkWhileRunningAlso);
+        return new RunIf(predicate, behavior, checkWhileRunningAlso);
     });
 
     public static final RegistryObject<BehaviorType<RunSometimes<?>>> RUN_SOMETIMES = register("run_sometimes", (jsonObject) -> {
@@ -138,9 +117,9 @@ public class BehaviorTypes {
         return new BabyFollowAdult<>(followRange, speedModifier);
     });
 
-    public static final RegistryObject<BehaviorType<AptitudeRunOne<?>>> RUN_ONE = register("run_one", (jsonObject) -> {
+    public static final RegistryObject<BehaviorType<RunOne<?>>> RUN_ONE = register("run_one", (jsonObject) -> {
         List<Pair<Behavior<?>, Integer>> behaviors = BehaviorHelper.parseWeightedBehaviors(jsonObject, "behaviors");
-        return new AptitudeRunOne<>(behaviors);
+        return new RunOne(behaviors);
     });
 
     public static final RegistryObject<BehaviorType<RandomStroll>> RANDOM_STROLL = register("random_stroll", (jsonObject) -> {
@@ -170,7 +149,14 @@ public class BehaviorTypes {
     });
 
     public static final RegistryObject<BehaviorType<StopAttackingIfTargetInvalid<?>>> STOP_ATTACKING_IF_TARGET_INVALID = register("stop_attacking_if_target_invalid", (jsonObject) -> {
-        return new StopAttackingIfTargetInvalid<>();
+        Predicate<LivingEntity> stopAttackingWhen = jsonObject.has("stopAttackingWhen") ?
+                (Predicate<LivingEntity>) BehaviorHelper.parsePredicate(jsonObject, "stopAttackingWhen", "type") :
+                le -> false;
+        Consumer<LivingEntity> onTargetErased = jsonObject.has("onTargetErased") ?
+                (Consumer<LivingEntity>) BehaviorHelper.parseConsumer(jsonObject, "onTargetErased", "type") :
+                le -> {};
+
+        return new StopAttackingIfTargetInvalid(stopAttackingWhen, onTargetErased);
     });
 
 
@@ -186,6 +172,46 @@ public class BehaviorTypes {
         }
         return new EraseMemoryIf<>(predicateCast, memoryType);
     });
+
+    public static final RegistryObject<BehaviorType<InteractWithDoor>> INTERACT_WITH_DOOR = register("interact_with_door",
+            jsonObject -> {
+                return new InteractWithDoor();
+            });
+
+    public static final RegistryObject<BehaviorType<CopyMemoryWithExpiry<?, ?>>> COPY_MEMORY_WITH_EXPIRY = register("copy_memory_with_expiry",
+            jsonObject -> {
+            Predicate<?> predicate = BehaviorHelper.parsePredicate(jsonObject, "predicate", "type");
+            MemoryModuleType<?> sourceMemory = BehaviorHelper.parseMemoryType(jsonObject, "sourceMemory");
+            MemoryModuleType<?> targetMemory = BehaviorHelper.parseMemoryType(jsonObject, "targetMemory");
+            UniformInt durationOfCopy = BehaviorHelper.parseUniformInt(jsonObject, "durationOfCopy");
+                return new CopyMemoryWithExpiry(predicate, sourceMemory, targetMemory, durationOfCopy);
+            });
+
+    public static final RegistryObject<BehaviorType<AptitudeStopHoldingItemIfNoLongerAdmiring>> STOP_HOLDING_ITEM_IF_NO_LONGER_ADMIRING = register("stop_holding_item_if_no_longer_admiring",
+            jsonObject -> {
+                Predicate<LivingEntity> shouldStopHoldingItem = (Predicate<LivingEntity>) BehaviorHelper.parsePredicate(jsonObject, "shouldStopHoldingItem", "type");
+                Consumer<LivingEntity> stopHoldingItem = (Consumer<LivingEntity>) BehaviorHelper.parseConsumer(jsonObject, "stopHoldingItem", "type");
+                return new AptitudeStopHoldingItemIfNoLongerAdmiring(shouldStopHoldingItem, stopHoldingItem);
+            });
+
+    public static final RegistryObject<BehaviorType<AptitudeStartAdmiringItemIfSeen>> START_ADMIRING_ITEM_IF_SEEN = register("start_admiring_item_if_seen",
+            jsonObject -> {
+                Ingredient lovedItems = Ingredient.fromJson(jsonObject.get("loved_items"));
+                int admireDuration = GsonHelper.getAsInt(jsonObject, "admireDuration", 0);
+                return new AptitudeStartAdmiringItemIfSeen(lovedItems, admireDuration);
+            });
+
+    public static final RegistryObject<BehaviorType<StartCelebratingIfTargetDead>> START_CELEBRATING_IF_TARGET_DEAD = register("start_celebrating_if_target_dead",
+            jsonObject -> {
+                int celebrateDuration = GsonHelper.getAsInt(jsonObject, "celebrateDuration");
+                BiPredicate<LivingEntity, LivingEntity> dancePredicate = (le, le1) -> true;
+                return new StartCelebratingIfTargetDead(celebrateDuration, dancePredicate);
+            });
+
+    public static final RegistryObject<BehaviorType<StopBeingAngryIfTargetDead<?>>> STOP_BEING_ANGRY_IF_TARGET_DEAD = register("stop_being_angry_if_target_dead",
+            jsonObject -> {
+                return new StopBeingAngryIfTargetDead<>();
+            });
 
     private static <U extends Behavior<?>> RegistryObject<BehaviorType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return BEHAVIOR_TYPES.register(name, () -> new BehaviorType<>(jsonFactory));

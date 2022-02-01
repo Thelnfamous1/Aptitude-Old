@@ -1,0 +1,81 @@
+{
+  "memory_types": [
+  ],
+  "sensor_types": [
+  ],
+  "core_activities": [
+    "minecraft:core"
+  ],
+  "default_activity": {
+    "type": "minecraft:idle",
+    "set_active": true
+  },
+  "rotating_activities": [
+    "minecraft:fight",
+    "minecraft:idle"
+  ],
+  "update_activity_callback": {
+    "type": "aptitude:update_activity",
+    "on_changed_callback": {
+      "type": "aptitude:play_activity_sound",
+      "play_first_valid": [
+        {
+          "predicate": {
+            "type": "aptitude:active_non_core_activity_check",
+            "activity": "minecraft:fight"
+          },
+          "sound_event": "minecraft:piglin_brute.angry"
+        }
+      ]
+    },
+    "additional_callbacks": [
+      {
+        "type": "aptitude:update_aggression_flag",
+        "predicate": {
+          "type": "aptitude:memory_status_check",
+          "addContext": {
+              "type": "minecraft:attack_target",
+              "status": "value_present"
+          }
+        }
+      }
+    ]
+  },
+  "activities_by_priority": [
+    {
+      "activity": "minecraft:core",
+      "priority_start": 0,
+      "behaviors": [
+        {
+            "type": "aptitude:look_at_target_sink",
+            "minDuration": 45,
+            "maxDuration": 90
+        },
+        {
+            "type": "aptitude:move_to_target_sink"
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:idle",
+      "priority_start": 10,
+      "behaviors": [
+      ]
+    },
+    {
+      "activity": "minecraft:fight",
+      "priority_start": 10,
+      "requirements": [
+        {
+          "type": "minecraft:attack_target",
+          "status": "value_present"
+        }
+      ],
+      "remove_when_stopped": [
+        "minecraft:attack_target"
+      ],
+      "behaviors": [
+      ]
+    }
+  ]
+}

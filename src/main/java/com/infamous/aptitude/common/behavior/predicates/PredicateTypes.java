@@ -39,6 +39,11 @@ public class PredicateTypes {
                 return livingEntity -> true;
             });
 
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ALWAYS_FALSE = register("always_false",
+            jsonObject -> {
+                return livingEntity -> false;
+            });
+
     public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> MEMORY_STATUS_CHECK = register("memory_status_check",
             jsonObject -> {
                 JsonElement addContextObj = jsonObject.get("addContext");
