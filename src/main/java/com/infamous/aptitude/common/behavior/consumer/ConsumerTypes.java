@@ -1,41 +1,28 @@
 package com.infamous.aptitude.common.behavior.consumer;
 
-import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
-import com.infamous.aptitude.common.behavior.functions.FunctionType;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.infamous.aptitude.mixin.LivingEntityAccessor;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.village.ReputationEventType;
-import net.minecraft.world.entity.animal.axolotl.Axolotl;
-import net.minecraft.world.entity.monster.hoglin.Hoglin;
-import net.minecraft.world.entity.monster.piglin.Piglin;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.*;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class ConsumerTypes {
@@ -53,77 +40,94 @@ public class ConsumerTypes {
                 return livingEntity -> {};
             });
 
-    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> HOGLINLIKE_UPDATE = register("hoglinlike_update",
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> UPDATE_AGGRESSION_FLAG = register("update_aggression_flag",
             jsonObject -> {
+                Predicate<LivingEntity> predicate = (Predicate<LivingEntity>) BehaviorHelper.parsePredicate(jsonObject, "predicate", "type");
                 return livingEntity -> {
-                    ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(livingEntity.getType());
-                    List<Activity> rotatingActivities = Aptitude.brainManager.getRotatingActivities(etLocation);
-
-                    Brain<?> brain = livingEntity.getBrain();
-                    Activity prevActivity = brain.getActiveNonCoreActivity().orElse((Activity)null);
-                    brain.setActiveActivityToFirstValid(rotatingActivities);
-                    Activity currActivity = brain.getActiveNonCoreActivity().orElse((Activity)null);
-
-                    // ACTIVITY SOUND
-                    if (prevActivity != currActivity) {
-                        livingEntity.getBrain().getActiveNonCoreActivity().map((activity) -> {
-                            if(activity == Activity.AVOID){
-                                return SoundEvents.HOGLIN_RETREAT;
-                            } else if (activity == Activity.FIGHT) {
-                                return SoundEvents.HOGLIN_ANGRY;
-                            } else if(livingEntity.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_REPELLENT)){
-                                return SoundEvents.HOGLIN_RETREAT;
-                            } else{
-                                return SoundEvents.HOGLIN_AMBIENT;
-                            }
-                        }).ifPresent(soundEvent -> livingEntity.playSound(soundEvent, ((LivingEntityAccessor)livingEntity).callGetSoundVolume(), livingEntity.getVoicePitch()));
-                    }
-
-                    // AGGRESSION
                     if(livingEntity instanceof Mob mob){
-                        mob.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
+                        mob.setAggressive(predicate.test(mob));
                     }
                 };
-    });
+            });
 
-    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> PIGLINLIKE_UPDATE = register("piglinlike_update",
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> SET_BOOLEAN_MEMORY = register("set_boolean_memory",
             jsonObject -> {
+                MemoryModuleType<Boolean> memoryType = (MemoryModuleType<Boolean>) BehaviorHelper.parseMemoryType(jsonObject, "memory");
+                boolean value = GsonHelper.getAsBoolean(jsonObject, "value");
+                Long expireTime = GsonHelper.getAsLong(jsonObject, "expire_time", Long.MAX_VALUE);
+
                 return livingEntity -> {
-                    ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(livingEntity.getType());
-                    List<Activity> rotatingActivities = Aptitude.brainManager.getRotatingActivities(etLocation);
+                    livingEntity.getBrain().setMemoryWithExpiry(memoryType, value, expireTime);
+                };
+            });
 
-                    Brain<?> brain = livingEntity.getBrain();
-                    Activity prevActivity = brain.getActiveNonCoreActivity().orElse((Activity)null);
-                    brain.setActiveActivityToFirstValid(rotatingActivities);
-                    Activity currActivity = brain.getActiveNonCoreActivity().orElse((Activity)null);
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> PLAY_ACTIVITY_SOUND = register("play_activity_sound",
+            jsonObject -> {
+                JsonArray playFirstValidArr = GsonHelper.getAsJsonArray(jsonObject, "play_first_valid");
+                Map<Predicate<LivingEntity>, SoundEvent> predicateToSoundMap = new LinkedHashMap<>();
+                playFirstValidArr.forEach(jsonElement -> {
+                    JsonObject elementObj = jsonElement.getAsJsonObject();
+                    Predicate<LivingEntity> predicate = (Predicate<LivingEntity>) BehaviorHelper.parsePredicate(elementObj, "predicate", "type");
+                    SoundEvent soundEvent = BehaviorHelper.parseSoundEventString(elementObj, "sound_event");
+                    predicateToSoundMap.put(predicate, soundEvent);
+                });
 
-                    // ACTIVITY SOUND
-                    if (prevActivity != currActivity) {
-                        livingEntity.getBrain().getActiveNonCoreActivity().map((activity) -> {
-                            boolean nearAvoidTarget = brain.hasMemoryValue(MemoryModuleType.AVOID_TARGET) && brain.getMemory(MemoryModuleType.AVOID_TARGET).get().closerThan(livingEntity, 12.0D);
-                            if (activity == Activity.FIGHT) {
-                                return SoundEvents.PIGLIN_ANGRY;
-                            } else if (activity == Activity.AVOID && nearAvoidTarget) {
-                                return SoundEvents.PIGLIN_RETREAT;
-                            } else if (activity == Activity.ADMIRE_ITEM) {
-                                return SoundEvents.PIGLIN_ADMIRING_ITEM;
-                            } else if (activity == Activity.CELEBRATE) {
-                                return SoundEvents.PIGLIN_CELEBRATE;
-                            } else if (livingEntity.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_PLAYER_HOLDING_WANTED_ITEM)) {
-                                return SoundEvents.PIGLIN_JEALOUS;
-                            } else if(livingEntity.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_REPELLENT)){
-                                return SoundEvents.PIGLIN_RETREAT;
-                            } else{
-                                return SoundEvents.PIGLIN_AMBIENT;
+                return livingEntity -> {
+                    for(Map.Entry<Predicate<LivingEntity>, SoundEvent> entry : predicateToSoundMap.entrySet()){
+                        if(entry.getKey().test(livingEntity)){
+                            livingEntity.playSound(entry.getValue(), ((LivingEntityAccessor)livingEntity).callGetSoundVolume(), livingEntity.getVoicePitch());
+                            break;
+                        }
+                    }
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> UPDATE_ACTIVITY = register("update_activity",
+            jsonObject -> {
+                Predicate<LivingEntity> updatePredicate = jsonObject.has("update_predicate") ?
+                        (Predicate<LivingEntity>) BehaviorHelper.parsePredicate(jsonObject, "update_predicate", "type") :
+                        le -> true;
+
+                Consumer<LivingEntity> onChanged = jsonObject.has("on_changed_callback") ?
+                        (Consumer<LivingEntity>) BehaviorHelper.parseConsumer(jsonObject, "on_changed_callback", "type") :
+                        le -> {};
+
+                List<Consumer<LivingEntity>> additionalCallbacks = new ArrayList<>();
+                if(jsonObject.has("additional_callbacks")){
+                    JsonArray additionalCallbacksArr = GsonHelper.getAsJsonArray(jsonObject, "additional_callbacks");
+                    additionalCallbacksArr.forEach(jsonElement -> {
+                        JsonObject elementObj = jsonElement.getAsJsonObject();
+                        Consumer<LivingEntity> consumer = (Consumer<LivingEntity>) BehaviorHelper.parseConsumer(elementObj, "type");
+                        additionalCallbacks.add(consumer);
+                    });
+                }
+
+                return livingEntity -> {
+                    if(updatePredicate.test(livingEntity)){
+                        ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(livingEntity.getType());
+                        List<Activity> rotatingActivities = Aptitude.brainManager.getRotatingActivities(etLocation);
+
+                        Brain<?> brain = livingEntity.getBrain();
+                        Activity prevActivity = brain.getActiveNonCoreActivity().orElse((Activity)null);
+                        brain.setActiveActivityToFirstValid(rotatingActivities);
+                        Activity currActivity = brain.getActiveNonCoreActivity().orElse((Activity)null);
+
+                        // ON CHANGED
+                        if (prevActivity != currActivity) {
+                            onChanged.accept(livingEntity);
+
+                            /*
+                            if (prevActivity == Activity.FIGHT && currActivity != Activity.FIGHT) {
+                                brain.setMemoryWithExpiry(MemoryModuleType.HAS_HUNTING_COOLDOWN, true, 2400L);
                             }
-                        }).ifPresent(soundEvent -> livingEntity.playSound(soundEvent, ((LivingEntityAccessor)livingEntity).callGetSoundVolume(), livingEntity.getVoicePitch()));
+                             */
+                        }
                     }
 
-                    // AGGRESSION
-                    if(livingEntity instanceof Mob mob){
-                        mob.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
-                    }
+                    // ADDITIONAL CALLBACKS
+                    additionalCallbacks.forEach(consumer -> consumer.accept(livingEntity));
 
+                    /*
                     // RIDING
                     boolean babyRidingBaby = livingEntity.isBaby() && livingEntity.getVehicle() instanceof LivingEntity mount && mount.isBaby();
                     if (!brain.hasMemoryValue(MemoryModuleType.RIDE_TARGET) && babyRidingBaby) {
@@ -135,117 +139,9 @@ public class ConsumerTypes {
                         brain.eraseMemory(MemoryModuleType.DANCING);
                     }
                     //livingEntity.setDancing(brain.hasMemoryValue(MemoryModuleType.DANCING));
-                };
-            });
-
-    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> AXOLOTLLIKE_UPDATE = register("axolotllike_update",
-            jsonObject -> {
-                return livingEntity -> {
-                    ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(livingEntity.getType());
-                    List<Activity> rotatingActivities = Aptitude.brainManager.getRotatingActivities(etLocation);
-
-                    Brain<?> brain = livingEntity.getBrain();
-                    Activity prevActivity = brain.getActiveNonCoreActivity().orElse((Activity)null);
-                    if (prevActivity != Activity.PLAY_DEAD) {
-                        brain.setActiveActivityToFirstValid(rotatingActivities);
-                        Activity currActivity = brain.getActiveNonCoreActivity().orElse((Activity) null);
-                        if (prevActivity == Activity.FIGHT && currActivity != Activity.FIGHT) {
-                            brain.setMemoryWithExpiry(MemoryModuleType.HAS_HUNTING_COOLDOWN, true, 2400L);
-                        }
-                    }
-                };
-            });
-
-    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> GOATLIKE_UPDATE = register("goatlike_update",
-            jsonObject -> {
-                return livingEntity -> {
-                    ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(livingEntity.getType());
-                    List<Activity> rotatingActivities = Aptitude.brainManager.getRotatingActivities(etLocation);
-
-                    livingEntity.getBrain().setActiveActivityToFirstValid(rotatingActivities);
-
-                };
-            });
-
-    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ZOGLINLIKE_UPDATE = register("zoglinlike_update",
-            jsonObject -> {
-                return livingEntity -> {
-                    JsonObject soundEventObj = GsonHelper.getAsJsonObject(jsonObject, "fight_sound");
-                    SoundEvent fightSound = BehaviorHelper.parseSoundEventString(soundEventObj, "type");
-                    float volume = GsonHelper.getAsFloat(soundEventObj, "volume", ((LivingEntityAccessor)livingEntity).callGetSoundVolume());
-                    float pitch = GsonHelper.getAsFloat(soundEventObj, "pitch", livingEntity.getVoicePitch());
-
-                    ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(livingEntity.getType());
-                    List<Activity> rotatingActivities = Aptitude.brainManager.getRotatingActivities(etLocation);
-
-                    Brain<?> brain = livingEntity.getBrain();
-                    Activity prevActivity = brain.getActiveNonCoreActivity().orElse((Activity)null);
-                    brain.setActiveActivityToFirstValid(rotatingActivities);
-                    Activity currActivity = brain.getActiveNonCoreActivity().orElse((Activity)null);
-
-                    // ACTIVITY SOUND
-                    if(prevActivity != currActivity){
-                        livingEntity.getBrain().getActiveNonCoreActivity().map((activity) -> {
-                            if(activity == Activity.FIGHT){
-                                return fightSound;
-                            } else{
-                                return null;
-                            }
-                        }).ifPresent(soundEvent -> livingEntity.playSound(soundEvent, volume, pitch));
-                    }
-
-                    // AGGRESSION
-                    if(livingEntity instanceof Mob mob){
-                        mob.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
-                    }
-
-                };
-            });
-
-    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> VILLAGERLIKE_UPDATE = register("villagerlike_update",
-            jsonObject -> {
-                return livingEntity -> {
-                    /*
-                    if (livingEntity.assignProfessionWhenSpawned) {
-                        livingEntity.assignProfessionWhenSpawned = false;
-                    }
-
-                    if (!livingEntity.isTrading() && livingEntity.updateMerchantTimer > 0) {
-                        --livingEntity.updateMerchantTimer;
-                        if (livingEntity.updateMerchantTimer <= 0) {
-                            if (livingEntity.increaseProfessionLevelOnUpdate) {
-                                livingEntity.increaseMerchantCareer();
-                                livingEntity.increaseProfessionLevelOnUpdate = false;
-                            }
-
-                            livingEntity.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 200, 0));
-                        }
-                    }
-                     */
-
-                    Level level = livingEntity.level;
-                    /*
-                    if (livingEntity.lastTradedPlayer != null && level instanceof ServerLevel) {
-                        ((ServerLevel) level).onReputationEvent(ReputationEventType.TRADE, livingEntity.lastTradedPlayer, livingEntity);
-                        level.broadcastEntityEvent(livingEntity, (byte)14); // ParticleTypes.HAPPY_VILLAGER
-                        livingEntity.lastTradedPlayer = null;
-                    }
-                     */
-
-                    if (livingEntity instanceof Mob mob && !mob.isNoAi() && livingEntity.getRandom().nextInt(100) == 0) {
-                        Raid raid = ((ServerLevel) level).getRaidAt(livingEntity.blockPosition());
-                        if (raid != null && raid.isActive() && !raid.isOver()) {
-                            level.broadcastEntityEvent(livingEntity, (byte)42); // ParticleTypes.SPLASH
-                        }
-                    }
-
-                    /*
-                    if (livingEntity.getVillagerData().getProfession() == VillagerProfession.NONE && livingEntity.isTrading()) {
-                        livingEntity.stopTrading();
-                    }
                      */
                 };
-            });
+    });
 
     private static <U extends Consumer<?>> RegistryObject<ConsumerType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return CONSUMER_TYPES.register(name, () -> new ConsumerType<>(jsonFactory));
@@ -255,9 +151,9 @@ public class ConsumerTypes {
         CONSUMER_TYPES.register(bus);
     }
 
-    public static ConsumerType<?> getConsumerType(ResourceLocation ftLocation) {
-        ConsumerType<?> value = CONSUMER_TYPE_REGISTRY.get().getValue(ftLocation);
-        Aptitude.LOGGER.info("Attempting to get consumer type {}, got {}", ftLocation, value.getRegistryName());
+    public static ConsumerType<?> getConsumerType(ResourceLocation ctLocation) {
+        ConsumerType<?> value = CONSUMER_TYPE_REGISTRY.get().getValue(ctLocation);
+        Aptitude.LOGGER.info("Attempting to get consumer type {}, got {}", ctLocation, value.getRegistryName());
         return value;
     }
 }

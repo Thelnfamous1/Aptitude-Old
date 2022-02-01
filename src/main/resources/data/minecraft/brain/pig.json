@@ -39,10 +39,54 @@
     "minecraft:idle"
   ],
   "update_activity_callback": {
-    "type": "aptitude:hoglinlike_update",
-    "additional": [
+    "type": "aptitude:update_activity",
+    "on_changed_callback": {
+      "type": "aptitude:play_activity_sound",
+      "play_first_valid": [
+        {
+          "predicate": {
+            "type": "aptitude:active_non_core_activity_check",
+            "activity": "minecraft:avoid"
+          },
+          "sound_event": "minecraft:entity.hoglin.retreat"
+        },
+        {
+          "predicate": {
+            "type": "aptitude:active_non_core_activity_check",
+            "activity": "minecraft:fight"
+          },
+          "sound_event": "minecraft:entity.hoglin.angry"
+        },
+        {
+          "predicate": {
+            "type": "aptitude:memory_status_check",
+            "addContext": [
+              {
+                "type": "minecraft:nearest_repellent",
+                "status": "value_present"
+              }
+            ]
+          },
+          "sound_event": "minecraft:entity.hoglin.retreat"
+        },
+        {
+          "predicate": {
+            "type": "aptitude:always_true"
+          },
+          "sound_event": "minecraft:entity.hoglin.ambient"
+        }
+      ]
+    },
+    "additional_callbacks": [
       {
-        "type": "aptitude:update_aggression"
+        "type": "aptitude:update_aggression_flag",
+        "predicate": {
+          "type": "aptitude:memory_status_check",
+          "addContext": {
+              "type": "minecraft:attack_target",
+              "status": "value_present"
+          }
+        }
       }
     ]
   },
@@ -89,7 +133,7 @@
         {
             "type": "aptitude:start_attacking",
             "canAttackPredicate": {
-              "type": "aptitude:memory_status_checks",
+              "type": "aptitude:memory_status_check",
               "addContext": [
                 {
                   "type": "minecraft:breed_target",
@@ -221,7 +265,7 @@
         {
             "type": "aptitude:erase_memory_if",
             "predicate": {
-              "type": "aptitude:memory_status_checks",
+              "type": "aptitude:memory_status_check",
               "addContext": {
                 "type": "minecraft:breed_target",
                 "status": "value_present"

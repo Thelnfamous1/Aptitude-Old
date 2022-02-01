@@ -205,6 +205,11 @@ public class BehaviorHelper {
         return activity;
     }
 
+    public static Consumer<?> parseConsumer(JsonObject jsonObject, String memberName, String typeMemberName){
+        JsonObject consumerObj = GsonHelper.getAsJsonObject(jsonObject, memberName);
+        return parseConsumer(consumerObj, typeMemberName);
+    }
+
     public static Consumer<?> parseConsumer(JsonObject jsonObject, String typeMemberName){
         ConsumerType<?> consumerType = parseConsumerType(jsonObject, typeMemberName);
         return consumerType.fromJson(jsonObject);

@@ -11,6 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -38,7 +39,7 @@ public class PredicateTypes {
                 return livingEntity -> true;
             });
 
-    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> MEMORY_STATUS_CHECKS = register("memory_status_checks",
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> MEMORY_STATUS_CHECK = register("memory_status_check",
             jsonObject -> {
                 JsonElement addContextObj = jsonObject.get("addContext");
                 Map<MemoryModuleType<?>, MemoryStatus> memoriesToStatus = BehaviorHelper.parseMemoriesToStatus(addContextObj);
@@ -51,8 +52,18 @@ public class PredicateTypes {
                     }
                     return true;
                 };
-            }
-            );
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ACTIVE_NON_CORE_ACTIVITY_CHECK = register("active_non_core_activity_check",
+            jsonObject -> {
+                Activity activity = BehaviorHelper.parseActivity(jsonObject, "activity");
+                return le -> {
+                    return le.getBrain()
+                            .getActiveNonCoreActivity()
+                            .map(activeNonCoreActivity -> activity == activeNonCoreActivity)
+                            .isPresent();
+                };
+            });
 
     public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> OUTNUMBERED_ADULT = register("outnumbered_adult",
             jsonObject -> {
