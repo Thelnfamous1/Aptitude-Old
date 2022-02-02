@@ -1,29 +1,33 @@
 package com.infamous.aptitude.common.behavior.functions;
 
-import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
+import net.minecraft.advancements.critereon.EntityTypePredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.monster.piglin.Piglin;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class FunctionTypes {
@@ -41,67 +45,63 @@ public class FunctionTypes {
                 return livingEntity -> livingEntity;
             });
 
-    public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<? extends LivingEntity>>>> RETRIEVE_TARGET_FROM_MEMORY = register("retrieve_target_from_memory",
-            jsonObject -> {
-                return le -> {
-                    Brain<?> brain = le.getBrain();
-                    JsonObject addContextObj = GsonHelper.getAsJsonObject(jsonObject, "addContext");
-                    MemoryModuleType<?> memoryType = BehaviorHelper.parseMemoryType(addContextObj, "type");
-                    if(brain.hasMemoryValue(memoryType)){
-                        return brain.getMemory(memoryType).map(LivingEntity.class::cast);
-                    } else{
-                        return Optional.empty();
-                    }
-                };
-            });
-
     public static final RegistryObject<FunctionType<Function<? extends Entity, Vec3>>> ENTITY_POSITION_VECTOR = register("entity_position_vector",
             jsonObject -> {
-                return e -> {
-                    return e.position();
-                };
+                return e -> e.position();
             });
 
     public static final RegistryObject<FunctionType<Function<BlockPos, Vec3>>> BLOCK_POSITION_VECTOR = register("block_position_vector",
             jsonObject -> {
-                return blockPos -> {
-                    return Vec3.atBottomCenterOf(blockPos);
-                };
+                return blockPos -> Vec3.atBottomCenterOf(blockPos);
             });
 
-
-
-    public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<? extends LivingEntity>>>> RETRIEVE_TARGET_FROM_MEMORY_CHECK_IGNORED = register("retrieve_target_from_memory_check_ignored",
+    public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<? extends LivingEntity>>>> RETRIEVE_ENTITY_FROM_MEMORY = register("retrieve_entity_from_memory",
             jsonObject -> {
+                JsonObject addContextObj = GsonHelper.getAsJsonObject(jsonObject, "addContext");
+                MemoryModuleType<? extends LivingEntity> memoryType = BehaviorHelper.parseMemoryType(addContextObj, "type");
+                Predicate<LivingEntity> filterPredicate = addContextObj.has("filter_predicate") ?
+                        BehaviorHelper.parsePredicate(addContextObj, "filter_predicate", "type") :
+                        le -> true;
+
                 return le -> {
                     Brain<?> brain = le.getBrain();
-                    JsonObject addContextObj = GsonHelper.getAsJsonObject(jsonObject, "addContext");
-                    MemoryModuleType<?> memoryType = BehaviorHelper.parseMemoryType(addContextObj, "type");
+                    return brain.getMemory(memoryType).filter(filterPredicate);
 
-                    Set<EntityType<?>> ignoredTypes = new HashSet<>();
-                    if(addContextObj.has("ignored_types")){
-                        if(addContextObj.get("ignored_types").isJsonArray()){
-                            JsonArray ignoredTypesArr = GsonHelper.getAsJsonArray(addContextObj, "ignored_types");
-                            ignoredTypesArr.forEach(jsonElement -> {
-                                if(jsonElement.isJsonObject()){
-                                    JsonObject elementObj = jsonElement.getAsJsonObject();
-                                    Tags.IOptionalNamedTag<EntityType<?>> tag = BehaviorHelper.parseEntityTypeTag(elementObj, "tag");
-                                    ignoredTypes.addAll(tag.getValues());
-                                } else{
-                                    EntityType<?> entityType = BehaviorHelper.parseEntityType(jsonElement);
-                                    ignoredTypes.add(entityType);
-                                }
-                            });
-                        }
-                    }
 
-                    if(brain.hasMemoryValue(memoryType)){
-                        return brain.getMemory(memoryType).map(LivingEntity.class::cast).filter(target -> !ignoredTypes.contains(target.getType()));
-                    } else{
-                        return Optional.empty();
-                    }
                 };
             });
+
+    public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<? extends LivingEntity>>>> RETRIEVE_ENTITY_FROM_UUID_MEMORY = register("retrieve_entity_from_uuid_memory",
+            jsonObject -> {
+                JsonObject addContextObj = GsonHelper.getAsJsonObject(jsonObject, "addContext");
+                MemoryModuleType<UUID> memoryType = BehaviorHelper.parseMemoryType(addContextObj, "type");
+                Predicate<LivingEntity> filterPredicate = addContextObj.has("filter_predicate") ?
+                        BehaviorHelper.parsePredicate(addContextObj, "filter_predicate", "type") :
+                        le -> true;
+
+                return le -> BehaviorUtils.getLivingEntityFromUUIDMemory(le, memoryType).filter(filterPredicate);
+            });
+
+    public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<? extends LivingEntity>>>> RETRIEVE_CLOSEST_VISIBLE_ENTITY = register("retrieve_closest_visible_entity",
+            jsonObject -> {
+                JsonObject addContextObj = GsonHelper.getAsJsonObject(jsonObject, "addContext");
+                MemoryModuleType<NearestVisibleLivingEntities> memoryType = BehaviorHelper.parseMemoryType(addContextObj, "type");
+                Predicate<LivingEntity> filterPredicate = addContextObj.has("filter_predicate") ?
+                        BehaviorHelper.parsePredicate(addContextObj, "filter_predicate", "type") :
+                        le -> true;
+
+                return le -> {
+                    Brain<?> brain = le.getBrain();
+                    return brain.getMemory(memoryType).orElse(NearestVisibleLivingEntities.empty()).findClosest(filterPredicate);
+                };
+            });
+
+    public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<? extends LivingEntity>>>> RETRIEVE_FIRST_VALID_ENTITY = register("retrieve_first_valid_entity",
+            jsonObject -> {
+
+            });
+
+
 
     private static <U extends Function<?, ?>> RegistryObject<FunctionType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return FUNCTION_TYPES.register(name, () -> new FunctionType<>(jsonFactory));

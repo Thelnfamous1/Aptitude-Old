@@ -25,6 +25,7 @@ import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.*;
 
 public class BehaviorTypes {
@@ -79,14 +80,15 @@ public class BehaviorTypes {
         float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
         int desiredDistance = GsonHelper.getAsInt(jsonObject, "desiredDistance", 0);
         boolean ignoreWalkTarget = GsonHelper.getAsBoolean(jsonObject, "ignoreWalkTarget", true);
-        Function<?, ?> toPosition = BehaviorHelper.parseFunction(jsonObject, "toPosition", "type");
-        Function<?, Vec3> toPositionCast = (Function<?, Vec3>) toPosition;
-        return new SetWalkTargetAwayFrom(walkAwayFromMemory, speedModifier, desiredDistance, ignoreWalkTarget, toPositionCast);
+        Function<?, Vec3> toPosition = BehaviorHelper.parseFunction(jsonObject, "toPosition", "type");
+        return new SetWalkTargetAwayFrom(walkAwayFromMemory, speedModifier, desiredDistance, ignoreWalkTarget, toPosition);
     }));
 
     public static final RegistryObject<BehaviorType<StartAttacking<?>>> START_ATTACKING = register("start_attacking", (jsonObject) -> {
-        Predicate<?> canAttackPredicate = BehaviorHelper.parsePredicate(jsonObject, "canAttackPredicate", "type");
-        Function<?, ?> targetFinderFunction = BehaviorHelper.parseFunction(jsonObject, "targetFinderFunction", "type");
+        Predicate<LivingEntity> canAttackPredicate = jsonObject.has("canAttackPredicate") ?
+                BehaviorHelper.parsePredicate(jsonObject, "canAttackPredicate", "type") :
+                le -> true;
+        Function<LivingEntity, Optional<? extends LivingEntity>> targetFinderFunction = BehaviorHelper.parseFunction(jsonObject, "targetFinderFunction", "type");
 
         return new StartAttacking(canAttackPredicate, targetFinderFunction);
     });
@@ -107,8 +109,11 @@ public class BehaviorTypes {
     });
 
     public static final RegistryObject<BehaviorType<SetEntityLookTarget>> SET_ENTITY_LOOK_TARGET = register("set_entity_look_target", (jsonObject) -> {
+        Predicate<LivingEntity> predicate = jsonObject.has("predicate") ?
+                BehaviorHelper.parsePredicate(jsonObject, "predicate", "type") :
+                le -> true;
         float maxDistSqr = GsonHelper.getAsFloat(jsonObject, "maxDistSqr", 0);
-        return new SetEntityLookTarget(maxDistSqr);
+        return new SetEntityLookTarget(predicate, maxDistSqr);
     });
 
     public static final RegistryObject<BehaviorType<BabyFollowAdult<?>>> BABY_FOLLOW_ADULT = register("baby_follow_adult", (jsonObject) -> {
@@ -150,10 +155,10 @@ public class BehaviorTypes {
 
     public static final RegistryObject<BehaviorType<StopAttackingIfTargetInvalid<?>>> STOP_ATTACKING_IF_TARGET_INVALID = register("stop_attacking_if_target_invalid", (jsonObject) -> {
         Predicate<LivingEntity> stopAttackingWhen = jsonObject.has("stopAttackingWhen") ?
-                (Predicate<LivingEntity>) BehaviorHelper.parsePredicate(jsonObject, "stopAttackingWhen", "type") :
+                BehaviorHelper.parsePredicate(jsonObject, "stopAttackingWhen", "type") :
                 le -> false;
         Consumer<LivingEntity> onTargetErased = jsonObject.has("onTargetErased") ?
-                (Consumer<LivingEntity>) BehaviorHelper.parseConsumer(jsonObject, "onTargetErased", "type") :
+                BehaviorHelper.parseConsumer(jsonObject, "onTargetErased", "type") :
                 le -> {};
 
         return new StopAttackingIfTargetInvalid(stopAttackingWhen, onTargetErased);
@@ -189,8 +194,8 @@ public class BehaviorTypes {
 
     public static final RegistryObject<BehaviorType<AptitudeStopHoldingItemIfNoLongerAdmiring>> STOP_HOLDING_ITEM_IF_NO_LONGER_ADMIRING = register("stop_holding_item_if_no_longer_admiring",
             jsonObject -> {
-                Predicate<LivingEntity> shouldStopHoldingItem = (Predicate<LivingEntity>) BehaviorHelper.parsePredicate(jsonObject, "shouldStopHoldingItem", "type");
-                Consumer<LivingEntity> stopHoldingItem = (Consumer<LivingEntity>) BehaviorHelper.parseConsumer(jsonObject, "stopHoldingItem", "type");
+                Predicate<LivingEntity> shouldStopHoldingItem = BehaviorHelper.parsePredicate(jsonObject, "shouldStopHoldingItem", "type");
+                Consumer<LivingEntity> stopHoldingItem = BehaviorHelper.parseConsumer(jsonObject, "stopHoldingItem", "type");
                 return new AptitudeStopHoldingItemIfNoLongerAdmiring(shouldStopHoldingItem, stopHoldingItem);
             });
 

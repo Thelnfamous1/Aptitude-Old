@@ -215,6 +215,35 @@
       "activity": "minecraft:idle",
       "priority_start": 10,
       "behaviors": [
+        {
+          "type": "aptitude:set_entity_look_target",
+          "predicate": {
+            "type": "aptitude:all_of_predicate",
+            "predicates": [
+              {
+                "type": "aptitude:entity_is_type",
+                "entity_type_predicate": "minecraft:player"
+              },
+              {
+                "type": "aptitude:entity_is_holding",
+                "is_holding": "#minecraft:piglin_loved"
+              }
+            ]
+          },
+          "maxDistSq": 14.0
+        },
+        {
+          "type": "aptitude:start_attacking",
+          "canAttackPredicate": {
+            "type": "aptitude:is_adult"
+          },
+          "targetFinderFunction": {
+            "type": "aptitude:retrieve_first_valid_entity",
+            "addContext": {
+              "type": "minecraft:nearest_visible_targetable_player"
+            }
+          }
+        }
       ]
     },
     {

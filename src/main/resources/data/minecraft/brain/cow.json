@@ -1,0 +1,169 @@
+{
+  "memory_types": [
+    "minecraft:mobs",
+    "minecraft:visible_mobs",
+    "minecraft:nearest_visible_player",
+    "minecraft:nearest_visible_targetable_player",
+    "minecraft:look_target",
+    "minecraft:walk_target",
+    "minecraft:cant_reach_walk_target_since",
+    "minecraft:path",
+    "minecraft:attack_target",
+    "minecraft:attack_cooling_down"
+  ],
+  "sensor_types": [
+    "minecraft:nearest_living_entities",
+    "minecraft:nearest_players"
+  ],
+  "core_activities": [
+    "minecraft:core"
+  ],
+  "default_activity": {
+    "type": "minecraft:idle",
+    "set_active": true
+  },
+  "rotating_activities": [
+    "minecraft:fight",
+    "minecraft:idle"
+  ],
+  "update_activity_callback": {
+    "type": "aptitude:update_activity",
+    "on_changed_callback": {
+      "type": "aptitude:nothing"
+    },
+    "additional_callbacks": [
+      {
+        "type": "aptitude:update_aggression_flag",
+        "predicate": {
+          "type": "aptitude:memory_status_check",
+          "addContext": {
+            "type": "minecraft:attack_target",
+            "status": "value_present"
+          }
+        }
+      }
+    ]
+  },
+  "activities_by_priority": [
+    {
+      "activity": "minecraft:core",
+      "priority_start": 0,
+      "behaviors": [
+        {
+            "type": "aptitude:look_at_target_sink",
+            "minDuration": 45,
+            "maxDuration": 90
+        },
+        {
+            "type": "aptitude:move_to_target_sink"
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:idle",
+      "priority_start": 10,
+      "behaviors": [
+        {
+          "type": "aptitude:start_attacking",
+          "targetFinderFunction": {
+            "type": "aptitude:retrieve_closest_visible_entity",
+            "addContext": {
+              "type": "minecraft:visible_mobs",
+              "filterPredicate": {
+                "type": "aptitude:negate_predicate",
+                "predicate": {
+                  "type": "aptitude:any_of_predicate",
+                  "predicates": [
+                    {
+                      "type": "aptitude:entity_is_type",
+                      "entity_type_predicate": "minecraft:creeper"
+                    },
+                    {
+                      "type": "aptitude:entity_is_type",
+                      "entity_type_predicate": "minecraft:zoglin"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "aptitude:run_sometimes",
+          "interval": {
+            "minInclusive": 30,
+            "maxInclusive": 60
+          },
+          "wrappedBehavior": {
+            "type": "aptitude:set_entity_look_target",
+            "maxDistSqr": 8.0
+          }
+        },
+        {
+          "type": "aptitude:run_one",
+          "behaviors": [
+            {
+              "weight": 2,
+              "type": "aptitude:random_stroll",
+              "speedModifier": 0.4
+            },
+            {
+              "weight": 2,
+              "type": "aptitude:set_walk_target_from_look_target",
+              "speedModifier": 0.4,
+              "closeEnoughDistance": 3
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:do_nothing",
+              "minDuration": 30,
+              "maxDuration": 60
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:fight",
+      "priority_start": 10,
+      "requirements": [
+        {
+          "type": "minecraft:attack_target",
+          "status": "value_present"
+        }
+      ],
+      "remove_when_stopped": [
+        "minecraft:attack_target"
+      ],
+      "behaviors": [
+        {
+          "type": "aptitude:set_walk_target_from_attack_target_if_target_out_of_reach",
+          "speedModifier": 1.0
+        },
+        {
+          "type": "aptitude:run_if",
+          "predicate": {
+            "type": "aptitude:is_adult"
+          },
+          "wrappedBehavior": {
+            "type": "aptitude:melee_attack",
+            "cooldownBetweenAttacks": 40
+          }
+        },
+        {
+          "type": "aptitude:run_if",
+          "predicate": {
+            "type": "aptitude:is_baby"
+          },
+          "wrappedBehavior": {
+            "type": "aptitude:melee_attack",
+            "cooldownBetweenAttacks": 15
+          }
+        },
+        {
+          "type": "aptitude:stop_attacking_if_target_invalid"
+        }
+      ]
+    }
+  ]
+}

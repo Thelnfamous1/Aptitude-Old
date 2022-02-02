@@ -42,7 +42,7 @@ public class ConsumerTypes {
 
     public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> UPDATE_AGGRESSION_FLAG = register("update_aggression_flag",
             jsonObject -> {
-                Predicate<LivingEntity> predicate = (Predicate<LivingEntity>) BehaviorHelper.parsePredicate(jsonObject, "predicate", "type");
+                Predicate<LivingEntity> predicate = BehaviorHelper.parsePredicate(jsonObject, "predicate", "type");
                 return livingEntity -> {
                     if(livingEntity instanceof Mob mob){
                         mob.setAggressive(predicate.test(mob));
@@ -52,7 +52,7 @@ public class ConsumerTypes {
 
     public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> SET_BOOLEAN_MEMORY = register("set_boolean_memory",
             jsonObject -> {
-                MemoryModuleType<Boolean> memoryType = (MemoryModuleType<Boolean>) BehaviorHelper.parseMemoryType(jsonObject, "memory");
+                MemoryModuleType<Boolean> memoryType = BehaviorHelper.parseMemoryType(jsonObject, "memory");
                 boolean value = GsonHelper.getAsBoolean(jsonObject, "value");
                 Long expireTime = GsonHelper.getAsLong(jsonObject, "expire_time", Long.MAX_VALUE);
 
@@ -67,7 +67,7 @@ public class ConsumerTypes {
                 Map<Predicate<LivingEntity>, SoundEvent> predicateToSoundMap = new LinkedHashMap<>();
                 playFirstValidArr.forEach(jsonElement -> {
                     JsonObject elementObj = jsonElement.getAsJsonObject();
-                    Predicate<LivingEntity> predicate = (Predicate<LivingEntity>) BehaviorHelper.parsePredicate(elementObj, "predicate", "type");
+                    Predicate<LivingEntity> predicate = BehaviorHelper.parsePredicate(elementObj, "predicate", "type");
                     SoundEvent soundEvent = BehaviorHelper.parseSoundEventString(elementObj, "sound_event");
                     predicateToSoundMap.put(predicate, soundEvent);
                 });
@@ -85,11 +85,11 @@ public class ConsumerTypes {
     public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> UPDATE_ACTIVITY = register("update_activity",
             jsonObject -> {
                 Predicate<LivingEntity> updatePredicate = jsonObject.has("update_predicate") ?
-                        (Predicate<LivingEntity>) BehaviorHelper.parsePredicate(jsonObject, "update_predicate", "type") :
+                        BehaviorHelper.parsePredicate(jsonObject, "update_predicate", "type") :
                         le -> true;
 
                 Consumer<LivingEntity> onChanged = jsonObject.has("on_changed_callback") ?
-                        (Consumer<LivingEntity>) BehaviorHelper.parseConsumer(jsonObject, "on_changed_callback", "type") :
+                        BehaviorHelper.parseConsumer(jsonObject, "on_changed_callback", "type") :
                         le -> {};
 
                 List<Consumer<LivingEntity>> additionalCallbacks = new ArrayList<>();
@@ -97,7 +97,7 @@ public class ConsumerTypes {
                     JsonArray additionalCallbacksArr = GsonHelper.getAsJsonArray(jsonObject, "additional_callbacks");
                     additionalCallbacksArr.forEach(jsonElement -> {
                         JsonObject elementObj = jsonElement.getAsJsonObject();
-                        Consumer<LivingEntity> consumer = (Consumer<LivingEntity>) BehaviorHelper.parseConsumer(elementObj, "type");
+                        Consumer<LivingEntity> consumer = BehaviorHelper.parseConsumer(elementObj, "type");
                         additionalCallbacks.add(consumer);
                     });
                 }

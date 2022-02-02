@@ -1,7 +1,31 @@
 {
   "memory_types": [
+    "minecraft:look_target",
+    "minecraft:doors_to_close",
+    "minecraft:mobs",
+    "minecraft:visible_mobs",
+    "minecraft:nearest_visible_player",
+    "minecraft:nearest_visible_targetable_player",
+    "aptitude:nearest_visible_adult_illagers",
+    "aptitude:nearby_adult_illagers",
+    "aptitude:hurt_by",
+    "aptitude:hurt_by_entity",
+    "minecraft:walk_target",
+    "minecraft:cant_reach_walk_target_since",
+    "minecraft:attack_target",
+    "minecraft:attack_cooling_down",
+    "minecraft:interaction_target",
+    "minecraft:path",
+    "minecraft:angry_at",
+    "minecraft:nearest_visible_nemesis",
+    "minecraft:home"
   ],
   "sensor_types": [
+    "minecraft:nearest_living_entities",
+    "minecraft:nearest_players",
+    "minecraft:nearest_items",
+    "minecraft:hurt_by",
+    "aptitude:illager_specific_sensor"
   ],
   "core_activities": [
     "minecraft:core"

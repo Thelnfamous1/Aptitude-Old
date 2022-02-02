@@ -13,9 +13,9 @@ import com.infamous.aptitude.common.behavior.functions.FunctionTypes;
 import com.infamous.aptitude.common.behavior.predicates.PredicateType;
 import com.infamous.aptitude.common.behavior.predicates.PredicateTypes;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.advancements.critereon.EntityTypePredicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.EntityType;
@@ -24,7 +24,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
@@ -34,21 +33,21 @@ import java.util.function.Predicate;
 
 public class BehaviorHelper {
 
-    public static MemoryModuleType<?> parseMemoryType(JsonObject jsonObject, String memberName) {
+    public static <U> MemoryModuleType<U> parseMemoryType(JsonObject jsonObject, String memberName) {
         String type = GsonHelper.getAsString(jsonObject, memberName, "");
-        return parseMemoryTypeString(type);
+        return (MemoryModuleType<U>) parseMemoryTypeString(type);
     }
 
-    public static MemoryModuleType<?> parseMemoryType(JsonElement jsonElement) {
+    public static <U> MemoryModuleType<U> parseMemoryType(JsonElement jsonElement) {
         String type = jsonElement.getAsString();
-        return parseMemoryTypeString(type);
+        return (MemoryModuleType<U>) parseMemoryTypeString(type);
     }
 
-    public static MemoryModuleType<?> parseMemoryTypeString(String type) {
+    public static <U> MemoryModuleType<U> parseMemoryTypeString(String type) {
         ResourceLocation location = new ResourceLocation(type);
         MemoryModuleType<?> memoryType = ForgeRegistries.MEMORY_MODULE_TYPES.getValue(location);
         if (memoryType == null) throw new JsonParseException("Invalid memory module type: " + type);
-        return memoryType;
+        return (MemoryModuleType<U>) memoryType;
     }
 
     public static SensorType<?> parseSensorType(JsonElement jsonElement) {
@@ -158,11 +157,11 @@ public class BehaviorHelper {
         memoriesToStatus.put(memoryType, memoryStatus);
     }
 
-    public static Predicate<?> parsePredicate(JsonObject jsonObject, String memberName, String typeMemberName){
+    public static <U> Predicate<U> parsePredicate(JsonObject jsonObject, String memberName, String typeMemberName){
         JsonObject predicateObj = GsonHelper.getAsJsonObject(jsonObject, memberName);
         PredicateType<?> predicateType = parsePredicateType(predicateObj, typeMemberName);
 
-        return predicateType.fromJson(predicateObj);
+        return (Predicate<U>) predicateType.fromJson(predicateObj);
     }
 
     public static PredicateType<?> parsePredicateType(JsonObject jsonObject, String memberName){
@@ -173,11 +172,11 @@ public class BehaviorHelper {
         return predicateType;
     }
 
-    public static Function<?, ?> parseFunction(JsonObject jsonObject, String memberName, String typeMemberName){
+    public static <T, R> Function<T, R> parseFunction(JsonObject jsonObject, String memberName, String typeMemberName){
         JsonObject functionObj = GsonHelper.getAsJsonObject(jsonObject, memberName);
         FunctionType<?> predicateType = parseFunctionType(functionObj, typeMemberName);
 
-        return predicateType.fromJson(functionObj);
+        return (Function<T, R>) predicateType.fromJson(functionObj);
     }
 
     public static FunctionType<?> parseFunctionType(JsonObject jsonObject, String memberName){
@@ -205,14 +204,14 @@ public class BehaviorHelper {
         return activity;
     }
 
-    public static Consumer<?> parseConsumer(JsonObject jsonObject, String memberName, String typeMemberName){
+    public static <U> Consumer<U> parseConsumer(JsonObject jsonObject, String memberName, String typeMemberName){
         JsonObject consumerObj = GsonHelper.getAsJsonObject(jsonObject, memberName);
         return parseConsumer(consumerObj, typeMemberName);
     }
 
-    public static Consumer<?> parseConsumer(JsonObject jsonObject, String typeMemberName){
+    public static <U> Consumer<U> parseConsumer(JsonObject jsonObject, String typeMemberName){
         ConsumerType<?> consumerType = parseConsumerType(jsonObject, typeMemberName);
-        return consumerType.fromJson(jsonObject);
+        return (Consumer<U>) consumerType.fromJson(jsonObject);
     }
 
     public static ConsumerType<?> parseConsumerType(JsonObject jsonObject, String memberName){
@@ -236,7 +235,33 @@ public class BehaviorHelper {
         return soundEvent;
     }
 
-    public static Tags.IOptionalNamedTag<EntityType<?>> parseEntityTypeTag(JsonObject elementObj, String memberName) {
-        return EntityTypeTags.createOptional(new ResourceLocation(GsonHelper.getAsString(elementObj, memberName, "")));
+    public static List<EntityTypePredicate> getEntityTypePredicates(JsonObject jsonObject, String memberName) {
+        List<EntityTypePredicate> ignoredTypes = new ArrayList<>();
+        if(jsonObject.has(memberName)){
+            JsonElement entityTypePredicateElem = jsonObject.get(memberName);
+            if(entityTypePredicateElem.isJsonArray()){
+                JsonArray ignoredTypesArr = GsonHelper.getAsJsonArray(jsonObject, memberName);
+                ignoredTypesArr.forEach(jsonElement -> {
+                    EntityTypePredicate entityTypePredicate = EntityTypePredicate.fromJson(jsonElement);
+                    ignoredTypes.add(entityTypePredicate);
+                });
+            } else{
+                EntityTypePredicate entityTypePredicate = EntityTypePredicate.fromJson(entityTypePredicateElem);
+                ignoredTypes.add(entityTypePredicate);
+            }
+        }
+        return ignoredTypes;
+    }
+
+    public static <U> List<Predicate<U>> getPredicates(JsonObject jsonObject, String predicatesMemberName, String typeMemberName) {
+        JsonArray predicatesArray = GsonHelper.getAsJsonArray(jsonObject, predicatesMemberName);
+        List<Predicate<U>> predicates = new ArrayList<>();
+        predicatesArray.forEach(jsonElement -> {
+            JsonObject elemObj = jsonElement.getAsJsonObject();
+            PredicateType<?> predicateType = parsePredicateType(elemObj, typeMemberName);
+            Predicate<U> predicate = (Predicate<U>) predicateType.fromJson(elemObj);
+            predicates.add(predicate);
+        });
+        return predicates;
     }
 }

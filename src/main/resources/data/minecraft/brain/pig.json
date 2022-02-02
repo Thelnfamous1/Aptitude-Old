@@ -146,7 +146,7 @@
               ]
             },
             "targetFinderFunction": {
-              "type": "aptitude:retrieve_target_from_memory",
+              "type": "aptitude:retrieve_entity_from_memory",
               "addContext": {
                 "type": "minecraft:nearest_visible_targetable_player"
               }
