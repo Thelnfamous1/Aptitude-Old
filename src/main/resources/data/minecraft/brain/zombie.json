@@ -6,11 +6,11 @@
     "minecraft:visible_mobs",
     "minecraft:nearest_visible_player",
     "minecraft:nearest_visible_targetable_player",
-    "aptitude:nearest_visible_adult_illagers",
-    "aptitude:nearby_adult_illagers",
-    "aptitude:nearest_visible_wanted_item",
-    "aptitude:hurt_by",
-    "aptitude:hurt_by_entity",
+    "aptitude:nearest_visible_adult_zombies",
+    "aptitude:nearby_adult_zombies",
+    "minecraft:nearest_visible_wanted_item",
+    "minecraft:hurt_by",
+    "minecraft:hurt_by_entity",
     "minecraft:walk_target",
     "minecraft:cant_reach_walk_target_since",
     "minecraft:attack_target",
@@ -31,7 +31,7 @@
     "minecraft:nearest_visible_nemesis",
     "minecraft:nearest_visible_zombified",
     "minecraft:ride_target",
-    "aptitude:visible_adult_illager_count",
+    "aptitude:visible_adult_zombie_count",
     "minecraft:visible_adult_hoglin_count",
     "minecraft:nearest_visible_huntable_hoglin",
     "minecraft:nearest_targetable_player_not_wearing_gold",
@@ -44,7 +44,7 @@
     "minecraft:nearest_players",
     "minecraft:nearest_items",
     "minecraft:hurt_by",
-    "aptitude:illager_specific_sensor"
+    "aptitude:zombie_specific_sensor"
   ],
   "core_activities": [
     "minecraft:core"
@@ -75,8 +75,23 @@
         },
         {
           "predicate": {
-            "type": "aptitude:active_non_core_activity_check",
-            "activity": "minecraft:avoid"
+            "type": "aptitude:all_of_predicate",
+            "predicates": [
+              {
+                "type": "aptitude:active_non_core_activity_check",
+                "activity": "minecraft:avoid"
+              },
+              {
+                "type": "aptitude:memory_value_check",
+                "addContext": {
+                  "memory_type": "minecraft:avoid_target",
+                  "filter_bipredicate": {
+                    "type": "aptitude:entity_within_distance",
+                    "distance": 12.0
+                  }
+                }
+              }
+            ]
           },
           "sound_event": "minecraft:entity.piglin.retreat"
         },
@@ -238,11 +253,186 @@
             "type": "aptitude:is_adult"
           },
           "targetFinderFunction": {
-            "type": "aptitude:retrieve_first_valid_entity",
-            "addContext": {
-              "type": "minecraft:nearest_visible_targetable_player"
+            "type": "aptitude:predicated_function",
+            "predicate": {
+              "type": "aptitude:memory_value_check",
+              "addContext": {
+                "memory_type": "minecraft:nearest_visible_zombified",
+                "filter_bipredicate": {
+                  "type": "aptitude:entity_within_distance",
+                  "distance": 6.0
+                }
+              }
+            },
+            "function": {
+              "type": "aptitude:retrieve_first_valid_entity",
+              "functions": [
+                {
+                  "type": "aptitude:retrieve_entity_from_uuid_memory",
+                  "addContext": {
+                    "memory_type": "minecraft:angry_at",
+                    "filter_bipredicate": {
+                      "type": "aptitude:entity_is_attackable_ignoring_line_of_sight"
+                    }
+                  }
+                },
+                {
+                  "type": "aptitude:predicated_function",
+                  "predicate": {
+                    "type": "aptitude:memory_status_check",
+                    "addContext": {
+                      "type": "minecraft:universal_anger",
+                      "status": "value_present"
+                    }
+                  },
+                  "function": {
+                    "type": "aptitude:retrieve_entity_from_memory",
+                    "addContext": {
+                      "memory_type": "minecraft:nearest_visible_targetable_player"
+                    }
+                  },
+                  "default": {
+                    "type": "aptitude:empty_optional"
+                  }
+                },
+                {
+                  "type": "aptitude:retrieve_entity_from_memory",
+                  "addContext": {
+                    "memory_type": "minecraft:nearest_visible_nemesis"
+                  }
+                },
+                {
+                  "type": "aptitude:retrieve_entity_from_memory",
+                  "addContext": {
+                    "memory_type": "minecraft:nearest_targetable_player_not_wearing_gold",
+                    "filter_bipredicate": {
+                      "type": "aptitude:entity_is_attackable"
+                    }
+                  }
+                }
+              ]
+            },
+            "default": {
+              "type": "aptitude:empty_optional"
             }
           }
+        },
+        {
+          "type": "aptitude:run_if",
+          "predicate": {
+            "type": "aptitude:always_true"
+          },
+          "wrappedBehavior": {
+            "type": "aptitude:start_hunting"
+          }
+        },
+        {
+          "type": "aptitude:set_walk_target_away_from",
+          "walkAwayFromMemory": "minecraft:nearest_repellent",
+          "speedModifier": 1.0,
+          "desiredDistance": 8,
+          "ignoreWalkTarget": false,
+          "toPosition": {
+            "type": "aptitude:block_position_vector"
+          }
+        },
+        {
+          "type": "aptitude:run_sometimes",
+          "interval": {
+            "minInclusive": 200,
+            "maxInclusive": 800
+          },
+          "wrappedBehavior": {
+            "type": "aptitude:copy_memory_with_expiry",
+            "predicate": {
+              "type": "aptitude:is_baby"
+            },
+            "sourceMemory": "minecraft:nearest_visible_baby_hoglin",
+            "targetMemory": "minecraft:ride_target",
+            "durationOfCopy": {
+              "minInclusive": 200,
+              "maxInclusive": 600
+            }
+          }
+        },
+        {
+          "type": "aptitude:run_one",
+          "behaviors": [
+            {
+              "weight": 1,
+              "type": "aptitude:set_entity_look_target",
+              "predicate": {
+                "type": "aptitude:entity_is_type",
+                "entity_type_predicate": "minecraft:player"
+              },
+              "maxDistSqr": 8.0
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:set_entity_look_target",
+              "predicate": {
+                "type": "aptitude:entity_is_type",
+                "entity_type_predicate": "minecraft:zombie"
+              },
+              "maxDistSqr": 8.0
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:set_entity_look_target",
+              "maxDistSqr": 8.0
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:do_nothing",
+              "minDuration": 30,
+              "maxDuration": 60
+            }
+          ]
+        },
+        {
+          "type": "aptitude:run_one",
+          "behaviors": [
+            {
+              "weight": 2,
+              "type": "aptitude:random_stroll",
+              "speedModifier": 0.6
+            },
+            {
+              "weight": 2,
+              "type": "aptitude:interact_with",
+              "entity_type": "minecraft:zombie",
+              "interaction_range": 8,
+              "memory": "minecraft:interaction_target",
+              "speedModifier": 0.6,
+              "maxDist": 2
+            },
+            {
+              "type": "aptitude:run_if",
+              "predicate": {
+                "type": "aptitude:memory_status_check",
+                "addContext": {
+                  "type": "minecraft:nearest_player_holding_wanted_item",
+                  "status": "value_absent"
+                }
+              },
+              "wrappedBehavior": {
+                "type": "aptitude:set_walk_target_from_look_target",
+                "speedModifier": 0.6,
+                "closeEnoughDistance": 3
+              }
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:do_nothing",
+              "minDuration": 30,
+              "maxDuration": 60
+            }
+          ]
+        },
+        {
+          "type": "aptitude:set_look_and_interact",
+          "entity_type": "minecraft:player",
+          "interaction_range": 4
         }
       ]
     },

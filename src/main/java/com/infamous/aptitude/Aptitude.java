@@ -6,6 +6,7 @@ import com.infamous.aptitude.common.behavior.consumer.ConsumerTypes;
 import com.infamous.aptitude.common.behavior.custom.memory.AptitudeMemoryModuleTypes;
 import com.infamous.aptitude.common.behavior.custom.sensor.AptitudeSensorTypes;
 import com.infamous.aptitude.common.behavior.functions.FunctionTypes;
+import com.infamous.aptitude.common.behavior.predicates.BiPredicateTypes;
 import com.infamous.aptitude.common.behavior.predicates.PredicateTypes;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -29,6 +30,7 @@ public class Aptitude
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
         PredicateTypes.register(modEventBus);
+        BiPredicateTypes.register(modEventBus);
         FunctionTypes.register(modEventBus);
         ConsumerTypes.register(modEventBus);
         BehaviorTypes.register(modEventBus);

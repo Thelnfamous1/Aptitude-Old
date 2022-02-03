@@ -4,14 +4,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.*;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
+import com.infamous.aptitude.common.behavior.util.ConsumerHelper;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
@@ -21,7 +20,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class BrainManager extends SimpleJsonResourceReloadListener {
@@ -135,7 +133,7 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
     }
 
     private void buildUpdateActivityCallbacks(ImmutableMap.Builder<ResourceLocation, Consumer<?>> updateActivityCallbacksBuilder, ResourceLocation location, JsonObject updateActivityCallbackObj){
-        Consumer<?> consumer = BehaviorHelper.parseConsumer(updateActivityCallbackObj, "type");
+        Consumer<?> consumer = ConsumerHelper.parseConsumer(updateActivityCallbackObj, "type");
         updateActivityCallbacksBuilder.put(location, consumer);
     }
 

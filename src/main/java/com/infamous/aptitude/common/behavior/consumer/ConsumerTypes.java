@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
+import com.infamous.aptitude.common.behavior.util.ConsumerHelper;
+import com.infamous.aptitude.common.behavior.util.PredicateHelper;
 import com.infamous.aptitude.mixin.LivingEntityAccessor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -35,14 +37,14 @@ public class ConsumerTypes {
             ).setDefaultKey(new ResourceLocation(Aptitude.MOD_ID, "nothing"))
     );
 
-    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> NOTHING = register("nothing",
+    public static final RegistryObject<ConsumerType<Consumer<?>>> NOTHING = register("nothing",
             jsonObject -> {
-                return livingEntity -> {};
+                return o -> {};
             });
 
     public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> UPDATE_AGGRESSION_FLAG = register("update_aggression_flag",
             jsonObject -> {
-                Predicate<LivingEntity> predicate = BehaviorHelper.parsePredicate(jsonObject, "predicate", "type");
+                Predicate<LivingEntity> predicate = PredicateHelper.parsePredicate(jsonObject, "predicate", "type");
                 return livingEntity -> {
                     if(livingEntity instanceof Mob mob){
                         mob.setAggressive(predicate.test(mob));
@@ -67,7 +69,7 @@ public class ConsumerTypes {
                 Map<Predicate<LivingEntity>, SoundEvent> predicateToSoundMap = new LinkedHashMap<>();
                 playFirstValidArr.forEach(jsonElement -> {
                     JsonObject elementObj = jsonElement.getAsJsonObject();
-                    Predicate<LivingEntity> predicate = BehaviorHelper.parsePredicate(elementObj, "predicate", "type");
+                    Predicate<LivingEntity> predicate = PredicateHelper.parsePredicate(elementObj, "predicate", "type");
                     SoundEvent soundEvent = BehaviorHelper.parseSoundEventString(elementObj, "sound_event");
                     predicateToSoundMap.put(predicate, soundEvent);
                 });
@@ -85,11 +87,11 @@ public class ConsumerTypes {
     public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> UPDATE_ACTIVITY = register("update_activity",
             jsonObject -> {
                 Predicate<LivingEntity> updatePredicate = jsonObject.has("update_predicate") ?
-                        BehaviorHelper.parsePredicate(jsonObject, "update_predicate", "type") :
+                        PredicateHelper.parsePredicate(jsonObject, "update_predicate", "type") :
                         le -> true;
 
                 Consumer<LivingEntity> onChanged = jsonObject.has("on_changed_callback") ?
-                        BehaviorHelper.parseConsumer(jsonObject, "on_changed_callback", "type") :
+                        ConsumerHelper.parseConsumer(jsonObject, "on_changed_callback", "type") :
                         le -> {};
 
                 List<Consumer<LivingEntity>> additionalCallbacks = new ArrayList<>();
@@ -97,7 +99,7 @@ public class ConsumerTypes {
                     JsonArray additionalCallbacksArr = GsonHelper.getAsJsonArray(jsonObject, "additional_callbacks");
                     additionalCallbacksArr.forEach(jsonElement -> {
                         JsonObject elementObj = jsonElement.getAsJsonObject();
-                        Consumer<LivingEntity> consumer = BehaviorHelper.parseConsumer(elementObj, "type");
+                        Consumer<LivingEntity> consumer = ConsumerHelper.parseConsumer(elementObj, "type");
                         additionalCallbacks.add(consumer);
                     });
                 }

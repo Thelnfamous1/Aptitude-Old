@@ -3,10 +3,16 @@ package com.infamous.aptitude.common.behavior;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.infamous.aptitude.Aptitude;
+import com.infamous.aptitude.common.behavior.custom.behavior.AptitudeMeleeAttack;
+import com.infamous.aptitude.common.behavior.custom.behavior.AptitudeSetWalkTargetFromAttackTargetIfTargetOutOfReach;
 import com.infamous.aptitude.common.behavior.custom.behavior.AptitudeStartAdmiringItemIfSeen;
 import com.infamous.aptitude.common.behavior.custom.behavior.AptitudeStopHoldingItemIfNoLongerAdmiring;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
+import com.infamous.aptitude.common.behavior.util.ConsumerHelper;
+import com.infamous.aptitude.common.behavior.util.FunctionHelper;
+import com.infamous.aptitude.common.behavior.util.PredicateHelper;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -17,7 +23,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -65,14 +70,10 @@ public class BehaviorTypes {
     }));
 
     public static final RegistryObject<BehaviorType<AnimalMakeLove>> ANIMAL_MAKE_LOVE = register("animal_make_love", (jsonObject -> {
-        EntityType<?> partnerType = BehaviorHelper.parseEntityType(jsonObject, "partnerType");
+        EntityType<? extends Animal> partnerType = BehaviorHelper.parseEntityType(jsonObject, "partnerType");
         float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
 
-        try{
-            return new AnimalMakeLove((EntityType<? extends Animal>) partnerType, speedModifier);
-        } catch (ClassCastException e){
-            throw new JsonParseException("Invalid entity type for AnimalMakeLove: " + partnerType);
-        }
+        return new AnimalMakeLove(partnerType, speedModifier);
     }));
 
     public static final RegistryObject<BehaviorType<SetWalkTargetAwayFrom<?>>> SET_WALK_TARGET_AWAY_FROM = register("set_walk_target_away_from", (jsonObject -> {
@@ -80,21 +81,19 @@ public class BehaviorTypes {
         float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
         int desiredDistance = GsonHelper.getAsInt(jsonObject, "desiredDistance", 0);
         boolean ignoreWalkTarget = GsonHelper.getAsBoolean(jsonObject, "ignoreWalkTarget", true);
-        Function<?, Vec3> toPosition = BehaviorHelper.parseFunction(jsonObject, "toPosition", "type");
+        Function<?, Vec3> toPosition = FunctionHelper.parseFunction(jsonObject, "toPosition", "type");
         return new SetWalkTargetAwayFrom(walkAwayFromMemory, speedModifier, desiredDistance, ignoreWalkTarget, toPosition);
     }));
 
     public static final RegistryObject<BehaviorType<StartAttacking<?>>> START_ATTACKING = register("start_attacking", (jsonObject) -> {
-        Predicate<LivingEntity> canAttackPredicate = jsonObject.has("canAttackPredicate") ?
-                BehaviorHelper.parsePredicate(jsonObject, "canAttackPredicate", "type") :
-                le -> true;
-        Function<LivingEntity, Optional<? extends LivingEntity>> targetFinderFunction = BehaviorHelper.parseFunction(jsonObject, "targetFinderFunction", "type");
+        Predicate<LivingEntity> canAttackPredicate = PredicateHelper.parsePredicateOrDefault(jsonObject, "canAttackPredicate", "type", le -> true);
+        Function<LivingEntity, Optional<? extends LivingEntity>> targetFinderFunction = FunctionHelper.parseFunction(jsonObject, "targetFinderFunction", "type");
 
         return new StartAttacking(canAttackPredicate, targetFinderFunction);
     });
 
     public static final RegistryObject<BehaviorType<RunIf<?>>> RUN_IF = register("run_if", (jsonObject) -> {
-        Predicate<?> predicate = BehaviorHelper.parsePredicate(jsonObject, "predicate", "type");
+        Predicate<?> predicate = PredicateHelper.parsePredicate(jsonObject, "predicate", "type");
         Behavior<?> behavior = BehaviorHelper.parseBehavior(jsonObject, "wrappedBehavior", "type");
         boolean checkWhileRunningAlso = GsonHelper.getAsBoolean(jsonObject, "checkWhileRunningAlso", false);
 
@@ -109,9 +108,7 @@ public class BehaviorTypes {
     });
 
     public static final RegistryObject<BehaviorType<SetEntityLookTarget>> SET_ENTITY_LOOK_TARGET = register("set_entity_look_target", (jsonObject) -> {
-        Predicate<LivingEntity> predicate = jsonObject.has("predicate") ?
-                BehaviorHelper.parsePredicate(jsonObject, "predicate", "type") :
-                le -> true;
+        Predicate<LivingEntity> predicate = PredicateHelper.parsePredicateOrDefault(jsonObject, "predicate", "type", le -> true);
         float maxDistSqr = GsonHelper.getAsFloat(jsonObject, "maxDistSqr", 0);
         return new SetEntityLookTarget(predicate, maxDistSqr);
     });
@@ -141,41 +138,33 @@ public class BehaviorTypes {
         return new SetWalkTargetFromLookTarget(speedModifier, closeEnoughDistance);
     });
 
-    public static final RegistryObject<BehaviorType<SetWalkTargetFromAttackTargetIfTargetOutOfReach>> SET_WALK_TARGET_FROM_ATTACK_TARGET_IF_TARGET_OUT_OF_REACH = register("set_walk_target_from_attack_target_if_target_out_of_reach", (jsonObject) -> {
-        float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
+    public static final RegistryObject<BehaviorType<AptitudeSetWalkTargetFromAttackTargetIfTargetOutOfReach>> SET_WALK_TARGET_FROM_ATTACK_TARGET_IF_TARGET_OUT_OF_REACH = register("set_walk_target_from_attack_target_if_target_out_of_reach", (jsonObject) -> {
+        Function<LivingEntity, Float> speedModifier = FunctionHelper.parseFunction(jsonObject, "speedModifier", "type");
+        BiPredicate<LivingEntity, LivingEntity> isWithinAttackRange = PredicateHelper.parseBiPredicate(jsonObject, "isWithinAttackRange", "type");
 
-        return new SetWalkTargetFromAttackTargetIfTargetOutOfReach(speedModifier);
+        return new AptitudeSetWalkTargetFromAttackTargetIfTargetOutOfReach(speedModifier, isWithinAttackRange);
     });
 
-    public static final RegistryObject<BehaviorType<MeleeAttack>> MELEE_ATTACK = register("melee_attack", (jsonObject) -> {
+    public static final RegistryObject<BehaviorType<AptitudeMeleeAttack>> MELEE_ATTACK = register("melee_attack", (jsonObject) -> {
         int cooldownBetweenAttacks = GsonHelper.getAsInt(jsonObject, "cooldownBetweenAttacks", 20);
-
-        return new MeleeAttack(cooldownBetweenAttacks);
+        Predicate<LivingEntity> isHoldingUsableProjectileWeapon = PredicateHelper.parsePredicate(jsonObject, "isHoldingUsableProjectileWeapon", "type");
+        BiPredicate<LivingEntity, LivingEntity> isWithinMeleeAttackRange = PredicateHelper.parseBiPredicate(jsonObject, "isWithinMeleeAttackRange", "type");
+        return new AptitudeMeleeAttack(cooldownBetweenAttacks, isHoldingUsableProjectileWeapon, isWithinMeleeAttackRange);
     });
 
     public static final RegistryObject<BehaviorType<StopAttackingIfTargetInvalid<?>>> STOP_ATTACKING_IF_TARGET_INVALID = register("stop_attacking_if_target_invalid", (jsonObject) -> {
-        Predicate<LivingEntity> stopAttackingWhen = jsonObject.has("stopAttackingWhen") ?
-                BehaviorHelper.parsePredicate(jsonObject, "stopAttackingWhen", "type") :
-                le -> false;
-        Consumer<LivingEntity> onTargetErased = jsonObject.has("onTargetErased") ?
-                BehaviorHelper.parseConsumer(jsonObject, "onTargetErased", "type") :
-                le -> {};
+        Predicate<LivingEntity> stopAttackingWhen = PredicateHelper.parsePredicateOrDefault(jsonObject, "stopAttackingWhen", "type", le -> false);
+        Consumer<LivingEntity> onTargetErased = ConsumerHelper.parseConsumerOrDefault(jsonObject, "onTargetErased", "type", le -> {});
 
         return new StopAttackingIfTargetInvalid(stopAttackingWhen, onTargetErased);
     });
 
 
     public static final RegistryObject<BehaviorType<EraseMemoryIf<?>>> ERASE_MEMORY_IF = register("erase_memory_if", (jsonObject) -> {
-        Predicate<?> predicate = BehaviorHelper.parsePredicate(jsonObject, "predicate", "type");
+        Predicate<LivingEntity> predicate = PredicateHelper.parsePredicate(jsonObject, "predicate", "type");
         MemoryModuleType<?> memoryType = BehaviorHelper.parseMemoryType(jsonObject, "memoryType");
 
-        Predicate<LivingEntity> predicateCast;
-        try{
-            predicateCast =  (Predicate<LivingEntity>) predicate;
-        } catch (ClassCastException e){
-            throw new JsonParseException("Invalid predicate type for EraseMemoryIf: " + BehaviorHelper.parsePredicateType(jsonObject, "predicate"));
-        }
-        return new EraseMemoryIf<>(predicateCast, memoryType);
+        return new EraseMemoryIf<>(predicate, memoryType);
     });
 
     public static final RegistryObject<BehaviorType<InteractWithDoor>> INTERACT_WITH_DOOR = register("interact_with_door",
@@ -185,7 +174,7 @@ public class BehaviorTypes {
 
     public static final RegistryObject<BehaviorType<CopyMemoryWithExpiry<?, ?>>> COPY_MEMORY_WITH_EXPIRY = register("copy_memory_with_expiry",
             jsonObject -> {
-            Predicate<?> predicate = BehaviorHelper.parsePredicate(jsonObject, "predicate", "type");
+            Predicate<?> predicate = PredicateHelper.parsePredicate(jsonObject, "predicate", "type");
             MemoryModuleType<?> sourceMemory = BehaviorHelper.parseMemoryType(jsonObject, "sourceMemory");
             MemoryModuleType<?> targetMemory = BehaviorHelper.parseMemoryType(jsonObject, "targetMemory");
             UniformInt durationOfCopy = BehaviorHelper.parseUniformInt(jsonObject, "durationOfCopy");
@@ -194,8 +183,8 @@ public class BehaviorTypes {
 
     public static final RegistryObject<BehaviorType<AptitudeStopHoldingItemIfNoLongerAdmiring>> STOP_HOLDING_ITEM_IF_NO_LONGER_ADMIRING = register("stop_holding_item_if_no_longer_admiring",
             jsonObject -> {
-                Predicate<LivingEntity> shouldStopHoldingItem = BehaviorHelper.parsePredicate(jsonObject, "shouldStopHoldingItem", "type");
-                Consumer<LivingEntity> stopHoldingItem = BehaviorHelper.parseConsumer(jsonObject, "stopHoldingItem", "type");
+                Predicate<LivingEntity> shouldStopHoldingItem = PredicateHelper.parsePredicate(jsonObject, "shouldStopHoldingItem", "type");
+                Consumer<LivingEntity> stopHoldingItem = ConsumerHelper.parseConsumer(jsonObject, "stopHoldingItem", "type");
                 return new AptitudeStopHoldingItemIfNoLongerAdmiring(shouldStopHoldingItem, stopHoldingItem);
             });
 
@@ -216,6 +205,44 @@ public class BehaviorTypes {
     public static final RegistryObject<BehaviorType<StopBeingAngryIfTargetDead<?>>> STOP_BEING_ANGRY_IF_TARGET_DEAD = register("stop_being_angry_if_target_dead",
             jsonObject -> {
                 return new StopBeingAngryIfTargetDead<>();
+            });
+
+    public static final RegistryObject<BehaviorType<SetLookAndInteract>> SET_LOOK_AND_INTERACT = register("set_look_and_interact",
+            jsonObject -> {
+                EntityType<?> type = BehaviorHelper.parseEntityType(jsonObject, "entity_type");
+                int interactionRange = GsonHelper.getAsInt(jsonObject, "interaction_range", 0);
+                Predicate<LivingEntity> selfFilter = PredicateHelper.parsePredicateOrDefault(jsonObject, "selfFilter", "type", le -> true);
+                Predicate<LivingEntity> targetFilter = PredicateHelper.parsePredicateOrDefault(jsonObject, "targetFilter", "type", le -> true);
+                return new SetLookAndInteract(type, interactionRange, selfFilter, targetFilter);
+            });
+
+    public static final RegistryObject<BehaviorType<InteractWith<?, ?>>> INTERACT_WITH = register("interact_with",
+            jsonObject -> {
+                EntityType<?> type = BehaviorHelper.parseEntityType(jsonObject, "entity_type");
+                int interactionRange = GsonHelper.getAsInt(jsonObject, "interaction_range", 0);
+                Predicate<LivingEntity> selfFilter = PredicateHelper.parsePredicateOrDefault(jsonObject, "selfFilter", "type", le -> true);
+                Predicate<LivingEntity> targetFilter = PredicateHelper.parsePredicateOrDefault(jsonObject, "targetFilter", "type", le -> true);
+                MemoryModuleType<LivingEntity> memory = BehaviorHelper.parseMemoryType(jsonObject, "memory");
+                float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
+                int maxDist = GsonHelper.getAsInt(jsonObject, "maxDist", 0);
+                return new InteractWith(type, interactionRange, selfFilter, targetFilter, memory, speedModifier, maxDist);
+            });
+
+    public static final RegistryObject<BehaviorType<StrollToPoi>> STROLL_TO_POI = register("stroll_to_poi",
+            jsonObject -> {
+                MemoryModuleType<GlobalPos> memoryType = BehaviorHelper.parseMemoryType(jsonObject, "memoryType");
+                float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
+                int closeEnoughDist = GsonHelper.getAsInt(jsonObject, "closeEnoughDist", 0);
+                int maxDistanceFromPoi = GsonHelper.getAsInt(jsonObject, "maxDistanceFromPoi", 0);
+                return new StrollToPoi(memoryType, speedModifier, closeEnoughDist, maxDistanceFromPoi);
+            });
+
+    public static final RegistryObject<BehaviorType<StrollAroundPoi>> STROLL_AROUND_POI = register("stroll_around_poi",
+            jsonObject -> {
+                MemoryModuleType<GlobalPos> memoryType = BehaviorHelper.parseMemoryType(jsonObject, "memoryType");
+                float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
+                int maxDistanceFromPoi = GsonHelper.getAsInt(jsonObject, "maxDistanceFromPoi", 0);
+                return new StrollAroundPoi(memoryType, speedModifier, maxDistanceFromPoi);
             });
 
     private static <U extends Behavior<?>> RegistryObject<BehaviorType<U>> register(String name, Function<JsonObject, U> jsonFactory) {

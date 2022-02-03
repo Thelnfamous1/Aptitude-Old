@@ -4,16 +4,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
+import com.infamous.aptitude.common.behavior.util.PredicateHelper;
 import net.minecraft.advancements.critereon.EntityTypePredicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -24,6 +26,7 @@ import net.minecraftforge.registries.RegistryObject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -38,14 +41,14 @@ public class PredicateTypes {
             ).setDefaultKey(new ResourceLocation(Aptitude.MOD_ID, "always_true"))
     );
 
-    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ALWAYS_TRUE = register("always_true",
+    public static final RegistryObject<PredicateType<Predicate<?>>> ALWAYS_TRUE = register("always_true",
             jsonObject -> {
-                return livingEntity -> true;
+                return o -> true;
             });
 
-    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ALWAYS_FALSE = register("always_false",
+    public static final RegistryObject<PredicateType<Predicate<?>>> ALWAYS_FALSE = register("always_false",
             jsonObject -> {
-                return livingEntity -> false;
+                return o -> false;
             });
 
     public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> MEMORY_STATUS_CHECK = register("memory_status_check",
@@ -60,6 +63,19 @@ public class PredicateTypes {
                         }
                     }
                     return true;
+                };
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> MEMORY_VALUE_CHECK = register("memory_value_check",
+            jsonObject -> {
+                JsonObject addContextObj = GsonHelper.getAsJsonObject(jsonObject, "addContext");
+                MemoryModuleType<Object> memoryType = BehaviorHelper.parseMemoryType(addContextObj, "memory_type");
+                Predicate<Object> filterPredicate = PredicateHelper.parsePredicateOrDefault(addContextObj, "filter_predicate", "type", o -> true);
+                BiPredicate<LivingEntity, Object> filterBiPredicate = PredicateHelper.parseBiPredicateOrDefault(addContextObj, "filter_bipredicate", "type", (le, o) -> true);
+                return le -> {
+                    Predicate<Object> jointFilterPredicate = e -> filterPredicate.test(e) && filterBiPredicate.test(le, e);
+                    Brain<?> brain = le.getBrain();
+                    return brain.hasMemoryValue(memoryType) && brain.getMemory(memoryType).filter(jointFilterPredicate).isPresent();
                 };
             });
 
@@ -118,7 +134,7 @@ public class PredicateTypes {
 
     public static final RegistryObject<PredicateType<Predicate<?>>> ALL_OF_PREDICATE = register("all_of_predicate",
             jsonObject -> {
-                List<Predicate<Object>> predicates = BehaviorHelper.getPredicates(jsonObject, "predicates", "type");
+                List<Predicate<Object>> predicates = PredicateHelper.parsePredicates(jsonObject, "predicates", "type");
 
                 return o -> {
                     for(Predicate<Object> predicate : predicates){
@@ -132,7 +148,7 @@ public class PredicateTypes {
 
     public static final RegistryObject<PredicateType<Predicate<?>>> ANY_OF_PREDICATE = register("any_of_predicate",
             jsonObject -> {
-                List<Predicate<Object>> predicates = BehaviorHelper.getPredicates(jsonObject, "predicates", "type");
+                List<Predicate<Object>> predicates = PredicateHelper.parsePredicates(jsonObject, "predicates", "type");
 
                 return o -> {
                     for(Predicate<Object> predicate : predicates){
@@ -146,18 +162,22 @@ public class PredicateTypes {
 
     public static final RegistryObject<PredicateType<Predicate<?>>> NEGATE_PREDICATE = register("negate_predicate",
             jsonObject -> {
-                Predicate<Object> predicate = BehaviorHelper.parsePredicate(jsonObject, "predicate", "type");
+                Predicate<Object> predicate = PredicateHelper.parsePredicate(jsonObject, "predicate", "type");
 
                 return predicate.negate();
             });
 
-    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> RETRIEVED_ENTITY_IS_ATTACKABLE = register("retrieved_entity_is_attackable",
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_HOLDING_USABLE_PROJECTILE_WEAPON = register("entity_is_holding_usable_projectile_weapon",
             jsonObject -> {
-                Function<LivingEntity, Optional<? extends LivingEntity>> retrievalFunction = BehaviorHelper.parseFunction(jsonObject, "retrieval_function", "type");
-
                 return livingEntity -> {
-                    Optional<? extends LivingEntity> target = retrievalFunction.apply(livingEntity);
-                    return target.map(le -> Sensor.isEntityAttackable(livingEntity, le)).isPresent();
+                    if(livingEntity instanceof Mob mob){
+                        return mob.isHolding((stack) -> {
+                            Item item = stack.getItem();
+                            return item instanceof ProjectileWeaponItem projectileWeaponItem
+                                    && mob.canFireProjectileWeapon(projectileWeaponItem);
+                        });
+                    }
+                    return false;
                 };
             });
 

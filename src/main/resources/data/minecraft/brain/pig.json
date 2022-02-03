@@ -148,7 +148,7 @@
             "targetFinderFunction": {
               "type": "aptitude:retrieve_entity_from_memory",
               "addContext": {
-                "type": "minecraft:nearest_visible_targetable_player"
+                "memory_type": "minecraft:nearest_visible_targetable_player"
               }
             }
         },
@@ -236,8 +236,15 @@
             "speedModifier": 0.6
         },
         {
-            "type": "aptitude:set_walk_target_from_attack_target_if_target_out_of_reach",
-            "speedModifier": 1.0
+          "type": "aptitude:set_walk_target_from_attack_target_if_target_out_of_reach",
+          "speedModifier": {
+              "type": "aptitude:get_float",
+              "value": 1.0
+          },
+          "isWithinAttackRange": {
+            "type": "aptitude:entity_is_within_attack_range",
+            "projectile_attack_range_buffer": 1
+          }
         },
         {
             "type": "aptitude:run_if",
@@ -246,7 +253,13 @@
             },
             "wrappedBehavior": {
               "type": "aptitude:melee_attack",
-              "cooldownBetweenAttacks": 40
+              "cooldownBetweenAttacks": 40,
+              "isHoldingUsableProjectileWeapon": {
+                "type": "aptitude:entity_is_holding_usable_projectile_weapon"
+              },
+              "isWithinMeleeAttackRange": {
+                "type": "aptitude:entity_is_within_melee_attack_range"
+              }
             }
         },
         {
@@ -256,7 +269,13 @@
             },
             "wrappedBehavior": {
               "type": "aptitude:melee_attack",
-              "cooldownBetweenAttacks": 15
+              "cooldownBetweenAttacks": 15,
+              "isHoldingUsableProjectileWeapon": {
+                "type": "aptitude:entity_is_holding_usable_projectile_weapon"
+              },
+              "isWithinMeleeAttackRange": {
+                "type": "aptitude:entity_is_within_melee_attack_range"
+              }
             }
         },
         {

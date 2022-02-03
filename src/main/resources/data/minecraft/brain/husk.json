@@ -1,0 +1,271 @@
+{
+  "memory_types": [
+    "minecraft:look_target",
+    "minecraft:doors_to_close",
+    "minecraft:mobs",
+    "minecraft:visible_mobs",
+    "minecraft:nearest_visible_player",
+    "minecraft:nearest_visible_targetable_player",
+    "aptitude:nearest_visible_adult_zombies",
+    "aptitude:nearby_adult_zombies",
+    "minecraft:hurt_by",
+    "minecraft:hurt_by_entity",
+    "minecraft:walk_target",
+    "minecraft:cant_reach_walk_target_since",
+    "minecraft:attack_target",
+    "minecraft:attack_cooling_down",
+    "minecraft:interaction_target",
+    "minecraft:path",
+    "minecraft:angry_at",
+    "minecraft:nearest_visible_nemesis",
+    "minecraft:home"
+  ],
+  "sensor_types": [
+    "minecraft:nearest_living_entities",
+    "minecraft:nearest_players",
+    "minecraft:nearest_items",
+    "minecraft:hurt_by",
+    "aptitude:husk_specific_sensor"
+  ],
+  "core_activities": [
+    "minecraft:core"
+  ],
+  "default_activity": {
+    "type": "minecraft:idle",
+    "set_active": true
+  },
+  "rotating_activities": [
+    "minecraft:fight",
+    "minecraft:idle"
+  ],
+  "update_activity_callback": {
+    "type": "aptitude:update_activity",
+    "on_changed_callback": {
+      "type": "aptitude:play_activity_sound",
+      "play_first_valid": [
+        {
+          "predicate": {
+            "type": "aptitude:active_non_core_activity_check",
+            "activity": "minecraft:fight"
+          },
+          "sound_event": "minecraft:piglin_brute.angry"
+        }
+      ]
+    },
+    "additional_callbacks": [
+      {
+        "type": "aptitude:update_aggression_flag",
+        "predicate": {
+          "type": "aptitude:memory_status_check",
+          "addContext": {
+              "type": "minecraft:attack_target",
+              "status": "value_present"
+          }
+        }
+      }
+    ]
+  },
+  "activities_by_priority": [
+    {
+      "activity": "minecraft:core",
+      "priority_start": 0,
+      "behaviors": [
+        {
+            "type": "aptitude:look_at_target_sink",
+            "minDuration": 45,
+            "maxDuration": 90
+        },
+        {
+            "type": "aptitude:move_to_target_sink"
+        },
+        {
+          "type": "aptitude:interact_with_door"
+        },
+        {
+          "type": "aptitude:stop_being_angry_if_target_dead"
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:idle",
+      "priority_start": 10,
+      "behaviors": [
+        {
+          "type": "aptitude:start_attacking",
+          "targetFinderFunction": {
+            "type": "aptitude:retrieve_first_valid_entity",
+            "functions": [
+              {
+                "type": "aptitude:retrieve_entity_from_uuid_memory",
+                "addContext": {
+                  "memory_type": "minecraft:angry_at",
+                  "filter_bipredicate": {
+                    "type": "aptitude:entity_is_attackable_ignoring_line_of_sight"
+                  }
+                }
+              },
+              {
+                "type": "aptitude:retrieve_entity_from_memory",
+                "addContext": {
+                  "memory_type": "minecraft:nearest_targetable_player",
+                  "filter_bipredicate": {
+                    "type": "aptitude:entity_within_range",
+                    "distance": 12.0
+                  }
+                }
+              },
+              {
+                "type": "aptitude:retrieve_entity_from_memory",
+                "addContext": {
+                  "memory_type": "minecraft:nearest_visible_nemesis"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "aptitude:run_one",
+          "behaviors": [
+            {
+              "weight": 1,
+              "type": "aptitude:set_entity_look_target",
+              "predicate": {
+                "type": "aptitude:entity_is_type",
+                "entity_type_predicate": "minecraft:player"
+              },
+              "maxDistSqr": 8.0
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:set_entity_look_target",
+              "predicate": {
+                "type": "aptitude:entity_is_type",
+                "entity_type_predicate": "minecraft:zombie"
+              },
+              "maxDistSqr": 8.0
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:set_entity_look_target",
+              "predicate": {
+                "type": "aptitude:entity_is_type",
+                "entity_type_predicate": "minecraft:husk"
+              },
+              "maxDistSqr": 8.0
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:set_entity_look_target",
+              "maxDistSqr": 8.0
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:do_nothing",
+              "minDuration": 30,
+              "maxDuration": 60
+            }
+          ]
+        },
+        {
+          "type": "aptitude:run_one",
+          "behaviors": [
+            {
+              "weight": 2,
+              "type": "aptitude:random_stroll",
+              "speedModifier": 0.6
+            },
+            {
+              "weight": 2,
+              "type": "aptitude:interact_with",
+              "entity_type": "minecraft:zombie",
+              "interaction_range": 8,
+              "memory": "minecraft:interaction_target",
+              "speedModifier": 0.6,
+              "maxDist": 2
+            },
+            {
+              "weight": 2,
+              "type": "aptitude:interact_with",
+              "entity_type": "minecraft:husk",
+              "interaction_range": 8,
+              "memory": "minecraft:interaction_target",
+              "speedModifier": 0.6,
+              "maxDist": 2
+            },
+            {
+              "weight": 2,
+              "type": "aptitude:stroll_to_poi",
+              "memoryType": "minecraft:home",
+              "speedModifier": 0.6,
+              "closeEnoughDist": 2,
+              "maxDistFromPoi": 100
+            },
+            {
+              "weight": 2,
+              "type": "aptitude:stroll_around_poi",
+              "memoryType": "minecraft:home",
+              "speedModifier": 0.6,
+              "maxDistFromPoi": 5
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:do_nothing",
+              "minDuration": 30,
+              "maxDuration": 60
+            }
+          ]
+        },
+        {
+          "type": "aptitude:set_look_and_interact",
+          "entity_type": "minecraft:player",
+          "interaction_range": 4
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:fight",
+      "priority_start": 10,
+      "requirements": [
+        {
+          "type": "minecraft:attack_target",
+          "status": "value_present"
+        }
+      ],
+      "remove_when_stopped": [
+        "minecraft:attack_target"
+      ],
+      "behaviors": [
+        {
+          "type": "aptitude:stop_attacking_if_target_invalid",
+          "stopAttackingWhen": {
+            "type": "aptitude:negate_predicate",
+            "predicate": {
+              "type": "aptitude:always_true"
+            }
+          }
+        },
+        {
+          "type": "aptitude:set_walk_target_from_attack_target_if_target_out_of_reach",
+          "speedModifier": {
+            "type": "aptitude:get_float",
+            "value": 1.0
+          },
+          "isWithinAttackRange": {
+            "type": "aptitude:entity_is_within_attack_range",
+            "projectile_attack_range_buffer": 1
+          }
+        },
+        {
+          "type": "aptitude:melee_attack",
+          "cooldownBetweenAttacks": 20,
+          "isHoldingUsableProjectileWeapon": {
+            "type": "aptitude:entity_is_holding_usable_projectile_weapon"
+          },
+          "isWithinMeleeAttackRange": {
+            "type": "aptitude:entity_is_within_melee_attack_range"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,23 +1,19 @@
 package com.infamous.aptitude.common.behavior.functions;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
-import net.minecraft.advancements.critereon.EntityTypePredicate;
+import com.infamous.aptitude.common.behavior.util.FunctionHelper;
+import com.infamous.aptitude.common.behavior.util.PredicateHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
-import net.minecraft.world.entity.ai.sensing.Sensor;
-import net.minecraft.world.entity.monster.piglin.Piglin;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -26,6 +22,7 @@ import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -37,12 +34,12 @@ public class FunctionTypes {
     public static Supplier<IForgeRegistry<FunctionType<?>>> FUNCTION_TYPE_REGISTRY = FUNCTION_TYPES.makeRegistry("function_types", () ->
             new RegistryBuilder<FunctionType<?>>().setMaxID(Integer.MAX_VALUE - 1).onAdd((owner, stage, id, obj, old) ->
                     Aptitude.LOGGER.info("FunctionType Added: " + obj.getRegistryName().toString() + " ")
-            ).setDefaultKey(new ResourceLocation(Aptitude.MOD_ID, "self"))
+            ).setDefaultKey(new ResourceLocation(Aptitude.MOD_ID, "empty_optional"))
     );
 
-    public static final RegistryObject<FunctionType<Function<LivingEntity, LivingEntity>>> SELF = register("self",
+    public static final RegistryObject<FunctionType<Function<?, Optional<?>>>> EMPTY_OPTIONAL = register("empty_optional",
             jsonObject -> {
-                return livingEntity -> livingEntity;
+                return o -> Optional.empty();
             });
 
     public static final RegistryObject<FunctionType<Function<? extends Entity, Vec3>>> ENTITY_POSITION_VECTOR = register("entity_position_vector",
@@ -58,14 +55,13 @@ public class FunctionTypes {
     public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<? extends LivingEntity>>>> RETRIEVE_ENTITY_FROM_MEMORY = register("retrieve_entity_from_memory",
             jsonObject -> {
                 JsonObject addContextObj = GsonHelper.getAsJsonObject(jsonObject, "addContext");
-                MemoryModuleType<? extends LivingEntity> memoryType = BehaviorHelper.parseMemoryType(addContextObj, "type");
-                Predicate<LivingEntity> filterPredicate = addContextObj.has("filter_predicate") ?
-                        BehaviorHelper.parsePredicate(addContextObj, "filter_predicate", "type") :
-                        le -> true;
+                MemoryModuleType<? extends LivingEntity> memoryType = BehaviorHelper.parseMemoryType(addContextObj, "memory_type");
+                Predicate<LivingEntity> filterPredicate = PredicateHelper.parsePredicateOrDefault(addContextObj, "filter_predicate", "type", le -> true);
+                BiPredicate<LivingEntity, LivingEntity> filterBiPredicate = PredicateHelper.parseBiPredicateOrDefault(addContextObj, "filter_bipredicate", "type", (le1, le2) -> true);
 
                 return le -> {
                     Brain<?> brain = le.getBrain();
-                    return brain.getMemory(memoryType).filter(filterPredicate);
+                    return brain.getMemory(memoryType).filter(filterPredicate).filter(e -> filterBiPredicate.test(le, e));
 
 
                 };
@@ -74,31 +70,61 @@ public class FunctionTypes {
     public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<? extends LivingEntity>>>> RETRIEVE_ENTITY_FROM_UUID_MEMORY = register("retrieve_entity_from_uuid_memory",
             jsonObject -> {
                 JsonObject addContextObj = GsonHelper.getAsJsonObject(jsonObject, "addContext");
-                MemoryModuleType<UUID> memoryType = BehaviorHelper.parseMemoryType(addContextObj, "type");
-                Predicate<LivingEntity> filterPredicate = addContextObj.has("filter_predicate") ?
-                        BehaviorHelper.parsePredicate(addContextObj, "filter_predicate", "type") :
-                        le -> true;
+                MemoryModuleType<UUID> memoryType = BehaviorHelper.parseMemoryType(addContextObj, "memory_type");
 
-                return le -> BehaviorUtils.getLivingEntityFromUUIDMemory(le, memoryType).filter(filterPredicate);
+                Predicate<LivingEntity> filterPredicate = PredicateHelper.parsePredicateOrDefault(addContextObj, "filter_predicate", "type", le -> true);
+                BiPredicate<LivingEntity, LivingEntity> filterBiPredicate = PredicateHelper.parseBiPredicateOrDefault(addContextObj, "filter_bipredicate", "type", (le1, le2) -> true);
+
+
+                return le -> BehaviorUtils.getLivingEntityFromUUIDMemory(le, memoryType).filter(filterPredicate).filter(e -> filterBiPredicate.test(le, e));
             });
 
-    public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<? extends LivingEntity>>>> RETRIEVE_CLOSEST_VISIBLE_ENTITY = register("retrieve_closest_visible_entity",
+    public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<? extends LivingEntity>>>> RETRIEVE_ENTITY_FROM_VISIBLE_ENTITIES_MEMORY = register("retrieve_entity_from_visible_entities_memory",
             jsonObject -> {
                 JsonObject addContextObj = GsonHelper.getAsJsonObject(jsonObject, "addContext");
-                MemoryModuleType<NearestVisibleLivingEntities> memoryType = BehaviorHelper.parseMemoryType(addContextObj, "type");
-                Predicate<LivingEntity> filterPredicate = addContextObj.has("filter_predicate") ?
-                        BehaviorHelper.parsePredicate(addContextObj, "filter_predicate", "type") :
-                        le -> true;
+                MemoryModuleType<NearestVisibleLivingEntities> memoryType = BehaviorHelper.parseMemoryType(addContextObj, "memory_type");
+                Predicate<LivingEntity> filterPredicate = PredicateHelper.parsePredicateOrDefault(addContextObj, "filter_predicate", "type", le -> true);
+                BiPredicate<LivingEntity, LivingEntity> filterBiPredicate = PredicateHelper.parseBiPredicateOrDefault(addContextObj, "filter_bipredicate", "type", (le1, le2) -> true);
+
 
                 return le -> {
                     Brain<?> brain = le.getBrain();
-                    return brain.getMemory(memoryType).orElse(NearestVisibleLivingEntities.empty()).findClosest(filterPredicate);
+                    Predicate<LivingEntity> jointFilterPredicate = e -> filterPredicate.test(e) && filterBiPredicate.test(le, e);
+                    return brain.getMemory(memoryType).orElse(NearestVisibleLivingEntities.empty()).findClosest(jointFilterPredicate);
                 };
             });
 
     public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<? extends LivingEntity>>>> RETRIEVE_FIRST_VALID_ENTITY = register("retrieve_first_valid_entity",
             jsonObject -> {
+                List<Function<LivingEntity, Optional<? extends LivingEntity>>> functions = FunctionHelper.parseFunctions(jsonObject, "functions", "type");
+                return livingEntity -> {
+                    for(Function<LivingEntity, Optional<? extends LivingEntity>> function : functions){
+                        Optional<? extends LivingEntity> retrievedEntity = function.apply(livingEntity);
+                        if(retrievedEntity.isPresent()) return retrievedEntity;
+                    }
+                    return Optional.empty();
+                };
+            });
 
+    public static final RegistryObject<FunctionType<Function<Object, Object>>> PREDICATED_FUNCTION = register("predicated_function",
+            jsonObject -> {
+                Predicate<Object> predicate = PredicateHelper.parsePredicate(jsonObject, "predicate", "type");
+                Function<Object, Object> function = FunctionHelper.parseFunction(jsonObject, "function", "type");
+                Function<Object, Object> defaultFunction = FunctionHelper.parseFunction(jsonObject, "default", "type");
+                return o -> {
+                    if(predicate.test(o)){
+                        return function.apply(o);
+                    }
+                    return defaultFunction.apply(o);
+                };
+            });
+
+    public static final RegistryObject<FunctionType<Function<LivingEntity, Float>>> GET_FLOAT = register("get_float",
+            jsonObject -> {
+                float value = GsonHelper.getAsFloat(jsonObject, "value", 0);
+                return livingEntity -> {
+                    return value;
+                };
             });
 
 

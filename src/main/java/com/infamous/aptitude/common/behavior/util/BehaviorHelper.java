@@ -18,18 +18,23 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraftforge.common.util.TriPredicate;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 public class BehaviorHelper {
 
@@ -69,21 +74,16 @@ public class BehaviorHelper {
         return memoryStatus;
     }
 
-    public static EntityType<?> parseEntityType(JsonElement memberElement) {
-        String entityTypeString = memberElement.getAsString();
-        return parseEntityTypeString(entityTypeString);
-    }
-
-    public static EntityType<?> parseEntityType(JsonObject jsonObject, String memberName) {
+    public static <U extends Entity> EntityType<U> parseEntityType(JsonObject jsonObject, String memberName) {
         String entityTypeString = GsonHelper.getAsString(jsonObject, memberName, "");
         return parseEntityTypeString(entityTypeString);
     }
 
-    public static EntityType<?> parseEntityTypeString(String entityTypeString) {
+    public static <U extends Entity> EntityType<U> parseEntityTypeString(String entityTypeString) {
         ResourceLocation etLocation = new ResourceLocation(entityTypeString);
         EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(etLocation);
         if (entityType == null) throw new JsonParseException("Invalid entity type: " + entityTypeString);
-        return entityType;
+        return (EntityType<U>) entityType;
     }
 
     public static List<Pair<Behavior<?>, Integer>> parseWeightedBehaviors(JsonObject jsonObject, String memberName){
@@ -157,36 +157,6 @@ public class BehaviorHelper {
         memoriesToStatus.put(memoryType, memoryStatus);
     }
 
-    public static <U> Predicate<U> parsePredicate(JsonObject jsonObject, String memberName, String typeMemberName){
-        JsonObject predicateObj = GsonHelper.getAsJsonObject(jsonObject, memberName);
-        PredicateType<?> predicateType = parsePredicateType(predicateObj, typeMemberName);
-
-        return (Predicate<U>) predicateType.fromJson(predicateObj);
-    }
-
-    public static PredicateType<?> parsePredicateType(JsonObject jsonObject, String memberName){
-        String predicateTypeString = GsonHelper.getAsString(jsonObject, memberName, "");
-        ResourceLocation ptLocation = new ResourceLocation(predicateTypeString);
-        PredicateType<?> predicateType = PredicateTypes.getPredicateType(ptLocation);
-        if(predicateType == null) throw new JsonParseException("Invalid predicate type: " + predicateTypeString);
-        return predicateType;
-    }
-
-    public static <T, R> Function<T, R> parseFunction(JsonObject jsonObject, String memberName, String typeMemberName){
-        JsonObject functionObj = GsonHelper.getAsJsonObject(jsonObject, memberName);
-        FunctionType<?> predicateType = parseFunctionType(functionObj, typeMemberName);
-
-        return (Function<T, R>) predicateType.fromJson(functionObj);
-    }
-
-    public static FunctionType<?> parseFunctionType(JsonObject jsonObject, String memberName){
-        String functionTypeString = GsonHelper.getAsString(jsonObject, memberName, "");
-        ResourceLocation ftLocation = new ResourceLocation(functionTypeString);
-        FunctionType<?> functionType = FunctionTypes.getFunctionType(ftLocation);
-        if(functionType == null) throw new JsonParseException("Invalid function type: " + functionTypeString);
-        return functionType;
-    }
-
     public static Activity parseActivity(JsonElement je) {
         String activityString = je.getAsString();
         return parseActivityString(activityString);
@@ -204,64 +174,11 @@ public class BehaviorHelper {
         return activity;
     }
 
-    public static <U> Consumer<U> parseConsumer(JsonObject jsonObject, String memberName, String typeMemberName){
-        JsonObject consumerObj = GsonHelper.getAsJsonObject(jsonObject, memberName);
-        return parseConsumer(consumerObj, typeMemberName);
-    }
-
-    public static <U> Consumer<U> parseConsumer(JsonObject jsonObject, String typeMemberName){
-        ConsumerType<?> consumerType = parseConsumerType(jsonObject, typeMemberName);
-        return (Consumer<U>) consumerType.fromJson(jsonObject);
-    }
-
-    public static ConsumerType<?> parseConsumerType(JsonObject jsonObject, String memberName){
-        String consumerTypeString = GsonHelper.getAsString(jsonObject, memberName, "");
-        ResourceLocation ctLocation = new ResourceLocation(consumerTypeString);
-        ConsumerType<?> consumerType = ConsumerTypes.getConsumerType(ctLocation);
-        if(consumerType == null) throw new JsonParseException("Invalid consumer type: " + consumerTypeString);
-        return consumerType;
-    }
-
-    public static SoundEvent parseSoundEvent(JsonObject jsonObject, String memberName, String typeMemberName) {
-        JsonObject soundEventObj = GsonHelper.getAsJsonObject(jsonObject, memberName);
-        return parseSoundEventString(soundEventObj, typeMemberName);
-    }
-
     public static SoundEvent parseSoundEventString(JsonObject jsonObject, String memberName){
         String soundTypeString = GsonHelper.getAsString(jsonObject, memberName, "");
         ResourceLocation seLocation = new ResourceLocation(soundTypeString);
         SoundEvent soundEvent = ForgeRegistries.SOUND_EVENTS.getValue(seLocation);
         if(soundEvent == null) throw new JsonParseException("Invalid sound event: " + soundTypeString);
         return soundEvent;
-    }
-
-    public static List<EntityTypePredicate> getEntityTypePredicates(JsonObject jsonObject, String memberName) {
-        List<EntityTypePredicate> ignoredTypes = new ArrayList<>();
-        if(jsonObject.has(memberName)){
-            JsonElement entityTypePredicateElem = jsonObject.get(memberName);
-            if(entityTypePredicateElem.isJsonArray()){
-                JsonArray ignoredTypesArr = GsonHelper.getAsJsonArray(jsonObject, memberName);
-                ignoredTypesArr.forEach(jsonElement -> {
-                    EntityTypePredicate entityTypePredicate = EntityTypePredicate.fromJson(jsonElement);
-                    ignoredTypes.add(entityTypePredicate);
-                });
-            } else{
-                EntityTypePredicate entityTypePredicate = EntityTypePredicate.fromJson(entityTypePredicateElem);
-                ignoredTypes.add(entityTypePredicate);
-            }
-        }
-        return ignoredTypes;
-    }
-
-    public static <U> List<Predicate<U>> getPredicates(JsonObject jsonObject, String predicatesMemberName, String typeMemberName) {
-        JsonArray predicatesArray = GsonHelper.getAsJsonArray(jsonObject, predicatesMemberName);
-        List<Predicate<U>> predicates = new ArrayList<>();
-        predicatesArray.forEach(jsonElement -> {
-            JsonObject elemObj = jsonElement.getAsJsonObject();
-            PredicateType<?> predicateType = parsePredicateType(elemObj, typeMemberName);
-            Predicate<U> predicate = (Predicate<U>) predicateType.fromJson(elemObj);
-            predicates.add(predicate);
-        });
-        return predicates;
     }
 }
