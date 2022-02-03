@@ -17,16 +17,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class AptitudeStartHunting<H extends LivingEntity, P extends LivingEntity, A extends LivingEntity> extends Behavior<H> {
-   private final UniformInt timeBetweenHunts;
-   private final Predicate<LivingEntity> canHunt;
-   private final Predicate<LivingEntity> canBeHunted;
+public class AptitudeStartHuntingPrey<H extends LivingEntity, P extends LivingEntity, A extends LivingEntity> extends Behavior<H> {
    private final MemoryModuleType<P> preyMemory;
    private final MemoryModuleType<List<A>> visibleAlliesMemory;
    private final MemoryModuleType<List<A>> alliesMemory;
+   private final Predicate<LivingEntity> canHunt;
+   private final Predicate<LivingEntity> canBeHunted;
+   private final UniformInt timeBetweenHunts;
    private final long angerExpiry;
 
-   public AptitudeStartHunting(MemoryModuleType<P> preyMemory, MemoryModuleType<List<A>> visibleAlliesMemory, MemoryModuleType<List<A>> alliesMemory,Predicate<LivingEntity> canHunt, Predicate<LivingEntity> canBeHunted, UniformInt timeBetweenHunts, long angerExpiry) {
+   public AptitudeStartHuntingPrey(MemoryModuleType<P> preyMemory, MemoryModuleType<List<A>> visibleAlliesMemory, MemoryModuleType<List<A>> alliesMemory, Predicate<LivingEntity> canHunt, Predicate<LivingEntity> canBeHunted, UniformInt timeBetweenHunts, long angerExpiry) {
       super(ImmutableMap.of(
               preyMemory, MemoryStatus.VALUE_PRESENT,
               MemoryModuleType.ANGRY_AT, MemoryStatus.VALUE_ABSENT,

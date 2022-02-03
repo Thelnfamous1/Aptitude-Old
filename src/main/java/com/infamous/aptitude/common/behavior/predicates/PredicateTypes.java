@@ -14,6 +14,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -179,6 +180,11 @@ public class PredicateTypes {
                     }
                     return false;
                 };
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_HOLDING_CROSSBOW = register("entity_is_holding_crossbow",
+            jsonObject -> {
+                return livingEntity -> livingEntity.isHolding(is -> is.getItem() instanceof CrossbowItem);
             });
 
     private static <U extends Predicate<?>> RegistryObject<PredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {

@@ -2,6 +2,8 @@ package com.infamous.aptitude.common.behavior.predicates;
 
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
+import com.infamous.aptitude.common.behavior.util.FunctionHelper;
+import com.infamous.aptitude.common.behavior.util.PredicateHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -16,6 +18,8 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -114,6 +118,50 @@ public class BiPredicateTypes {
                         return distanceToSqr <= mob.getMeleeAttackRangeSqr(le1);
                     }
                     return false;
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<?, ?>>> ALL_OF_BIPREDICATE = register("all_of_bipredicate",
+            jsonObject -> {
+                List<BiPredicate<Object, Object>> biPredicates = PredicateHelper.parseBiPredicates(jsonObject, "bipredicates", "type");
+
+                return (o, o1) -> {
+                    for(BiPredicate<Object, Object> biPredicate : biPredicates){
+                        if(!biPredicate.test(o, o1)){
+                            return false;
+                        }
+                    }
+                    return true;
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<?, ?>>> ANY_OF_BIPREDICATE = register("any_of_bipredicate",
+            jsonObject -> {
+                List<BiPredicate<Object, Object>> biPredicates = PredicateHelper.parseBiPredicates(jsonObject, "bipredicates", "type");
+
+                return (o, o1) -> {
+                    for(BiPredicate<Object, Object> biPredicate : biPredicates){
+                        if(biPredicate.test(o, o1)){
+                            return true;
+                        }
+                    }
+                    return false;
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<?, ?>>> NEGATE_BIPREDICATE = register("negate_bipredicate",
+            jsonObject -> {
+                BiPredicate<Object, Object> biPredicate = PredicateHelper.parseBiPredicate(jsonObject, "bipredicate", "type");
+
+                return biPredicate.negate();
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, LivingEntity>>> ENTITY_MATCHES_ENTITY_FROM_MEMORY = register("entity_matches_entity_from_memory",
+            jsonObject -> {
+                Function<LivingEntity, Optional<? extends LivingEntity>> retrievalFunction = FunctionHelper.parseFunction(jsonObject, "retrieval_function", "type");
+                return (le, le1) -> {
+                    Optional<? extends LivingEntity> result = retrievalFunction.apply(le);
+                    return result.filter(e -> le1 == e).isPresent();
                 };
             });
 

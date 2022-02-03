@@ -43,6 +43,18 @@ public class PredicateHelper {
         return predicates;
     }
 
+    public static <T, U> List<BiPredicate<T, U>> parseBiPredicates(JsonObject jsonObject, String predicatesMemberName, String typeMemberName) {
+        JsonArray biPredicatesArray = GsonHelper.getAsJsonArray(jsonObject, predicatesMemberName);
+        List<BiPredicate<T, U>> biPredicates = new ArrayList<>();
+        biPredicatesArray.forEach(jsonElement -> {
+            JsonObject elemObj = jsonElement.getAsJsonObject();
+            BiPredicateType<?> biPredicateType = parseBiPredicateType(elemObj, typeMemberName);
+            BiPredicate<T, U> biPredicate = (BiPredicate<T, U>) biPredicateType.fromJson(elemObj);
+            biPredicates.add(biPredicate);
+        });
+        return biPredicates;
+    }
+
     public static <T, U> BiPredicate<T, U> parseBiPredicate(JsonObject jsonObject, String memberName, String typeMemberName) {
         JsonObject predicateObj = GsonHelper.getAsJsonObject(jsonObject, memberName);
         BiPredicateType<?> biPredicateType = parseBiPredicateType(predicateObj, typeMemberName);
