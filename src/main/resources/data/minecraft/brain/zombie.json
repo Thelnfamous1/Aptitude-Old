@@ -723,7 +723,60 @@
                 }
               },
               {
-
+                "type": "aptitude:all_of_predicate",
+                "predicates": [
+                  {
+                    "type": "aptitude:memory_value_check",
+                    "addContext": {
+                      "memory_type": "minecraft:avoid_target",
+                      "filter_predicate": {
+                        "type": "aptitude:entity_is_type",
+                        "entity_type_predicate": "minecraft:hoglin"
+                      }
+                    }
+                  },
+                  {
+                    "type": "aptitude:negate_predicate",
+                    "predicate": {
+                      "type": "aptitude:outnumbered_adult",
+                      "addContext": {
+                        "sameType": "aptitude:visible_adult_zombie_count",
+                        "otherType": "aptitude:visible_adult_hoglin_count"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "aptitude:memory_value_check",
+                "addContext": {
+                  "memory_type": "minecraft:avoid_target",
+                  "filter_predicate": {
+                    "type": "aptitude:any_of_predicate",
+                    "predicates": [
+                      {
+                        "type": "aptitude:entity_is_type",
+                        "entity_type_predicate": "minecraft:zombified_piglin"
+                      },
+                      {
+                        "type": "aptitude:entity_is_type",
+                        "entity_type_predicate": "minecraft:zoglin"
+                      }
+                    ]
+                  },
+                  "filter_bipredicate": {
+                    "type": "aptitude:negate_bipredicate",
+                    "bipredicate": {
+                      "type": "aptitude:entity_matches_entity_from_memory",
+                      "retrieval_function": {
+                        "type": "aptitude:retrieve_entity_from_memory",
+                        "addContext": {
+                          "memory_type": "minecraft:nearest_visible_zombified"
+                        }
+                      }
+                    }
+                  }
+                }
               }
             ]
           },
