@@ -6,35 +6,21 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.infamous.aptitude.common.behavior.BehaviorType;
 import com.infamous.aptitude.common.behavior.BehaviorTypes;
-import com.infamous.aptitude.common.behavior.consumer.ConsumerType;
-import com.infamous.aptitude.common.behavior.consumer.ConsumerTypes;
-import com.infamous.aptitude.common.behavior.functions.FunctionType;
-import com.infamous.aptitude.common.behavior.functions.FunctionTypes;
-import com.infamous.aptitude.common.behavior.predicates.PredicateType;
-import com.infamous.aptitude.common.behavior.predicates.PredicateTypes;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.advancements.critereon.EntityTypePredicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraftforge.common.util.TriPredicate;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.*;
 
 public class BehaviorHelper {
 

@@ -353,14 +353,25 @@
         {
             "type": "aptitude:erase_memory_if",
             "predicate": {
-              "type": "aptitude:outnumbered_adult",
-              "addContext": {
-                "sameType": "aptitude:visible_adult_pig_count",
-                "otherType": "aptitude:visible_adult_piglin_count"
-              }
+              "type": "aptitude:all_of_predicate",
+              "predicates": [
+                {
+                  "type": "aptitude:is_adult"
+                },
+                {
+                  "type": "aptitude:negate_predicate",
+                  "predicate": {
+                    "type": "aptitude:outnumbered_adult",
+                    "addContext": {
+                      "sameType": "aptitude:visible_adult_pig_count",
+                      "otherType": "aptitude:visible_adult_piglin_count"
+                    }
+                  }
+                }
+              ]
             },
             "memoryType": "minecraft:avoid_target"
-          }
+        }
       ]
     }
   ]

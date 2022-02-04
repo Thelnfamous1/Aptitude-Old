@@ -577,10 +577,13 @@
             "type": "aptitude:entity_is_within_projectile_attack_range"
           },
           "setChargingCrossbow": {
-
+            "type": "aptitude:entity_set_charging_crossbow"
           },
           "performRangedAttack": {
-
+            "type": "aptitude:entity_perform_crossbow_attack",
+            "shooting_power": 1.6,
+            "base_inaccuracy": 14,
+            "difficuly_scale": 4
           }
         },
         {
@@ -623,6 +626,109 @@
         "minecraft:avoid_target"
       ],
       "behaviors": [
+        {
+          "type": "aptitude:set_walk_target_away_from",
+          "walkAwayFromMemory": "minecraft:avoid_target",
+          "speedModifier": 1.0,
+          "desiredDistance": 12,
+          "ignoreWalkTarget": true,
+          "toPosition": {
+            "type": "aptitude:entity_position_vector"
+          }
+        },
+        {
+          "type": "aptitude:run_one",
+          "behaviors": [
+            {
+              "weight": 1,
+              "type": "aptitude:set_entity_look_target",
+              "predicate": {
+                "type": "aptitude:entity_is_type",
+                "entity_type_predicate": "minecraft:player"
+              },
+              "maxDistSqr": 8.0
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:set_entity_look_target",
+              "predicate": {
+                "type": "aptitude:entity_is_type",
+                "entity_type_predicate": "minecraft:zombie"
+              },
+              "maxDistSqr": 8.0
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:set_entity_look_target",
+              "maxDistSqr": 8.0
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:do_nothing",
+              "minDuration": 30,
+              "maxDuration": 60
+            }
+          ]
+        },
+        {
+          "type": "aptitude:run_one",
+          "behaviors": [
+            {
+              "weight": 2,
+              "type": "aptitude:random_stroll",
+              "speedModifier": 0.6
+            },
+            {
+              "weight": 2,
+              "type": "aptitude:interact_with",
+              "entity_type": "minecraft:zombie",
+              "interaction_range": 8,
+              "memory": "minecraft:interaction_target",
+              "speedModifier": 0.6,
+              "maxDist": 2
+            },
+            {
+              "type": "aptitude:run_if",
+              "predicate": {
+                "type": "aptitude:memory_status_check",
+                "addContext": {
+                  "type": "minecraft:nearest_player_holding_wanted_item",
+                  "status": "value_absent"
+                }
+              },
+              "wrappedBehavior": {
+                "type": "aptitude:set_walk_target_from_look_target",
+                "speedModifier": 0.6,
+                "closeEnoughDistance": 3
+              }
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:do_nothing",
+              "minDuration": 30,
+              "maxDuration": 60
+            }
+          ]
+        },
+        {
+          "type": "aptitude:erase_memory_if",
+          "predicate": {
+            "type": "aptitude:any_of_predicate",
+            "predicates": [
+              {
+                "type": "aptitude:memory_status_check",
+                "addContext": {
+                  "type": "minecraft:avoid_target",
+                  "status": "value_absent"
+                }
+              },
+              {
+
+              }
+            ]
+          },
+          "memoryType": "minecraft:avoid_target"
+        }
       ]
     }
   ]

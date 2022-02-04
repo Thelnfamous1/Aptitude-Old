@@ -273,8 +273,8 @@ public class BehaviorTypes {
     public static final RegistryObject<BehaviorType<AptitudeCrossbowAttack>> CROSSBOW_ATTACK = register("crossbow_attack",
             jsonObject -> {
                 BiPredicate<LivingEntity, LivingEntity> isWithinProjectileAttackRange = PredicateHelper.parseBiPredicate(jsonObject, "isWithinProjectileAttackRange", "type");
-                BiConsumer<LivingEntity, Boolean> setChargingCrossbow = (le, b) -> {};
-                BiConsumer<LivingEntity, LivingEntity> performRangedAttack = (le, le1) -> {};
+                BiConsumer<LivingEntity, Boolean> setChargingCrossbow = (le, b) -> ConsumerHelper.parseBiConsumer(jsonObject, "setChargingCrossbow", "type");
+                BiConsumer<LivingEntity, LivingEntity> performRangedAttack = ConsumerHelper.parseBiConsumer(jsonObject, "performRangedAttack", "type");
 
                 return new AptitudeCrossbowAttack(isWithinProjectileAttackRange, setChargingCrossbow, performRangedAttack);
             });
