@@ -4,10 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.custom.behavior.*;
-import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
-import com.infamous.aptitude.common.behavior.util.ConsumerHelper;
-import com.infamous.aptitude.common.behavior.util.FunctionHelper;
-import com.infamous.aptitude.common.behavior.util.PredicateHelper;
+import com.infamous.aptitude.common.behavior.util.*;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +34,7 @@ public class BehaviorTypes {
     public static Supplier<IForgeRegistry<BehaviorType<?>>> BEHAVIOR_TYPE_REGISTRY = BEHAVIOR_TYPES.makeRegistry("behavior_types", () ->
             new RegistryBuilder<BehaviorType<?>>().setMaxID(Integer.MAX_VALUE - 1).onAdd((owner, stage, id, obj, old) ->
                     Aptitude.LOGGER.info("BehaviorType Added: " + obj.getRegistryName().toString() + " ")
-            ).setDefaultKey(new ResourceLocation(Aptitude.MOD_ID, "do_nothing"))
+            )
     );
 
     public static final RegistryObject<BehaviorType<DoNothing>> DO_NOTHING = register("do_nothing", (jsonObject) -> {
@@ -144,8 +141,8 @@ public class BehaviorTypes {
 
     public static final RegistryObject<BehaviorType<AptitudeMeleeAttack>> MELEE_ATTACK = register("melee_attack", (jsonObject) -> {
         int cooldownBetweenAttacks = GsonHelper.getAsInt(jsonObject, "cooldownBetweenAttacks", 20);
-        Predicate<LivingEntity> isHoldingUsableProjectileWeapon = PredicateHelper.parsePredicate(jsonObject, "isHoldingUsableProjectileWeapon", "type");
-        BiPredicate<LivingEntity, LivingEntity> isWithinMeleeAttackRange = PredicateHelper.parseBiPredicate(jsonObject, "isWithinMeleeAttackRange", "type");
+        Predicate<LivingEntity> isHoldingUsableProjectileWeapon = PredicateHelper.parsePredicateOrDefault(jsonObject, "isHoldingUsableProjectileWeapon", "type", le -> false);
+        BiPredicate<LivingEntity, LivingEntity> isWithinMeleeAttackRange = PredicateHelper.parseBiPredicateOrDefault(jsonObject, "isWithinMeleeAttackRange", "type", MeleeAttackHelper::isWithinMeleeAttackRangeDefault);
         return new AptitudeMeleeAttack(cooldownBetweenAttacks, isHoldingUsableProjectileWeapon, isWithinMeleeAttackRange);
     });
 

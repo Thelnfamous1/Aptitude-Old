@@ -9,6 +9,7 @@ import com.infamous.aptitude.common.behavior.predicates.PredicateType;
 import com.infamous.aptitude.common.behavior.predicates.PredicateTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +65,10 @@ public class PredicateHelper {
 
     public static BiPredicateType<?> parseBiPredicateType(JsonObject jsonObject, String memberName){
         String biPredicateTypeString = GsonHelper.getAsString(jsonObject, memberName, "");
+        return parseBiPredicateTypeString(biPredicateTypeString);
+    }
+
+    public static BiPredicateType<?> parseBiPredicateTypeString(String biPredicateTypeString) {
         ResourceLocation bptLocation = new ResourceLocation(biPredicateTypeString);
         BiPredicateType<?> biPredicateType = BiPredicateTypes.getBiPredicateType(bptLocation);
         if(biPredicateType == null) throw new JsonParseException("Invalid bipredicate type: " + biPredicateTypeString);

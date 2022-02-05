@@ -9,13 +9,12 @@ import net.minecraft.advancements.critereon.EntityTypePredicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -39,7 +38,7 @@ public class PredicateTypes {
     public static Supplier<IForgeRegistry<PredicateType<?>>> PREDICATE_TYPE_REGISTRY = PREDICATE_TYPES.makeRegistry("predicate_types", () ->
             new RegistryBuilder<PredicateType<?>>().setMaxID(Integer.MAX_VALUE - 1).onAdd((owner, stage, id, obj, old) ->
                     Aptitude.LOGGER.info("PredicateType Added: " + obj.getRegistryName().toString() + " ")
-            ).setDefaultKey(new ResourceLocation(Aptitude.MOD_ID, "always_true"))
+            )
     );
 
     public static final RegistryObject<PredicateType<Predicate<?>>> ALWAYS_TRUE = register("always_true",
@@ -168,23 +167,19 @@ public class PredicateTypes {
                 return predicate.negate();
             });
 
-    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_HOLDING_USABLE_PROJECTILE_WEAPON = register("entity_is_holding_usable_projectile_weapon",
-            jsonObject -> {
-                return livingEntity -> {
-                    if(livingEntity instanceof Mob mob){
-                        return mob.isHolding((stack) -> {
-                            Item item = stack.getItem();
-                            return item instanceof ProjectileWeaponItem projectileWeaponItem
-                                    && mob.canFireProjectileWeapon(projectileWeaponItem);
-                        });
-                    }
-                    return false;
-                };
-            });
-
     public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_HOLDING_CROSSBOW = register("entity_is_holding_crossbow",
             jsonObject -> {
                 return livingEntity -> livingEntity.isHolding(is -> is.getItem() instanceof CrossbowItem);
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_HOLDING_BOW = register("entity_is_holding_bow",
+            jsonObject -> {
+                return livingEntity -> livingEntity.isHolding(is -> is.getItem() instanceof BowItem);
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_HOLDING_PROJECTILE_WEAPON = register("entity_is_holding_projectile_weapon",
+            jsonObject -> {
+                return livingEntity -> livingEntity.isHolding(is -> is.getItem() instanceof ProjectileWeaponItem);
             });
 
     private static <U extends Predicate<?>> RegistryObject<PredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {

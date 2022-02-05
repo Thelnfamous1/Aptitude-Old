@@ -3,7 +3,9 @@ package com.infamous.aptitude.common.behavior.predicates;
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.FunctionHelper;
+import com.infamous.aptitude.common.behavior.util.MeleeAttackHelper;
 import com.infamous.aptitude.common.behavior.util.PredicateHelper;
+import com.infamous.aptitude.common.behavior.util.RangedAttackHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -20,10 +22,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 public class BiPredicateTypes {
 
@@ -32,7 +31,7 @@ public class BiPredicateTypes {
     public static Supplier<IForgeRegistry<BiPredicateType<?>>> BIPREDICATE_TYPE_REGISTRY = BIPREDICATE_TYPES.makeRegistry("bipredicate_types", () ->
             new RegistryBuilder<BiPredicateType<?>>().setMaxID(Integer.MAX_VALUE - 1).onAdd((owner, stage, id, obj, old) ->
                     Aptitude.LOGGER.info("BiPredicateType Added: " + obj.getRegistryName().toString() + " ")
-            ).setDefaultKey(new ResourceLocation(Aptitude.MOD_ID, "always_true"))
+            )
     );
 
     public static final RegistryObject<BiPredicateType<BiPredicate<?, ?>>> ALWAYS_TRUE = register("always_true",
@@ -76,10 +75,15 @@ public class BiPredicateTypes {
 
     public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, LivingEntity>>> ENTITY_IS_WITHIN_MELEE_ATTACK_RANGE = register("entity_is_within_melee_attack_range",
             jsonObject -> {
-                return (le, le1) -> {
-                    if(le instanceof Mob mob){
-                        double distanceToSqr = mob.distanceToSqr(le1.getX(), le1.getY(), le1.getZ());
-                        return distanceToSqr <= mob.getMeleeAttackRangeSqr(le1);
+                Predicate<LivingEntity> meleeWeaponPredicate = PredicateHelper.parsePredicateOrDefault(jsonObject, "melee_weapon_predicate", "type",
+                        le -> true);
+                BiFunction<LivingEntity, LivingEntity, Double> getMeleeAttackRangeSqr = FunctionHelper.parseBiFunctionOrDefault(jsonObject, "get_melee_attack_range_sqr", "type",
+                        MeleeAttackHelper::getDefaultMeleeAttackRangeSqr);
+
+                return (attacker, target) -> {
+                    if(meleeWeaponPredicate.test(attacker)){
+                        double distanceToSqr = attacker.distanceToSqr(target.getX(), target.getY(), target.getZ());
+                        return distanceToSqr <= getMeleeAttackRangeSqr.apply(attacker, target);
                     }
                     return false;
                 };
@@ -87,37 +91,24 @@ public class BiPredicateTypes {
 
     public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, LivingEntity>>> ENTITY_IS_WITHIN_PROJECTILE_ATTACK_RANGE = register("entity_is_within_projectile_attack_range",
             jsonObject -> {
+                Predicate<LivingEntity> projectileWeaponPredicate = PredicateHelper.parsePredicateOrDefault(jsonObject, "projectile_weapon_predicate", "type",
+                        le -> le.isHolding(stack -> stack.getItem() instanceof ProjectileWeaponItem));
+                int defaultProjectileRange = GsonHelper.getAsInt(jsonObject, "default_projectile_range", 8);
                 int projectileAttackRangeBuffer = GsonHelper.getAsInt(jsonObject, "projectile_attack_range_buffer", 0);
-                return (le, le1) -> {
-                    if(le instanceof Mob mob){
-                        Item item = mob.getMainHandItem().getItem();
-                        if (item instanceof ProjectileWeaponItem projectileweaponitem) {
-                            if (mob.canFireProjectileWeapon((ProjectileWeaponItem)item)) {
-                                int projectileRange = projectileweaponitem.getDefaultProjectileRange() - projectileAttackRangeBuffer;
-                                return mob.closerThan(le1, (double)projectileRange);
-                            }
-                        }
-                    }
-                    return false;
+                int projectileRange = defaultProjectileRange - projectileAttackRangeBuffer;
+
+                return (attacker, target) -> {
+                    return projectileWeaponPredicate.test(attacker) && attacker.closerThan(target, (double)projectileRange);
                 };
             });
 
     public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, LivingEntity>>> ENTITY_IS_WITHIN_ATTACK_RANGE = register("entity_is_within_attack_range",
             jsonObject -> {
-                int projectileAttackRangeBuffer = GsonHelper.getAsInt(jsonObject, "projectile_attack_range_buffer", 0);
+                BiPredicate<LivingEntity, LivingEntity> isWithinProjectileAttackRange = PredicateHelper.parseBiPredicateOrDefault(jsonObject, "is_within_projectile_attack_range", "type", (le, le1) -> false);
+                BiPredicate<LivingEntity, LivingEntity> isWithinMeleeAttackRange = PredicateHelper.parseBiPredicateOrDefault(jsonObject, "is_within_melee_attack_range", "type", MeleeAttackHelper::isWithinMeleeAttackRangeDefault);
+
                 return (le, le1) -> {
-                    if(le instanceof Mob mob){
-                        Item item = mob.getMainHandItem().getItem();
-                        if (item instanceof ProjectileWeaponItem projectileweaponitem) {
-                            if (mob.canFireProjectileWeapon((ProjectileWeaponItem)item)) {
-                                int projectileRange = projectileweaponitem.getDefaultProjectileRange() - projectileAttackRangeBuffer;
-                                return mob.closerThan(le1, (double)projectileRange);
-                            }
-                        }
-                        double distanceToSqr = mob.distanceToSqr(le1.getX(), le1.getY(), le1.getZ());
-                        return distanceToSqr <= mob.getMeleeAttackRangeSqr(le1);
-                    }
-                    return false;
+                    return isWithinProjectileAttackRange.test(le, le1) || isWithinMeleeAttackRange.test(le, le1);
                 };
             });
 

@@ -34,7 +34,7 @@ public class FunctionTypes {
     public static Supplier<IForgeRegistry<FunctionType<?>>> FUNCTION_TYPE_REGISTRY = FUNCTION_TYPES.makeRegistry("function_types", () ->
             new RegistryBuilder<FunctionType<?>>().setMaxID(Integer.MAX_VALUE - 1).onAdd((owner, stage, id, obj, old) ->
                     Aptitude.LOGGER.info("FunctionType Added: " + obj.getRegistryName().toString() + " ")
-            ).setDefaultKey(new ResourceLocation(Aptitude.MOD_ID, "empty_optional"))
+            )
     );
 
     public static final RegistryObject<FunctionType<Function<?, Optional<?>>>> EMPTY_OPTIONAL = register("empty_optional",

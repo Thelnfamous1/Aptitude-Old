@@ -242,8 +242,7 @@
               "value": 1.0
           },
           "isWithinAttackRange": {
-            "type": "aptitude:entity_is_within_attack_range",
-            "projectile_attack_range_buffer": 1
+            "type": "aptitude:entity_is_within_attack_range"
           }
         },
         {
@@ -253,13 +252,7 @@
             },
             "wrappedBehavior": {
               "type": "aptitude:melee_attack",
-              "cooldownBetweenAttacks": 40,
-              "isHoldingUsableProjectileWeapon": {
-                "type": "aptitude:entity_is_holding_usable_projectile_weapon"
-              },
-              "isWithinMeleeAttackRange": {
-                "type": "aptitude:entity_is_within_melee_attack_range"
-              }
+              "cooldownBetweenAttacks": 40
             }
         },
         {
@@ -269,13 +262,7 @@
             },
             "wrappedBehavior": {
               "type": "aptitude:melee_attack",
-              "cooldownBetweenAttacks": 15,
-              "isHoldingUsableProjectileWeapon": {
-                "type": "aptitude:entity_is_holding_usable_projectile_weapon"
-              },
-              "isWithinMeleeAttackRange": {
-                "type": "aptitude:entity_is_within_melee_attack_range"
-              }
+              "cooldownBetweenAttacks": 15
             }
         },
         {

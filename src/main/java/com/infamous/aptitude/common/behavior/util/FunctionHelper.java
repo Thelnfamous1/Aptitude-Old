@@ -3,6 +3,8 @@ package com.infamous.aptitude.common.behavior.util;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.infamous.aptitude.common.behavior.functions.BiFunctionType;
+import com.infamous.aptitude.common.behavior.functions.BiFunctionTypes;
 import com.infamous.aptitude.common.behavior.functions.FunctionType;
 import com.infamous.aptitude.common.behavior.functions.FunctionTypes;
 import net.minecraft.resources.ResourceLocation;
@@ -10,9 +12,15 @@ import net.minecraft.util.GsonHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class FunctionHelper {
+
+    public static <T, R> Function<T, R> parseFunctionOrDefault(JsonObject jsonObject, String memberName, String typeMemberName, Function<T, R> defaultFunction){
+        if(jsonObject.has(memberName)) return parseFunction(jsonObject, memberName, typeMemberName);
+        return defaultFunction;
+    }
     public static <T, R> Function<T, R> parseFunction(JsonObject jsonObject, String memberName, String typeMemberName){
         JsonObject functionObj = GsonHelper.getAsJsonObject(jsonObject, memberName);
         FunctionType<?> predicateType = parseFunctionType(functionObj, typeMemberName);
@@ -38,5 +46,25 @@ public class FunctionHelper {
             functions.add(function);
         });
         return functions;
+    }
+
+    public static <T, U, R> BiFunction<T, U, R> parseBiFunctionOrDefault(JsonObject jsonObject, String memberName, String typeMemberName, BiFunction<T, U, R> defaultBiFunction){
+        if(jsonObject.has(memberName)) return parseBiFunction(jsonObject, memberName, typeMemberName);
+        return defaultBiFunction;
+    }
+
+    public static <T, U, R> BiFunction<T, U, R> parseBiFunction(JsonObject jsonObject, String memberName, String typeMemberName){
+        JsonObject biFunctionObj = GsonHelper.getAsJsonObject(jsonObject, memberName);
+        BiFunctionType<?> predicateType = parseBiFunctionType(biFunctionObj, typeMemberName);
+
+        return (BiFunction<T, U, R>) predicateType.fromJson(biFunctionObj);
+    }
+
+    public static BiFunctionType<?> parseBiFunctionType(JsonObject jsonObject, String memberName){
+        String biFunctionTypeString = GsonHelper.getAsString(jsonObject, memberName, "");
+        ResourceLocation ftLocation = new ResourceLocation(biFunctionTypeString);
+        BiFunctionType<?> functionType = BiFunctionTypes.getBiFunctionType(ftLocation);
+        if(functionType == null) throw new JsonParseException("Invalid function type: " + biFunctionTypeString);
+        return functionType;
     }
 }

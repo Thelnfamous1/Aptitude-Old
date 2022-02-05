@@ -34,7 +34,7 @@ public class ConsumerTypes {
     public static Supplier<IForgeRegistry<ConsumerType<?>>> CONSUMER_TYPE_REGISTRY = CONSUMER_TYPES.makeRegistry("consumer_types", () ->
             new RegistryBuilder<ConsumerType<?>>().setMaxID(Integer.MAX_VALUE - 1).onAdd((owner, stage, id, obj, old) ->
                     Aptitude.LOGGER.info("ConsumerType Added: " + obj.getRegistryName().toString() + " ")
-            ).setDefaultKey(new ResourceLocation(Aptitude.MOD_ID, "nothing"))
+            )
     );
 
     public static final RegistryObject<ConsumerType<Consumer<?>>> NOTHING = register("nothing",

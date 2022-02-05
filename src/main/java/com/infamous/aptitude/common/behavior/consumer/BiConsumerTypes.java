@@ -28,7 +28,7 @@ public class BiConsumerTypes {
     public static Supplier<IForgeRegistry<BiConsumerType<?>>> BICONSUMER_TYPE_REGISTRY = BICONSUMER_TYPES.makeRegistry("biconsumer_types", () ->
             new RegistryBuilder<BiConsumerType<?>>().setMaxID(Integer.MAX_VALUE - 1).onAdd((owner, stage, id, obj, old) ->
                     Aptitude.LOGGER.info("BiConsumerType Added: " + obj.getRegistryName().toString() + " ")
-            ).setDefaultKey(new ResourceLocation(Aptitude.MOD_ID, "nothing"))
+            )
     );
 
     public static final RegistryObject<BiConsumerType<BiConsumer<?, ?>>> NOTHING = register("nothing",
