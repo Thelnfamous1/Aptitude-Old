@@ -193,7 +193,7 @@ public class BehaviorTypes {
     public static final RegistryObject<BehaviorType<StartCelebratingIfTargetDead>> START_CELEBRATING_IF_TARGET_DEAD = register("start_celebrating_if_target_dead",
             jsonObject -> {
                 int celebrateDuration = GsonHelper.getAsInt(jsonObject, "celebrateDuration");
-                BiPredicate<LivingEntity, LivingEntity> dancePredicate = (le, le1) -> true;
+                BiPredicate<LivingEntity, LivingEntity> dancePredicate = PredicateHelper.parseBiPredicate(jsonObject, "dancePredicate", "type");
                 return new StartCelebratingIfTargetDead(celebrateDuration, dancePredicate);
             });
 

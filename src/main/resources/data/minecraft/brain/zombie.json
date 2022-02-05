@@ -245,7 +245,17 @@
           "type": "aptitude:start_celebrating_if_target_dead",
           "celebrateDuration": 300,
           "dancePredicate": {
-            "type": "aptitude:wants_to_dance"
+            "type": "aptitude:all_of_bipredicate",
+            "bipredicates": [
+              {
+                "type": "aptitude:entity_target_is_type",
+                "entity_type_predicate": "minecraft:hoglin"
+              },
+              {
+                "type": "aptitude:entity_game_time_seeded_random_float_chance",
+                "random_chance": 0.1
+              }
+            ]
           }
         },
         {

@@ -2,10 +2,8 @@ package com.infamous.aptitude.common.behavior.predicates;
 
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
-import com.infamous.aptitude.common.behavior.util.FunctionHelper;
-import com.infamous.aptitude.common.behavior.util.MeleeAttackHelper;
-import com.infamous.aptitude.common.behavior.util.PredicateHelper;
-import com.infamous.aptitude.common.behavior.util.RangedAttackHelper;
+import com.infamous.aptitude.common.behavior.util.*;
+import net.minecraft.advancements.critereon.EntityTypePredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -25,6 +23,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.*;
 
 public class BiPredicateTypes {
@@ -177,6 +176,23 @@ public class BiPredicateTypes {
                     } else {
                         return false;
                     }
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, LivingEntity>>> ENTITY_TARGET_IS_TYPE = register("entity_target_is_type",
+            jsonObject -> {
+                EntityTypePredicate entityTypePredicate = EntityTypePredicate.fromJson(jsonObject.get("entity_type_predicate"));
+                return (attacker, target) -> {
+                    return entityTypePredicate.matches(target.getType());
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, ?>>> ENTITY_GAME_TIME_SEEDED_RANDOM_FLOAT_CHANCE = register("entity_game_time_seeded_random_float_chance",
+            jsonObject -> {
+                float randomChance = GsonHelper.getAsFloat(jsonObject, "random_chance");
+
+                return (livingEntity, o) -> {
+                    return (new Random(livingEntity.level.getGameTime())).nextFloat() < randomChance;
                 };
             });
 
