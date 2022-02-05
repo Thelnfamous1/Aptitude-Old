@@ -646,7 +646,7 @@
       ]
     },
     {
-      "activity": "minecraft:avoid",
+      "activity": "minecraft:celebrate",
       "priority_start": 10,
       "requirements": [
         {
