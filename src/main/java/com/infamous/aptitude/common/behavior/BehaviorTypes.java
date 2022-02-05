@@ -10,6 +10,7 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.*;
@@ -274,6 +275,62 @@ public class BehaviorTypes {
                 BiConsumer<LivingEntity, LivingEntity> performRangedAttack = ConsumerHelper.parseBiConsumer(jsonObject, "performRangedAttack", "type");
 
                 return new AptitudeCrossbowAttack(isWithinProjectileAttackRange, setChargingCrossbow, performRangedAttack);
+            });
+
+
+    public static final RegistryObject<BehaviorType<GoToCelebrateLocation<?>>> GO_TO_CELEBRATE_LOCATION = register("go_to_celebrate_location",
+            (jsonObject) -> {
+                int closeEnoughDist = GsonHelper.getAsInt(jsonObject, "closeEnoughDist", 0);
+                float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
+
+                return new GoToCelebrateLocation<>(closeEnoughDist, speedModifier);
+            });
+
+
+    public static final RegistryObject<BehaviorType<AptitudeStopAdmiringIfItemTooFarAway<?>>> STOP_ADMIRING_IF_ITEM_TOO_FAR_AWAY = register("stop_admiring_if_item_too_far_away",
+            (jsonObject) -> {
+                Predicate<LivingEntity> canAdmire = PredicateHelper.parsePredicateOrDefault(jsonObject, "canAdmire", "type", livingEntity -> livingEntity.getOffhandItem().isEmpty());
+                int maxDistanceToItem = GsonHelper.getAsInt(jsonObject, "maxDistanceToItem", 0);
+
+                return new AptitudeStopAdmiringIfItemTooFarAway<>(canAdmire, maxDistanceToItem);
+            });
+
+
+    public static final RegistryObject<BehaviorType<AptitudeStopAdmiringIfTiredOfTryingToReachItem<?>>> STOP_ADMIRING_IF_TIRED_OF_TRYING_TO_REACH_ITEM = register("stop_admiring_if_tired_of_trying_to_reach_item",
+            (jsonObject) -> {
+                Predicate<LivingEntity> canAdmire = PredicateHelper.parsePredicateOrDefault(jsonObject, "canAdmire", "type", livingEntity -> livingEntity.getOffhandItem().isEmpty());
+                int maxTimeToReachItem = GsonHelper.getAsInt(jsonObject, "maxTimeToReachItem", 0);
+                int disableTime = GsonHelper.getAsInt(jsonObject, "disableTime", 0);
+
+                return new AptitudeStopAdmiringIfTiredOfTryingToReachItem<>(canAdmire, maxTimeToReachItem, disableTime);
+            });
+
+
+    public static final RegistryObject<BehaviorType<GoToWantedItem<?>>> GO_TO_WANTED_ITEM = register("go_to_wanted_item",
+            (jsonObject) -> {
+                Predicate<LivingEntity> predicate = PredicateHelper.parsePredicateOrDefault(jsonObject, "predicate", "type", livingEntity -> true);
+                float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
+                boolean ignoreWalkTarget = GsonHelper.getAsBoolean(jsonObject, "ignore_walk_target", false);
+                int maxDistToWalk = GsonHelper.getAsInt(jsonObject, "maxDistToWalk", 0);
+
+                return new GoToWantedItem<>(predicate, speedModifier, ignoreWalkTarget, maxDistToWalk);
+            });
+
+
+    public static final RegistryObject<BehaviorType<Mount<?>>> MOUNT = register("mount",
+            (jsonObject) -> {
+                float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
+
+                return new Mount<>(speedModifier);
+            });
+
+
+    public static final RegistryObject<BehaviorType<DismountOrSkipMounting<?, ?>>> DISMOUNT_OR_SKIP_MOUNTING = register("dismount_or_skip_mounting",
+            (jsonObject) -> {
+                int maxWalkDistToRideTarget = GsonHelper.getAsInt(jsonObject, "maxWalkDistToRideTarget", 0);
+                BiPredicate<LivingEntity, Entity> dontRideIf = PredicateHelper.parseBiPredicate(jsonObject, "dontRideIf", "type");
+
+                return new DismountOrSkipMounting<>(maxWalkDistToRideTarget, dontRideIf);
             });
 
     private static <U extends Behavior<?>> RegistryObject<BehaviorType<U>> register(String name, Function<JsonObject, U> jsonFactory) {

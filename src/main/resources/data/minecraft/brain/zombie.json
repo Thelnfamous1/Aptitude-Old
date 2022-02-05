@@ -204,10 +204,34 @@
         {
           "type": "aptitude:stop_holding_item_if_no_longer_admiring",
           "shouldStopHoldingItem": {
-            "type": "aptitude:should_stop_holding_offhand"
+            "type": "aptitude:all_of_predicate",
+            "predicates": [
+              {
+                "type": "aptitude:negate_predicate",
+                "predicate": {
+                  "type": "aptitude:entity_item_in_slot_is_empty",
+                  "slot": "offhand"
+                }
+              },
+              {
+                "type": "aptitude:negate_predicate",
+                "predicate": {
+                  "type": "aptitude:entity_item_in_slot_can_perfom_action",
+                  "slot": "offhand",
+                  "tool_action": "shield_block"
+                }
+              }
+            ]
           },
           "stopHoldingItem": {
-            "type": "aptitude:stop_holding_offhand"
+            "type": "aptitude:entity_finish_admiring_and_maybe_barter",
+            "barter_currency": {
+              "item": "minecraft:gold_ingot"
+            },
+            "bartering_loot_table": "minecraft:gameplay/piglin_bartering",
+            "loved_items": {
+              "tag": "minecraft:piglin_loved"
+            }
           }
         },
         {
@@ -244,7 +268,7 @@
               },
               {
                 "type": "aptitude:entity_is_holding",
-                "is_holding": "#minecraft:piglin_loved"
+                "is_holding": "minecraft:piglin_loved"
               }
             ]
           },
@@ -626,6 +650,207 @@
       "priority_start": 10,
       "requirements": [
         {
+          "type": "minecraft:celebrate_location",
+          "status": "value_present"
+        }
+      ],
+      "remove_when_stopped": [
+        "minecraft:celebrate_location"
+      ],
+      "behaviors": [
+        {
+          "type": "aptitude:set_walk_target_away_from",
+          "walkAwayFromMemory": "minecraft:nearest_repellent",
+          "speedModifier": 1.0,
+          "desiredDistance": 8,
+          "ignoreWalkTarget": false,
+          "toPosition": {
+            "type": "aptitude:block_position_vector"
+          }
+        },
+        {
+          "type": "aptitude:set_entity_look_target",
+          "predicate": {
+            "type": "aptitude:all_of_predicate",
+            "predicates": [
+              {
+                "type": "aptitude:entity_is_type",
+                "entity_type_predicate": "minecraft:player"
+              },
+              {
+                "type": "aptitude:entity_is_holding",
+                "is_holding": "minecraft:piglin_loved"
+              }
+            ]
+          },
+          "maxDistSq": 14.0
+        },
+        {
+          "type": "aptitude:start_attacking",
+          "canAttackPredicate": {
+            "type": "aptitude:is_adult"
+          },
+          "targetFinderFunction": {
+            "type": "aptitude:predicated_function",
+            "predicate": {
+              "type": "aptitude:memory_value_check",
+              "addContext": {
+                "memory_type": "minecraft:nearest_visible_zombified",
+                "filter_bipredicate": {
+                  "type": "aptitude:entity_within_distance",
+                  "distance": 6.0
+                }
+              }
+            },
+            "function": {
+              "type": "aptitude:retrieve_first_valid_entity",
+              "functions": [
+                {
+                  "type": "aptitude:retrieve_entity_from_uuid_memory",
+                  "addContext": {
+                    "memory_type": "minecraft:angry_at",
+                    "filter_bipredicate": {
+                      "type": "aptitude:entity_is_attackable_ignoring_line_of_sight"
+                    }
+                  }
+                },
+                {
+                  "type": "aptitude:predicated_function",
+                  "predicate": {
+                    "type": "aptitude:memory_status_check",
+                    "addContext": {
+                      "type": "minecraft:universal_anger",
+                      "status": "value_present"
+                    }
+                  },
+                  "function": {
+                    "type": "aptitude:retrieve_entity_from_memory",
+                    "addContext": {
+                      "memory_type": "minecraft:nearest_visible_targetable_player"
+                    }
+                  },
+                  "default": {
+                    "type": "aptitude:empty_optional"
+                  }
+                },
+                {
+                  "type": "aptitude:retrieve_entity_from_memory",
+                  "addContext": {
+                    "memory_type": "minecraft:nearest_visible_nemesis"
+                  }
+                },
+                {
+                  "type": "aptitude:retrieve_entity_from_memory",
+                  "addContext": {
+                    "memory_type": "minecraft:nearest_targetable_player_not_wearing_gold",
+                    "filter_bipredicate": {
+                      "type": "aptitude:entity_is_attackable"
+                    }
+                  }
+                }
+              ]
+            },
+            "default": {
+              "type": "aptitude:empty_optional"
+            }
+          }
+        },
+        {
+          "type": "aptitude:run_if",
+          "predicate": {
+            "type": "aptitude:always_true"
+          },
+          "wrappedBehavior": {
+            "type": "aptitude:go_to_celebrate_location",
+            "closeEnoughDist": 2,
+            "speedModifier": 1.0
+          }
+        },
+        {
+          "type": "aptitude:run_if",
+          "predicate": {
+            "type": "aptitude:always_true"
+          },
+          "wrappedBehavior": {
+            "type": "aptitude:go_to_celebrate_location",
+            "closeEnoughDist": 4,
+            "speedModifier": 0.6
+          }
+        },
+        {
+          "type": "aptitude:run_one",
+          "behaviors": [
+            {
+              "weight": 1,
+              "type": "aptitude:set_entity_look_target",
+              "predicate": {
+                "type": "aptitude:entity_is_type",
+                "entity_type_predicate": "minecraft:zombie"
+              },
+              "maxDistSqr": 8.0
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:random_stroll",
+              "speedModifier": 0.6,
+              "maxHorizontalDistance": 2,
+              "maxVerticalDistance": 1
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:do_nothing",
+              "minDuration": 10,
+              "maxDuration": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:admire_item",
+      "priority_start": 10,
+      "requirements": [
+        {
+          "type": "minecraft:admiring_item",
+          "status": "value_present"
+        }
+      ],
+      "remove_when_stopped": [
+        "minecraft:admiring_item"
+      ],
+      "behaviors": [
+        {
+          "type": "aptitude:go_to_wanted_item",
+          "predicate": {
+            "type": "aptitude:negate_predicate",
+            "predicate": {
+              "type": "aptitude:entity_item_in_slot_is",
+              "slot": "offhand",
+              "item_in_slot_is": {
+                "tag": "minecraft:piglin_loved"
+              }
+            }
+          },
+          "speedModifer": 1.0,
+          "ignore_walk_target": true,
+          "maxDistToWalk": 9
+        },
+        {
+          "type": "aptitude:stop_admiring_if_item_too_far_away",
+          "maxDistanceToItem": 9
+        },
+        {
+          "type": "aptitude:stop_admiring_if_tired_of_trying_to_reach_item",
+          "maxTimeToReachItem": 200,
+          "disableTime": 200
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:avoid",
+      "priority_start": 10,
+      "requirements": [
+        {
           "type": "minecraft:avoid_target",
           "status": "value_present"
         }
@@ -789,6 +1014,90 @@
             ]
           },
           "memoryType": "minecraft:avoid_target"
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:ride",
+      "priority_start": 10,
+      "requirements": [
+        {
+          "type": "minecraft:ride_target",
+          "status": "value_present"
+        }
+      ],
+      "remove_when_stopped": [
+        "minecraft:ride_target"
+      ],
+      "behaviors": [
+        {
+          "type": "aptitude:mount",
+          "speedModifier": 0.8
+        },
+        {
+          "type": "aptitude:set_entity_look_target",
+          "predicate": {
+            "type": "aptitude:all_of_predicate",
+            "predicates": [
+              {
+                "type": "aptitude:entity_is_type",
+                "entity_type_predicate": "minecraft:player"
+              },
+              {
+                "type": "aptitude:entity_is_holding",
+                "is_holding": "minecraft:piglin_loved"
+              }
+            ]
+          },
+          "maxDistSq": 8.0
+        },
+        {
+          "type": "aptitude:run_if",
+          "predicate": {
+            "type": "aptitude:entity_is_passenger"
+          },
+          "wrappedBehavior": {
+            "type": "aptitude:run_one",
+            "behaviors": [
+              {
+                "weight": 1,
+                "type": "aptitude:set_entity_look_target",
+                "predicate": {
+                  "type": "aptitude:entity_is_type",
+                  "entity_type_predicate": "minecraft:player"
+                },
+                "maxDistSqr": 8.0
+              },
+              {
+                "weight": 1,
+                "type": "aptitude:set_entity_look_target",
+                "predicate": {
+                  "type": "aptitude:entity_is_type",
+                  "entity_type_predicate": "minecraft:zombie"
+                },
+                "maxDistSqr": 8.0
+              },
+              {
+                "weight": 1,
+                "type": "aptitude:set_entity_look_target",
+                "maxDistSqr": 8.0
+              },
+              {
+                "weight": 1,
+                "type": "aptitude:do_nothing",
+                "minDuration": 30,
+                "maxDuration": 60
+              }
+            ]
+          }
+        },
+        {
+          "type": "aptitude:dismount_or_skip_mounting",
+          "maxWalkDistToRideTarget": 8,
+          "dontRideIf": {
+            "type": "aptitude:entity_wants_to_stop_riding_mount",
+            "can_ride_adults": false
+          }
         }
       ]
     }

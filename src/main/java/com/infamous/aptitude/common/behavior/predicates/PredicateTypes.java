@@ -8,6 +8,8 @@ import com.infamous.aptitude.common.behavior.util.PredicateHelper;
 import net.minecraft.advancements.critereon.EntityTypePredicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -17,6 +19,7 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -180,6 +183,31 @@ public class PredicateTypes {
     public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_HOLDING_PROJECTILE_WEAPON = register("entity_is_holding_projectile_weapon",
             jsonObject -> {
                 return livingEntity -> livingEntity.isHolding(is -> is.getItem() instanceof ProjectileWeaponItem);
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_HAS_EMPTY_SLOT = register("entity_has_empty_slot",
+            jsonObject -> {
+                EquipmentSlot equipmentSlot = BehaviorHelper.parseEquipmentSlot(jsonObject, "slot");
+                return livingEntity -> livingEntity.getItemBySlot(equipmentSlot).isEmpty();
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_ITEM_IN_SLOT_IS = register("entity_item_in_slot_is",
+            jsonObject -> {
+                EquipmentSlot equipmentSlot = BehaviorHelper.parseEquipmentSlot(jsonObject, "slot");
+                Ingredient ingredient = Ingredient.fromJson(jsonObject.get("item_in_slot_is"));
+                return livingEntity -> ingredient.test(livingEntity.getItemBySlot(equipmentSlot));
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_ITEM_IN_SLOT_CAN_PERFORM_ACTION = register("entity_item_in_slot_can_perform_action",
+            jsonObject -> {
+                EquipmentSlot equipmentSlot = BehaviorHelper.parseEquipmentSlot(jsonObject, "slot");
+                ToolAction toolAction = BehaviorHelper.parseToolAction(jsonObject);
+                return livingEntity -> livingEntity.getItemBySlot(equipmentSlot).canPerformAction(toolAction);
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_PASSENGER = register("entity_is_passenger",
+            jsonObject -> {
+                return Entity::isPassenger;
             });
 
     private static <U extends Predicate<?>> RegistryObject<PredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {

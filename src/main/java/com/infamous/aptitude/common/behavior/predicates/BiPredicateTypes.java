@@ -9,9 +9,12 @@ import com.infamous.aptitude.common.behavior.util.RangedAttackHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -153,6 +156,27 @@ public class BiPredicateTypes {
                 return (le, le1) -> {
                     Optional<? extends LivingEntity> result = retrievalFunction.apply(le);
                     return result.filter(e -> le1 == e).isPresent();
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, Entity>>> ENTITY_WANTS_TO_STOP_RIDING_MOUNT = register("entity_wants_to_stop_riding_mount",
+            jsonObject -> {
+                boolean canRideAdults = GsonHelper.getAsBoolean(jsonObject, "can_ride_adults", true);
+                boolean ignoreHurtRider = GsonHelper.getAsBoolean(jsonObject, "ignore_hurt_rider", false);
+                boolean ignoreHurtMount = GsonHelper.getAsBoolean(jsonObject, "ignore_hurt_mount", false);
+                boolean canRideSameType = GsonHelper.getAsBoolean(jsonObject, "can_ride_same_type", false);
+
+                return (rider, vehicle) -> {
+                    if (vehicle instanceof LivingEntity mount) {
+                        boolean ridingAdult = !mount.isBaby() && !canRideAdults;
+                        boolean mountDead = !mount.isAlive();
+                        boolean riderHurt = rider.getBrain().hasMemoryValue(MemoryModuleType.HURT_BY) && !ignoreHurtRider;
+                        boolean mountHurt = mount.getBrain().hasMemoryValue(MemoryModuleType.HURT_BY) && !ignoreHurtMount;
+                        boolean notRidingInTower = mount.getType() == rider.getType() && mount.getVehicle() == null && !canRideSameType;
+                        return ridingAdult || mountDead || riderHurt || mountHurt || notRidingInTower;
+                    } else {
+                        return false;
+                    }
                 };
             });
 

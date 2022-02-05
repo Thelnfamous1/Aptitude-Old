@@ -10,18 +10,18 @@ import com.infamous.aptitude.mixin.LivingEntityAccessor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.*;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -144,6 +144,51 @@ public class ConsumerTypes {
                      */
                 };
     });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_FINISH_ADMIRING_AND_MAYBE_BARTER = register("entity_finish_admiring_and_maybe_barter",
+            jsonObject -> {
+                Predicate<LivingEntity> canBarter = PredicateHelper.parsePredicateOrDefault(jsonObject, "can_barter", "type", le -> !le.isBaby());
+                EquipmentSlot admireItemSlot = BehaviorHelper.parseEquipmentSlotOrDefault(jsonObject, "admire_item_slot", EquipmentSlot.OFFHAND);
+                Ingredient barterCurrency = Ingredient.fromJson(jsonObject.get("barter_currency"));
+
+                String barteringLootTableString = GsonHelper.getAsString(jsonObject, "bartering_loot_table", "");
+                ResourceLocation barteringLootTable = new ResourceLocation(barteringLootTableString);
+
+                EquipmentSlot swapToSlot = BehaviorHelper.parseEquipmentSlotOrDefault(jsonObject, "swap_to_slot", EquipmentSlot.MAINHAND);
+                Ingredient lovedItems = Ingredient.fromJson(jsonObject.get("loved_items"));
+
+                return livingEntity -> {
+                    ItemStack admireItem = livingEntity.getItemBySlot(admireItemSlot);
+                    livingEntity.setItemSlot(admireItemSlot, ItemStack.EMPTY);
+                    if (canBarter.test(livingEntity)) {
+                        boolean isBarterCurrency = barterCurrency.test(admireItem);
+                        if (isBarterCurrency) {
+                            BehaviorHelper.throwItems(livingEntity, BehaviorHelper.getBarterResponseItems(livingEntity, barteringLootTable));
+                        } else {
+                            boolean equippedItem = livingEntity instanceof Mob mob && mob.equipItemIfPossible(admireItem);
+                            if (!equippedItem) {
+                                BehaviorHelper.putInInventory(livingEntity, admireItem);
+                            }
+                        }
+                    } else {
+                        boolean equippedItem = livingEntity instanceof Mob mob && mob.equipItemIfPossible(admireItem);
+                        if (!equippedItem) {
+                            ItemStack swapToItem = livingEntity.getItemBySlot(swapToSlot);
+                            if (lovedItems.test(swapToItem)) {
+                                BehaviorHelper.putInInventory(livingEntity, swapToItem);
+                            } else {
+                                BehaviorHelper.throwItems(livingEntity, Collections.singletonList(swapToItem));
+                            }
+
+                            livingEntity.setItemSlot(swapToSlot, admireItem);
+                            if(livingEntity instanceof Mob mob){
+                                mob.setGuaranteedDrop(swapToSlot);
+                                mob.setPersistenceRequired();
+                            }
+                        }
+                    }
+                };
+            });
 
     private static <U extends Consumer<?>> RegistryObject<ConsumerType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return CONSUMER_TYPES.register(name, () -> new ConsumerType<>(jsonFactory));

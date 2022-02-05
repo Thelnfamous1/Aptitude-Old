@@ -8,16 +8,29 @@ import com.infamous.aptitude.common.behavior.BehaviorType;
 import com.infamous.aptitude.common.behavior.BehaviorTypes;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
+import net.minecraft.world.entity.npc.InventoryCarrier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
@@ -166,5 +179,75 @@ public class BehaviorHelper {
         SoundEvent soundEvent = ForgeRegistries.SOUND_EVENTS.getValue(seLocation);
         if(soundEvent == null) throw new JsonParseException("Invalid sound event: " + soundTypeString);
         return soundEvent;
+    }
+
+    public static ToolAction parseToolAction(JsonObject jsonObject) {
+        String toolActionString = GsonHelper.getAsString(jsonObject, "tool_action");
+        ToolAction toolAction = null;
+        for(ToolAction ta : ToolAction.getActions()){
+            if(ta.name().equals(toolActionString)){
+                toolAction = ta;
+                break;
+            }
+        }
+        if(toolAction == null) throw new JsonParseException("Invalid tool action: " + toolActionString);
+        return toolAction;
+    }
+
+    public static void putInInventory(LivingEntity livingEntity, ItemStack stack) {
+        ItemStack addResult =
+                livingEntity instanceof InventoryCarrier ic
+                        && ic.getInventory() instanceof SimpleContainer sc ?
+                        sc.addItem(stack) :
+                        stack;
+        throwItemsTowardRandomPos(livingEntity, Collections.singletonList(addResult));
+    }
+
+    public static void throwItems(LivingEntity livingEntity, List<ItemStack> items) {
+        Optional<Player> player = livingEntity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER);
+        if (player.isPresent()) {
+            throwItemsTowardPlayer(livingEntity, player.get(), items);
+        } else {
+            throwItemsTowardRandomPos(livingEntity, items);
+        }
+
+    }
+
+    public static void throwItemsTowardRandomPos(LivingEntity livingEntity, List<ItemStack> items) {
+        throwItemsTowardPos(livingEntity, items, getRandomNearbyPos(livingEntity));
+    }
+
+    public static void throwItemsTowardPlayer(LivingEntity livingEntity, Player player, List<ItemStack> items) {
+        throwItemsTowardPos(livingEntity, items, player.position());
+    }
+
+    public static void throwItemsTowardPos(LivingEntity livingEntity, List<ItemStack> items, Vec3 pos) {
+        if (!items.isEmpty()) {
+            livingEntity.swing(InteractionHand.OFF_HAND);
+
+            for(ItemStack itemstack : items) {
+                BehaviorUtils.throwItem(livingEntity, itemstack, pos.add(0.0D, 1.0D, 0.0D));
+            }
+        }
+    }
+
+    public static Vec3 getRandomNearbyPos(LivingEntity livingEntity) {
+        Vec3 randomNearbyPos = livingEntity instanceof PathfinderMob pathfinderMob? LandRandomPos.getPos(pathfinderMob, 4, 2) : null;
+        return randomNearbyPos == null ? livingEntity.position() : randomNearbyPos;
+    }
+
+    public static List<ItemStack> getBarterResponseItems(LivingEntity livingEntity, ResourceLocation barteringLootLocation) {
+        LootTable lootTable = livingEntity.level.getServer().getLootTables().get(barteringLootLocation);
+        return lootTable.getRandomItems((new LootContext.Builder((ServerLevel)livingEntity.level)).withParameter(LootContextParams.THIS_ENTITY, livingEntity).withRandom(livingEntity.level.random).create(LootContextParamSets.PIGLIN_BARTER));
+    }
+
+    public static EquipmentSlot parseEquipmentSlotOrDefault(JsonObject jsonObject, String slotMemberName, EquipmentSlot defaultSlot){
+        if(jsonObject.has(slotMemberName)) return parseEquipmentSlot(jsonObject, slotMemberName);
+        return defaultSlot;
+    }
+
+    public static EquipmentSlot parseEquipmentSlot(JsonObject jsonObject, String slotMemberName) {
+        String equipmentSlotString = GsonHelper.getAsString(jsonObject, slotMemberName);
+        return EquipmentSlot.byName(equipmentSlotString);
     }
 }
