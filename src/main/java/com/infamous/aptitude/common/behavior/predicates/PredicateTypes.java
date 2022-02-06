@@ -34,6 +34,7 @@ import net.minecraftforge.registries.RegistryObject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -244,6 +245,16 @@ public class PredicateTypes {
     public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_CELEBRATING = register("entity_is_celebrating",
             jsonObject -> {
                 return livingEntity -> livingEntity instanceof Piglin piglin && piglin.isDancing() || livingEntity instanceof Raider raider && raider.isCelebrating();
+            });
+
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_RANDOM_FLOAT_CHANCE = register("entity_random_float_chance",
+            jsonObject -> {
+                float randomChance = GsonHelper.getAsFloat(jsonObject, "random_chance");
+
+                return livingEntity -> {
+                    return livingEntity.level.getRandom().nextFloat() < randomChance;
+                };
             });
 
     private static <U extends Predicate<?>> RegistryObject<PredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {

@@ -62,6 +62,25 @@
               "status": "value_present"
           }
         }
+      },
+      {
+        "type": "aptitude:predicated_consumer",
+        "predicate": {
+          "type": "aptitude:entity_random_float_chance",
+          "random_chance": 0.0125
+        },
+        "consumer": {
+          "type": "aptitude:play_activity_sound",
+          "play_first_valid": [
+            {
+              "predicate": {
+                "type": "aptitude:active_non_core_activity_check",
+                "activity": "minecraft:fight"
+              },
+              "sound_event": "minecraft:piglin_brute.angry"
+            }
+          ]
+        }
       }
     ]
   },

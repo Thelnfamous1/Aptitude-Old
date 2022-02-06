@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 public class BrainManager extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
     private static final Logger LOGGER = LogManager.getLogger();
+    private Map<ResourceLocation, Boolean> hasBrainFile = ImmutableMap.of();
     private Map<ResourceLocation, Set<MemoryModuleType<?>>> memoryTypes = ImmutableMap.of();
     private Map<ResourceLocation, Set<SensorType<?>>> sensorTypes = ImmutableMap.of();
     private Map<ResourceLocation, Map<Activity, List<Pair<Integer, JsonObject>>>> prioritizedBehaviorsByActivity = ImmutableMap.of();
@@ -37,6 +38,10 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
 
     public BrainManager() {
         super(GSON, "brain");
+    }
+
+    public boolean hasBrainFile(ResourceLocation location){
+        return hasBrainFile.getOrDefault(location, false);
     }
 
     public Set<MemoryModuleType<?>> getMemoryTypes(ResourceLocation location) {
@@ -72,6 +77,7 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
     }
 
     protected void apply(Map<ResourceLocation, JsonElement> locationElementMap, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+        ImmutableMap.Builder<ResourceLocation, Boolean> hasBrainFileBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<ResourceLocation, Set<MemoryModuleType<?>>> memoryTypesBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<ResourceLocation, Set<SensorType<?>>> sensorTypesBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<ResourceLocation, Map<Activity, List<Pair<Integer, JsonObject>>>> prioritizedBehaviorsByActivityBuilder = ImmutableMap.builder();
@@ -92,6 +98,7 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
                 JsonArray rotatingActivitiesObj = GsonHelper.getAsJsonArray(topElement, "rotating_activities");
                 JsonObject updateActivityCallbackObj = GsonHelper.getAsJsonObject(topElement, "update_activity_callback");
 
+                hasBrainFileBuilder.put(location, true);
                 this.buildMemoryTypes(memoryTypesBuilder, location, topElement);
                 this.buildSensorTypes(sensorTypesBuilder, location, topElement);
                 this.buildCoreActivities(coreActivitiesBuilder, location, coreActivitiesArr);
@@ -121,6 +128,7 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
             }
 
         });
+        this.hasBrainFile = hasBrainFileBuilder.build();
         this.memoryTypes = memoryTypesBuilder.build();
         this.sensorTypes = sensorTypesBuilder.build();
         this.prioritizedBehaviorsByActivity = prioritizedBehaviorsByActivityBuilder.build();

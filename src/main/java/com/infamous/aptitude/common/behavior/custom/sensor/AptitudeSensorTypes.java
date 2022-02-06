@@ -16,6 +16,9 @@ public class AptitudeSensorTypes {
 
     public static final RegistryObject<SensorType<PigSpecificSensor>> PIG_SPECIFIC_SENSOR = register("pig_specific_sensor", PigSpecificSensor::new);
 
+    public static final RegistryObject<SensorType<ZombieSpecificSensor>> ZOMBIE_SPECIFIC_SENSOR = register("zombie_specific_sensor", ZombieSpecificSensor::new);
+    public static final RegistryObject<SensorType<HuskSpecificSensor>> HUSK_SPECIFIC_SENSOR = register("husk_specific_sensor", HuskSpecificSensor::new);
+
     private static <U extends Sensor<?>> RegistryObject<SensorType<U>> register(String name, Supplier<U> constructor) {
         return SENSOR_TYPES.register(name, () -> new SensorType<>(constructor));
     }

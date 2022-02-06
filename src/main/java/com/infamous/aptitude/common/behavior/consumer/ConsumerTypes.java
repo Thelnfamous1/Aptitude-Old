@@ -7,18 +7,14 @@ import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.infamous.aptitude.common.behavior.util.ConsumerHelper;
 import com.infamous.aptitude.common.behavior.util.PredicateHelper;
 import com.infamous.aptitude.mixin.LivingEntityAccessor;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.monster.AbstractIllager;
-import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.schedule.Activity;
@@ -28,10 +24,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.*;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 public class ConsumerTypes {
 
@@ -92,13 +85,9 @@ public class ConsumerTypes {
 
     public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> UPDATE_ACTIVITY = register("update_activity",
             jsonObject -> {
-                Predicate<LivingEntity> updatePredicate = jsonObject.has("update_predicate") ?
-                        PredicateHelper.parsePredicate(jsonObject, "update_predicate", "type") :
-                        le -> true;
-
-                Consumer<LivingEntity> onChanged = jsonObject.has("on_changed_callback") ?
-                        ConsumerHelper.parseConsumer(jsonObject, "on_changed_callback", "type") :
-                        le -> {};
+                Predicate<LivingEntity> updatePredicate = PredicateHelper.parsePredicateOrDefault(jsonObject, "update_predicate", "type", le -> true);
+                Consumer<LivingEntity> onChanged = ConsumerHelper.parseConsumerOrDefault(jsonObject, "on_changed_callback", "type", le -> {});
+                BiConsumer<LivingEntity, Activity> handleActivityChange = ConsumerHelper.parseBiConsumerOrDefault(jsonObject, "handle_activity_change", "type", (le, a) -> {});
 
                 List<Consumer<LivingEntity>> additionalCallbacks = new ArrayList<>();
                 if(jsonObject.has("additional_callbacks")){
@@ -112,7 +101,7 @@ public class ConsumerTypes {
 
                 return livingEntity -> {
                     if(updatePredicate.test(livingEntity)){
-                        ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(livingEntity.getType());
+                        ResourceLocation etLocation = livingEntity.getType().getRegistryName();
                         List<Activity> rotatingActivities = Aptitude.brainManager.getRotatingActivities(etLocation);
 
                         Brain<?> brain = livingEntity.getBrain();
@@ -123,6 +112,7 @@ public class ConsumerTypes {
                         // ON CHANGED
                         if (prevActivity != currActivity) {
                             onChanged.accept(livingEntity);
+                            handleActivityChange.accept(livingEntity, prevActivity);
 
                             /*
                             if (prevActivity == Activity.FIGHT && currActivity != Activity.FIGHT) {
@@ -202,6 +192,19 @@ public class ConsumerTypes {
                         piglin.setDancing(shouldCelebrate);
                     } else if(livingEntity instanceof Raider raider){
                         raider.setCelebrating(shouldCelebrate);
+                    }
+                };
+            });
+
+
+
+    public static final RegistryObject<ConsumerType<Consumer<?>>> PREDICATED_CONSUMER = register("predicated_consumer",
+            jsonObject -> {
+                Predicate<Object> predicate = PredicateHelper.parsePredicate(jsonObject, "predicate", "type");
+                Consumer<Object> function = ConsumerHelper.parseConsumer(jsonObject, "consumer", "type");
+                return o -> {
+                    if(predicate.test(o)) {
+                        function.accept(o);
                     }
                 };
             });

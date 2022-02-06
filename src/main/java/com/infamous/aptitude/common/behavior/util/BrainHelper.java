@@ -36,7 +36,7 @@ public class BrainHelper {
     }
 
     public static <E extends LivingEntity> void remakeBrain(E mob, ServerLevel serverLevel){
-        ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(mob.getType());
+        ResourceLocation etLocation = mob.getType().getRegistryName();
 
         Set<MemoryModuleType<?>> memoryTypes = Aptitude.brainManager.getMemoryTypes(etLocation);
         Set<SensorType<? extends Sensor<?>>> sensorTypes = Aptitude.brainManager.getSensorTypes(etLocation);
@@ -123,7 +123,7 @@ public class BrainHelper {
     }
 
     public static <E extends Mob> void updateActivity(E mob) {
-        ResourceLocation etLocation = ForgeRegistries.ENTITIES.getKey(mob.getType());
+        ResourceLocation etLocation = mob.getType().getRegistryName();
         Consumer<?> updateActivityCallback = Aptitude.brainManager.getUpdateActivityCallback(etLocation);
         Consumer<E> updateActivityCallbackCast = (Consumer<E>)updateActivityCallback;
         updateActivityCallbackCast.accept(mob);
