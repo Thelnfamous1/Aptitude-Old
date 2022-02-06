@@ -168,7 +168,7 @@
               }
             },
             {
-              "type": "entity_riding_valid_mount",
+              "type": "aptitude:entity_riding_valid_mount",
               "rider_predicate": {
                 "type": "aptitude:is_baby"
               },
@@ -176,12 +176,17 @@
                 "type": "aptitude:all_of_predicate",
                 "predicates": [
                   {
-                    "type": "aptitude:entity_is_type",
-                    "entity_type_predicate": "minecraft:hoglin"
-                  },
-                  {
-                    "type": "aptitude:entity_is_type",
-                    "entity_type_predicate": "minecraft:zombie"
+                    "type": "aptitude:any_of_predicate",
+                    "predicates": [
+                      {
+                        "type": "aptitude:entity_is_type",
+                        "entity_type_predicate": "minecraft:hoglin"
+                      },
+                      {
+                        "type": "aptitude:entity_is_type",
+                        "entity_type_predicate": "minecraft:zombie"
+                      }
+                    ]
                   },
                   {
                     "type": "aptitude:is_baby"
@@ -193,7 +198,7 @@
         }
       },
       {
-        "type": "aptitude:update_celebration_flag",
+        "type": "aptitude:entity_update_celebration_flag",
         "predicate": {
           "type": "aptitude:memory_status_check",
           "addContext": {
@@ -259,14 +264,14 @@
               {
                 "type": "aptitude:negate_predicate",
                 "predicate": {
-                  "type": "aptitude:entity_item_in_slot_is_empty",
+                  "type": "aptitude:entity_has_empty_slot",
                   "slot": "offhand"
                 }
               },
               {
                 "type": "aptitude:negate_predicate",
                 "predicate": {
-                  "type": "aptitude:entity_item_in_slot_can_perfom_action",
+                  "type": "aptitude:entity_item_in_slot_can_perform_action",
                   "slot": "offhand",
                   "tool_action": "shield_block"
                 }
@@ -342,7 +347,9 @@
               },
               {
                 "type": "aptitude:entity_is_holding",
-                "is_holding": "minecraft:piglin_loved"
+                "is_holding": {
+                  "tag": "minecraft:piglin_loved"
+                }
               }
             ]
           },
@@ -425,9 +432,9 @@
           },
           "wrappedBehavior": {
             "type": "aptitude:start_hunting_prey",
-            "preyMemory": "aptitude:nearest_visible_huntable_hoglin",
-            "visibleAlliesMemory": "minecraft:nearest_visible_adult_zombies",
-            "alliesMemory": "minecraft:nearby_adult_zombies",
+            "preyMemory": "minecraft:nearest_visible_huntable_hoglin",
+            "visibleAlliesMemory": "aptitude:nearest_visible_adult_zombies",
+            "alliesMemory": "aptitude:nearby_adult_zombies",
             "canHunt": {
               "type": "aptitude:entity_can_hunt"
             },
@@ -753,7 +760,9 @@
               },
               {
                 "type": "aptitude:entity_is_holding",
-                "is_holding": "minecraft:piglin_loved"
+                "is_holding": {
+                  "tag": "minecraft:piglin_loved"
+                }
               }
             ]
           },
@@ -834,7 +843,7 @@
           "predicate": {
             "type": "aptitude:negate_predicate",
             "predicate": {
-              "type": "aptitude:entity_is_dancing"
+              "type": "aptitude:entity_is_celebrating"
             }
           },
           "wrappedBehavior": {
@@ -846,7 +855,7 @@
         {
           "type": "aptitude:run_if",
           "predicate": {
-            "type": "aptitude:entity_is_dancing"
+            "type": "aptitude:entity_is_celebrating"
           },
           "wrappedBehavior": {
             "type": "aptitude:go_to_celebrate_location",
@@ -1051,7 +1060,7 @@
                       "type": "aptitude:outnumbered_adult",
                       "addContext": {
                         "sameType": "aptitude:visible_adult_zombie_count",
-                        "otherType": "aptitude:visible_adult_hoglin_count"
+                        "otherType": "minecraft:visible_adult_hoglin_count"
                       }
                     }
                   }
@@ -1122,7 +1131,9 @@
               },
               {
                 "type": "aptitude:entity_is_holding",
-                "is_holding": "minecraft:piglin_loved"
+                "is_holding": {
+                  "tag": "minecraft:piglin_loved"
+                }
               }
             ]
           },

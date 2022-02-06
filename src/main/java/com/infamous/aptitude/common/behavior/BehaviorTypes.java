@@ -185,7 +185,7 @@ public class BehaviorTypes {
 
     public static final RegistryObject<BehaviorType<AptitudeStartAdmiringItemIfSeen>> START_ADMIRING_ITEM_IF_SEEN = register("start_admiring_item_if_seen",
             jsonObject -> {
-                Ingredient lovedItems = Ingredient.fromJson(jsonObject.get("loved_items"));
+                Ingredient lovedItems = Ingredient.fromJson(jsonObject.get("lovedItems"));
                 int admireDuration = GsonHelper.getAsInt(jsonObject, "admireDuration", 0);
                 return new AptitudeStartAdmiringItemIfSeen(lovedItems, admireDuration);
             });
@@ -343,7 +343,7 @@ public class BehaviorTypes {
 
     public static BehaviorType<?> getBehaviorType(ResourceLocation name) {
         BehaviorType<?> value = BEHAVIOR_TYPE_REGISTRY.get().getValue(name);
-        Aptitude.LOGGER.info("Attempting to get behavior type {}, got {}", name, value.getRegistryName());
+        if(value == null) Aptitude.LOGGER.error("Failed to get BehaviorType {}", name);
         return value;
     }
 }

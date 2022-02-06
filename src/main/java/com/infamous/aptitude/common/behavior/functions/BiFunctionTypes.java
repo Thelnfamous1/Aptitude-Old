@@ -48,7 +48,7 @@ public class BiFunctionTypes {
 
     public static BiFunctionType<?> getBiFunctionType(ResourceLocation bftLocation) {
         BiFunctionType<?> value = BIFUNCTION_TYPE_REGISTRY.get().getValue(bftLocation);
-        Aptitude.LOGGER.info("Attempting to get bifunction type {}, got {}", bftLocation, value.getRegistryName());
+        if(value == null) Aptitude.LOGGER.error("Failed to get BiFunctionType {}", bftLocation);
         return value;
     }
 }

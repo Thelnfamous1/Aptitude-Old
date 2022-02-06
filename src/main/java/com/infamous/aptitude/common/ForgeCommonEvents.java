@@ -4,15 +4,24 @@ import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.BrainManager;
 import com.infamous.aptitude.common.behavior.util.BrainHelper;
 import com.infamous.aptitude.common.util.AptitudeResources;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.TimeUtil;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.hoglin.Hoglin;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -32,17 +41,41 @@ public class ForgeCommonEvents {
         if(event.getWorld().isClientSide){
             return;
         }
+        performSpecificMobHandling(event);
 
         if(event.getEntity() instanceof Mob mob && hasBrainFile(mob)){
-            if(mob instanceof Zombie zombie) {
-                zombie.setCanPickUpLoot(true);
-                if (GoalUtils.hasGroundPathNavigation(zombie)) {
-                    ((GroundPathNavigation)zombie.getNavigation()).setCanOpenDoors(true);
-                }
-            }
             ServerLevel serverLevel = (ServerLevel) event.getWorld();
             MinecraftServer server = serverLevel.getServer();
             server.tell(new TickTask(server.getTickCount() + 1, () -> BrainHelper.clearAIAndRemakeBrain(mob, serverLevel)));
+        }
+    }
+
+    private static void performSpecificMobHandling(EntityJoinWorldEvent event) {
+        Entity mob = event.getEntity();
+        if(mob instanceof Zombie zombie) {
+            zombie.setCanPickUpLoot(true);
+            if (GoalUtils.hasGroundPathNavigation(zombie)) {
+                ((GroundPathNavigation)zombie.getNavigation()).setCanOpenDoors(true);
+            }
+            if(!event.loadedFromDisk()){ // "finalize spawn"
+                if(zombie.getType() == EntityType.ZOMBIE){
+                    if(zombie.getRandom().nextFloat() < 0.5F){
+                        zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.CROSSBOW));
+                    } else{
+                        zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
+                    }
+                    int waitBeforeHunting = TimeUtil.rangeOfSeconds(30, 120).sample(zombie.level.random);
+                    zombie.getBrain().setMemoryWithExpiry(MemoryModuleType.HUNTED_RECENTLY, true, (long)waitBeforeHunting);
+                } else if(zombie.getType() == EntityType.HUSK){
+                    zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_AXE));
+                    GlobalPos globalpos = GlobalPos.of(zombie.level.dimension(), zombie.blockPosition());
+                    zombie.getBrain().setMemory(MemoryModuleType.HOME, globalpos);
+                }
+            }
+        } else if(mob instanceof AbstractPiglin piglin){
+            piglin.setImmuneToZombification(true);
+        } else if(mob instanceof Hoglin hoglin){
+            hoglin.setImmuneToZombification(true);
         }
     }
 

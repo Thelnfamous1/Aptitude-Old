@@ -351,7 +351,7 @@
                     "type": "aptitude:outnumbered_adult",
                     "addContext": {
                       "sameType": "aptitude:visible_adult_pig_count",
-                      "otherType": "aptitude:visible_adult_piglin_count"
+                      "otherType": "minecraft:visible_adult_piglin_count"
                     }
                   }
                 }

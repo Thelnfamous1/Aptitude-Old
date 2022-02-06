@@ -100,9 +100,9 @@ public class AptitudeStartHuntingPrey<H extends LivingEntity, P extends LivingEn
 
    private void setAngerTargetIfCloserThanCurrent(LivingEntity hunter, P target) {
       Optional<LivingEntity> optional = this.getAngerTarget(hunter);
-      LivingEntity livingentity = BehaviorUtils.getNearestTarget(hunter, optional, target);
-      if (optional.isEmpty() || optional.get() != livingentity) {
-         this.setAngerTarget(hunter, livingentity);
+      LivingEntity nearestTarget = BehaviorUtils.getNearestTarget(hunter, optional, target);
+      if (optional.isEmpty() || optional.get() != nearestTarget) {
+         this.setAngerTarget(hunter, nearestTarget);
       }
    }
 

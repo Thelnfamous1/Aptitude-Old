@@ -29,7 +29,16 @@
   "update_activity_callback": {
     "type": "aptitude:update_activity",
     "on_changed_callback": {
-      "type": "aptitude:nothing"
+      "type": "aptitude:play_activity_sound",
+      "play_first_valid": [
+        {
+          "predicate": {
+            "type": "aptitude:active_non_core_activity_check",
+            "activity": "minecraft:fight"
+          },
+          "sound_event": "minecraft:entity.zoglin.angry"
+        }
+      ]
     },
     "additional_callbacks": [
       {
@@ -80,7 +89,7 @@
                     },
                     {
                       "type": "aptitude:entity_is_type",
-                      "entity_type_predicate": "minecraft:zoglin"
+                      "entity_type_predicate": "minecraft:cow"
                     }
                   ]
                 }

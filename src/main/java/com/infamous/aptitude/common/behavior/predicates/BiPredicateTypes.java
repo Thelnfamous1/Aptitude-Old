@@ -207,7 +207,7 @@ public class BiPredicateTypes {
 
     public static BiPredicateType<?> getBiPredicateType(ResourceLocation bptLocation) {
         BiPredicateType<?> value = BIPREDICATE_TYPE_REGISTRY.get().getValue(bptLocation);
-        Aptitude.LOGGER.info("Attempting to get bipredicate type {}, got {}", bptLocation, value.getRegistryName());
+        if(value == null) Aptitude.LOGGER.error("Failed to get BiPredicateType {}", bptLocation);
         return value;
     }
 }

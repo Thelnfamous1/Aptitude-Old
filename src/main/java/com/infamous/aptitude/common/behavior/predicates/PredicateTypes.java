@@ -267,7 +267,7 @@ public class PredicateTypes {
 
     public static PredicateType<?> getPredicateType(ResourceLocation ptLocation) {
         PredicateType<?> value = PREDICATE_TYPE_REGISTRY.get().getValue(ptLocation);
-        Aptitude.LOGGER.info("Attempting to get predicate type {}, got {}", ptLocation, value.getRegistryName());
+        if(value == null) Aptitude.LOGGER.error("Failed to get PredicateType {}", ptLocation);
         return value;
     }
 }

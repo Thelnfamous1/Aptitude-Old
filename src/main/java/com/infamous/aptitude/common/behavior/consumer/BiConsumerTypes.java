@@ -74,7 +74,7 @@ public class BiConsumerTypes {
 
     public static BiConsumerType<?> getBiConsumerType(ResourceLocation bctLocation) {
         BiConsumerType<?> value = BICONSUMER_TYPE_REGISTRY.get().getValue(bctLocation);
-        Aptitude.LOGGER.info("Attempting to get biconsumer type {}, got {}", bctLocation, value.getRegistryName());
+        if(value == null) Aptitude.LOGGER.error("Failed to get BiConsumerType {}", bctLocation);
         return value;
     }
 }

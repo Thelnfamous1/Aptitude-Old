@@ -174,7 +174,7 @@ public class ConsumerTypes {
 
     public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_STOP_RIDING = register("entity_stop_riding",
             jsonObject -> {
-                Predicate<LivingEntity> predicate = PredicateHelper.parsePredicate(jsonObject, "valid_riding_predicate", "type");
+                Predicate<LivingEntity> predicate = PredicateHelper.parsePredicate(jsonObject, "predicate", "type");
                 return rider -> {
                     if (!predicate.test(rider)) {
                         rider.stopRiding();
@@ -219,7 +219,7 @@ public class ConsumerTypes {
 
     public static ConsumerType<?> getConsumerType(ResourceLocation ctLocation) {
         ConsumerType<?> value = CONSUMER_TYPE_REGISTRY.get().getValue(ctLocation);
-        Aptitude.LOGGER.info("Attempting to get consumer type {}, got {}", ctLocation, value.getRegistryName());
+        if(value == null) Aptitude.LOGGER.error("Failed to get ConsumerType {}", ctLocation);
         return value;
     }
 }
