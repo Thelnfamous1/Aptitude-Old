@@ -7,14 +7,20 @@ import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.infamous.aptitude.common.behavior.util.ConsumerHelper;
 import com.infamous.aptitude.common.behavior.util.PredicateHelper;
 import com.infamous.aptitude.mixin.LivingEntityAccessor;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.monster.AbstractIllager;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+import net.minecraft.world.entity.monster.piglin.Piglin;
+import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -128,20 +134,6 @@ public class ConsumerTypes {
 
                     // ADDITIONAL CALLBACKS
                     additionalCallbacks.forEach(consumer -> consumer.accept(livingEntity));
-
-                    /*
-                    // RIDING
-                    boolean babyRidingBaby = livingEntity.isBaby() && livingEntity.getVehicle() instanceof LivingEntity mount && mount.isBaby();
-                    if (!brain.hasMemoryValue(MemoryModuleType.RIDE_TARGET) && babyRidingBaby) {
-                        livingEntity.stopRiding();
-                    }
-
-                    // CELEBRATION
-                    if (!brain.hasMemoryValue(MemoryModuleType.CELEBRATE_LOCATION)) {
-                        brain.eraseMemory(MemoryModuleType.DANCING);
-                    }
-                    //livingEntity.setDancing(brain.hasMemoryValue(MemoryModuleType.DANCING));
-                     */
                 };
     });
 
@@ -186,6 +178,30 @@ public class ConsumerTypes {
                                 mob.setPersistenceRequired();
                             }
                         }
+                    }
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_STOP_RIDING = register("entity_stop_riding",
+            jsonObject -> {
+                Predicate<LivingEntity> predicate = PredicateHelper.parsePredicate(jsonObject, "valid_riding_predicate", "type");
+                return rider -> {
+                    if (!predicate.test(rider)) {
+                        rider.stopRiding();
+                    }
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_UPDATE_CELEBRATION_FLAG = register("entity_update_celebration_flag",
+            jsonObject -> {
+                Predicate<LivingEntity> predicate = PredicateHelper.parsePredicate(jsonObject, "predicate", "type");
+
+                return livingEntity -> {
+                    boolean shouldCelebrate = predicate.test(livingEntity);
+                    if(livingEntity instanceof Piglin piglin){
+                        piglin.setDancing(shouldCelebrate);
+                    } else if(livingEntity instanceof Raider raider){
+                        raider.setCelebrating(shouldCelebrate);
                     }
                 };
             });

@@ -151,6 +151,56 @@
               "status": "value_present"
           }
         }
+      },
+      {
+        "type": "aptitude:entity_stop_riding",
+        "predicate": {
+          "type": "aptitude:all_of_predicate",
+          "predicates": [
+            {
+              "type": "aptitude:negate_predicate",
+              "predicate": {
+                "type": "aptitude:memory_status_check",
+                "addContext": {
+                  "type": "minecraft:ride_target",
+                  "status": "value_present"
+                }
+              }
+            },
+            {
+              "type": "entity_riding_valid_mount",
+              "rider_predicate": {
+                "type": "aptitude:is_baby"
+              },
+              "mount_predicate": {
+                "type": "aptitude:all_of_predicate",
+                "predicates": [
+                  {
+                    "type": "aptitude:entity_is_type",
+                    "entity_type_predicate": "minecraft:hoglin"
+                  },
+                  {
+                    "type": "aptitude:entity_is_type",
+                    "entity_type_predicate": "minecraft:zombie"
+                  },
+                  {
+                    "type": "aptitude:is_baby"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "aptitude:update_celebration_flag",
+        "predicate": {
+          "type": "aptitude:memory_status_check",
+          "addContext": {
+            "type": "minecraft:dancing",
+            "status": "value_present"
+          }
+        }
       }
     ]
   },
@@ -260,6 +310,20 @@
         },
         {
           "type": "aptitude:stop_being_angry_if_target_dead"
+        },
+        {
+          "type": "aptitude:erase_memory_if",
+          "predicate": {
+            "type": "aptitude:negate_predicate",
+            "predicate": {
+              "type": "aptitude:memory_status_check",
+              "addContext": {
+                "type": "minecraft:celebrate_location",
+                "status": "value_present"
+              }
+            }
+          },
+          "memoryType": "minecraft:dancing"
         }
       ]
     },
@@ -357,7 +421,7 @@
         {
           "type": "aptitude:run_if",
           "predicate": {
-            "type": "aptitude:always_true"
+            "type": "aptitude:entity_can_hunt"
           },
           "wrappedBehavior": {
             "type": "aptitude:start_hunting_prey",
@@ -365,10 +429,10 @@
             "visibleAlliesMemory": "minecraft:nearest_visible_adult_zombies",
             "alliesMemory": "minecraft:nearby_adult_zombies",
             "canHunt": {
-              "type": "aptitude:always_true"
+              "type": "aptitude:entity_can_hunt"
             },
             "canBeHunted": {
-              "type": "aptitude:always_true"
+              "type": "aptitude:entity_can_be_hunted"
             },
             "timeBetweenHunts": {
               "minInclusive": 600,
@@ -768,7 +832,10 @@
         {
           "type": "aptitude:run_if",
           "predicate": {
-            "type": "aptitude:always_true"
+            "type": "aptitude:negate_predicate",
+            "predicate": {
+              "type": "aptitude:entity_is_dancing"
+            }
           },
           "wrappedBehavior": {
             "type": "aptitude:go_to_celebrate_location",
@@ -779,7 +846,7 @@
         {
           "type": "aptitude:run_if",
           "predicate": {
-            "type": "aptitude:always_true"
+            "type": "aptitude:entity_is_dancing"
           },
           "wrappedBehavior": {
             "type": "aptitude:go_to_celebrate_location",

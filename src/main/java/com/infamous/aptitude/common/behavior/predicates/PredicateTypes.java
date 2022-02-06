@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.infamous.aptitude.common.behavior.util.PredicateHelper;
+import com.infamous.aptitude.common.util.ReflectionHelper;
 import net.minecraft.advancements.critereon.EntityTypePredicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -14,6 +15,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.monster.hoglin.Hoglin;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+import net.minecraft.world.entity.monster.piglin.Piglin;
+import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
@@ -208,6 +213,37 @@ public class PredicateTypes {
     public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_PASSENGER = register("entity_is_passenger",
             jsonObject -> {
                 return Entity::isPassenger;
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_RIDING_VALID_MOUNT = register("entity_riding_valid_mount",
+            jsonObject -> {
+                Predicate<LivingEntity> riderPredicate = PredicateHelper.parsePredicate(jsonObject, "rider_predicate", "type");
+                Predicate<LivingEntity> mountPredicate = PredicateHelper.parsePredicate(jsonObject, "mount_predicate", "type");
+
+
+                return rider -> {
+                    if (!riderPredicate.test(rider)) {
+                        return false;
+                    } else {
+                        Entity vehicle = rider.getVehicle();
+                        return vehicle instanceof LivingEntity mount && mountPredicate.test(mount);
+                    }
+                };
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_CAN_HUNT = register("entity_can_hunt",
+            jsonObject -> {
+                return livingEntity -> !(livingEntity instanceof AbstractPiglin piglin) || ReflectionHelper.reflectPiglinCanHunt(piglin);
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_CAN_BE_HUNTED = register("entity_can_be_hunted",
+            jsonObject -> {
+                return livingEntity -> !(livingEntity instanceof Hoglin hoglin) || hoglin.canBeHunted();
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_CELEBRATING = register("entity_is_celebrating",
+            jsonObject -> {
+                return livingEntity -> livingEntity instanceof Piglin piglin && piglin.isDancing() || livingEntity instanceof Raider raider && raider.isCelebrating();
             });
 
     private static <U extends Predicate<?>> RegistryObject<PredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
