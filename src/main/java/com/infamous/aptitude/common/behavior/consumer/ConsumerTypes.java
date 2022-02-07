@@ -176,7 +176,7 @@ public class ConsumerTypes {
             jsonObject -> {
                 Predicate<LivingEntity> predicate = PredicateHelper.parsePredicate(jsonObject, "predicate", "type");
                 return rider -> {
-                    if (!predicate.test(rider)) {
+                    if (predicate.test(rider)) {
                         rider.stopRiding();
                     }
                 };

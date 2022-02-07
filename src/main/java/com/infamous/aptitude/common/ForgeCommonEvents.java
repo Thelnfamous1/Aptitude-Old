@@ -41,12 +41,20 @@ public class ForgeCommonEvents {
         if(event.getWorld().isClientSide){
             return;
         }
-        performSpecificMobHandling(event);
+
+        if(event.getEntity() instanceof AbstractPiglin piglin){
+            piglin.setImmuneToZombification(true);
+        } else if(event.getEntity() instanceof Hoglin hoglin){
+            hoglin.setImmuneToZombification(true);
+        }
 
         if(event.getEntity() instanceof Mob mob && hasBrainFile(mob)){
             ServerLevel serverLevel = (ServerLevel) event.getWorld();
             MinecraftServer server = serverLevel.getServer();
-            server.tell(new TickTask(server.getTickCount() + 1, () -> BrainHelper.clearAIAndRemakeBrain(mob, serverLevel)));
+            server.tell(new TickTask(server.getTickCount() + 1, () -> {
+                BrainHelper.clearAIAndRemakeBrain(mob, serverLevel);
+                performSpecificMobHandling(event);
+            }));
         }
     }
 
@@ -58,24 +66,25 @@ public class ForgeCommonEvents {
                 ((GroundPathNavigation)zombie.getNavigation()).setCanOpenDoors(true);
             }
             if(!event.loadedFromDisk()){ // "finalize spawn"
+                boolean baby = zombie.isBaby();
                 if(zombie.getType() == EntityType.ZOMBIE){
-                    if(zombie.getRandom().nextFloat() < 0.5F){
-                        zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.CROSSBOW));
-                    } else{
-                        zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
+                    if(!baby){
+                        if(zombie.getRandom().nextFloat() < 0.5F){
+                            zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.CROSSBOW));
+                        } else{
+                            zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
+                        }
                     }
                     int waitBeforeHunting = TimeUtil.rangeOfSeconds(30, 120).sample(zombie.level.random);
                     zombie.getBrain().setMemoryWithExpiry(MemoryModuleType.HUNTED_RECENTLY, true, (long)waitBeforeHunting);
                 } else if(zombie.getType() == EntityType.HUSK){
-                    zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_AXE));
+                    if(!baby){
+                        zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_AXE));
+                    }
                     GlobalPos globalpos = GlobalPos.of(zombie.level.dimension(), zombie.blockPosition());
                     zombie.getBrain().setMemory(MemoryModuleType.HOME, globalpos);
                 }
             }
-        } else if(mob instanceof AbstractPiglin piglin){
-            piglin.setImmuneToZombification(true);
-        } else if(mob instanceof Hoglin hoglin){
-            hoglin.setImmuneToZombification(true);
         }
     }
 

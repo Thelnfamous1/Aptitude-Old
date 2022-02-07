@@ -363,12 +363,15 @@
           "targetFinderFunction": {
             "type": "aptitude:predicated_function",
             "predicate": {
-              "type": "aptitude:memory_value_check",
-              "addContext": {
-                "memory_type": "minecraft:nearest_visible_zombified",
-                "filter_bipredicate": {
-                  "type": "aptitude:entity_within_distance",
-                  "distance": 6.0
+              "type": "aptitude:negate_predicate",
+              "predicate": {
+                "type": "aptitude:memory_value_check",
+                "addContext": {
+                  "memory_type": "minecraft:nearest_visible_zombified",
+                  "filter_bipredicate": {
+                    "type": "aptitude:entity_within_distance",
+                    "distance": 6.0
+                  }
                 }
               }
             },
@@ -580,12 +583,15 @@
               "retrieval_function": {
                 "type": "aptitude:predicated_function",
                 "predicate": {
-                  "type": "aptitude:memory_value_check",
-                  "addContext": {
-                    "memory_type": "minecraft:nearest_visible_zombified",
-                    "filter_bipredicate": {
-                      "type": "aptitude:entity_within_distance",
-                      "distance": 6.0
+                  "type": "aptitude:negate_predicate",
+                  "predicate": {
+                    "type": "aptitude:memory_value_check",
+                    "addContext": {
+                      "memory_type": "minecraft:nearest_visible_zombified",
+                      "filter_bipredicate": {
+                        "type": "aptitude:entity_within_distance",
+                        "distance": 6.0
+                      }
                     }
                   }
                 },
@@ -776,12 +782,15 @@
           "targetFinderFunction": {
             "type": "aptitude:predicated_function",
             "predicate": {
-              "type": "aptitude:memory_value_check",
-              "addContext": {
-                "memory_type": "minecraft:nearest_visible_zombified",
-                "filter_bipredicate": {
-                  "type": "aptitude:entity_within_distance",
-                  "distance": 6.0
+              "type": "aptitude:negate_predicate",
+              "predicate": {
+                "type": "aptitude:memory_value_check",
+                "addContext": {
+                  "memory_type": "minecraft:nearest_visible_zombified",
+                  "filter_bipredicate": {
+                    "type": "aptitude:entity_within_distance",
+                    "distance": 6.0
+                  }
                 }
               }
             },
