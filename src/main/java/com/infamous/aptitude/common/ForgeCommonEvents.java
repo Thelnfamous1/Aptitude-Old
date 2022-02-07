@@ -58,6 +58,7 @@ public class ForgeCommonEvents {
         }
     }
 
+    // TODO: Make data-driven
     private static void performSpecificMobHandling(EntityJoinWorldEvent event) {
         Entity mob = event.getEntity();
         if(mob instanceof Zombie zombie) {
@@ -97,6 +98,16 @@ public class ForgeCommonEvents {
                 BrainHelper.getBrainCast(mob).tick((ServerLevel) mob.level, mob);
                 BrainHelper.updateActivity(mob);
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMobPickUpLootEvent(MobPickUpLootEvent event){
+        Mob mob = event.getMob();
+        ItemStack stack = event.getItemStack();
+
+        if(hasBrainFile(mob)){
+            // TODO
         }
     }
 
