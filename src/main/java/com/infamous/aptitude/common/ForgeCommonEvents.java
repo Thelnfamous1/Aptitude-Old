@@ -2,23 +2,21 @@ package com.infamous.aptitude.common;
 
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.SelectorHelper;
+import com.infamous.aptitude.common.manager.base.BaseAIHelper;
 import com.infamous.aptitude.common.manager.brain.BrainManager;
 import com.infamous.aptitude.common.behavior.util.BrainHelper;
 import com.infamous.aptitude.common.manager.selector.SelectorManager;
-import com.infamous.aptitude.common.util.AptitudeResources;
+import com.infamous.aptitude.common.manager.base.BaseAIManager;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.TimeUtil;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.GoalUtils;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
@@ -36,8 +34,10 @@ public class ForgeCommonEvents {
     public static void onReloadListener(AddReloadListenerEvent event){
         Aptitude.brainManager = new BrainManager();
         Aptitude.selectorManager = new SelectorManager();
+        Aptitude.baseAIManager = new BaseAIManager();
         event.addListener(Aptitude.brainManager);
         event.addListener(Aptitude.selectorManager);
+        event.addListener(Aptitude.baseAIManager);
     }
 
     @SubscribeEvent
@@ -52,26 +52,26 @@ public class ForgeCommonEvents {
             hoglin.setImmuneToZombification(true);
         }
 
+        ServerLevel serverLevel = (ServerLevel) event.getWorld();
+        MinecraftServer server = serverLevel.getServer();
         if(event.getEntity() instanceof Mob mob){
-            ServerLevel serverLevel = (ServerLevel) event.getWorld();
-            MinecraftServer server = serverLevel.getServer();
-            if(hasSelectorFile(mob)){
+            if(SelectorHelper.hasSelectorFile(mob)){
                 server.tell(new TickTask(server.getTickCount() + 1, () -> {
                     SelectorHelper.remakeSelectors(mob);
                 }));
             }
-            if(hasBrainFile(mob)){
+        } else if(event.getEntity() instanceof LivingEntity le){
+            if(BrainHelper.hasBrainFile(le)){
                 server.tell(new TickTask(server.getTickCount() + 1, () -> {
-                    BrainHelper.remakeBrain(mob, serverLevel);
+                    BrainHelper.remakeBrain(le, serverLevel);
                 }));
             }
-            performSpecificMobHandling(event);
+            if(BaseAIHelper.hasBaseAIFile(le)){
+                server.tell(new TickTask(server.getTickCount() + 1, () -> {
+                    BaseAIHelper.finalizeSpawn(le);
+                }));
+            }
         }
-    }
-
-    private static boolean hasSelectorFile(Mob mob) {
-        ResourceLocation etLocation = mob.getType().getRegistryName();
-        return Aptitude.selectorManager.hasSelectorEntry(etLocation);
     }
 
     // TODO: Make data-driven
@@ -109,8 +109,8 @@ public class ForgeCommonEvents {
     public static void onCustomServerAiStepEvent(CustomServerAiStepEvent event){
         Mob mob = event.getMob();
 
-        if(hasBrainFile(mob)){
-            if(shouldTickBrain(mob)){
+        if(BrainHelper.hasBrainFile(mob)){
+            if(BrainHelper.shouldTickBrain(mob)){
                 BrainHelper.getBrainCast(mob).tick((ServerLevel) mob.level, mob);
                 BrainHelper.updateActivity(mob);
             }
@@ -119,17 +119,14 @@ public class ForgeCommonEvents {
 
     @SubscribeEvent
     public static void onMobPickUpLootEvent(MobPickUpLootEvent event){
-        //Mob mob = event.getMob();
-        //ItemStack stack = event.getItemStack();
-    }
-
-    private static boolean shouldTickBrain(Mob mob) {
-        return !mob.getType().is(AptitudeResources.EXCLUDE_BRAIN_TICK);
-    }
-
-    private static boolean hasBrainFile(Mob mob) {
-        ResourceLocation etLocation = mob.getType().getRegistryName();
-        return Aptitude.brainManager.hasBrainEntry(etLocation);
+        Mob mob = event.getMob();
+        ItemEntity itemEntity = event.getItem();
+        if(BaseAIHelper.hasBaseAIFile(mob)){
+            event.setCanceled(true);
+            if(BaseAIHelper.wantsToPickUp(mob, itemEntity.getItem())){
+                BaseAIHelper.pickUpItem(mob, itemEntity);
+            }
+        }
     }
 
 }

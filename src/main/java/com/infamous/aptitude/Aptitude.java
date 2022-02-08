@@ -11,6 +11,7 @@ import com.infamous.aptitude.common.behavior.functions.FunctionTypes;
 import com.infamous.aptitude.common.behavior.predicates.BiPredicateTypes;
 import com.infamous.aptitude.common.behavior.predicates.PredicateTypes;
 import com.infamous.aptitude.common.manager.selector.SelectorManager;
+import com.infamous.aptitude.common.manager.base.BaseAIManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -27,6 +28,7 @@ public class Aptitude
     public static final String MOD_ID = "aptitude";
     public static BrainManager brainManager;
     public static SelectorManager selectorManager;
+    public static BaseAIManager baseAIManager;
 
     public Aptitude() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();

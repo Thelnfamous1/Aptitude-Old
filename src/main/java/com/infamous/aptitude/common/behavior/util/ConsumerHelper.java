@@ -1,16 +1,21 @@
 package com.infamous.aptitude.common.behavior.util;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.infamous.aptitude.common.behavior.consumer.BiConsumerType;
 import com.infamous.aptitude.common.behavior.consumer.BiConsumerTypes;
 import com.infamous.aptitude.common.behavior.consumer.ConsumerType;
 import com.infamous.aptitude.common.behavior.consumer.ConsumerTypes;
+import com.infamous.aptitude.common.behavior.functions.FunctionType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ConsumerHelper {
     public static <U> Consumer<U> parseConsumer(JsonObject jsonObject, String memberName, String typeMemberName){
@@ -58,5 +63,17 @@ public class ConsumerHelper {
     public static <T, U> BiConsumer<T, U> parseBiConsumerOrDefault(JsonObject jsonObject, String memberName, String typeMemberName, BiConsumer<T, U> defaultBiConsumer) {
         if(jsonObject.has(memberName)) return parseBiConsumer(jsonObject, memberName, typeMemberName);
         return defaultBiConsumer;
+    }
+
+    public static <U> List<Consumer<U>> parseConsumers(JsonObject jsonObject, String memberName, String typeMemberName) {
+        JsonArray consumersArr = GsonHelper.getAsJsonArray(jsonObject, memberName);
+        List<Consumer<U>> consumers = new ArrayList<>();
+        consumersArr.forEach(jsonElement -> {
+            JsonObject elemObj = jsonElement.getAsJsonObject();
+            ConsumerType<?> consumerType = parseConsumerType(elemObj, typeMemberName);
+            Consumer<U> consumer = (Consumer<U>) consumerType.fromJson(elemObj);
+            consumers.add(consumer);
+        });
+        return consumers;
     }
 }

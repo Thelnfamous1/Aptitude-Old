@@ -196,15 +196,16 @@ public class ConsumerTypes {
                 };
             });
 
-
-
     public static final RegistryObject<ConsumerType<Consumer<?>>> PREDICATED_CONSUMER = register("predicated_consumer",
             jsonObject -> {
                 Predicate<Object> predicate = PredicateHelper.parsePredicate(jsonObject, "predicate", "type");
-                Consumer<Object> function = ConsumerHelper.parseConsumer(jsonObject, "consumer", "type");
+                Consumer<Object> consumer = ConsumerHelper.parseConsumer(jsonObject, "consumer", "type");
+                Consumer<Object> defaultConsumer = ConsumerHelper.parseConsumerOrDefault(jsonObject, "default", "type", o -> {});
                 return o -> {
                     if(predicate.test(o)) {
-                        function.accept(o);
+                        consumer.accept(o);
+                    } else{
+                        defaultConsumer.accept(o);
                     }
                 };
             });
@@ -213,6 +214,14 @@ public class ConsumerTypes {
             jsonObject -> {
                 return livingEntity -> {
                     livingEntity.getBrain().useDefaultActivity();
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<?>>> ALL_OF_CONSUMER = register("all_of_consumer",
+            jsonObject -> {
+                List<Consumer<Object>> consumers = ConsumerHelper.parseConsumers(jsonObject, "consumers", "type");
+                return o -> {
+                    consumers.forEach(consumer -> consumer.accept(o));
                 };
             });
 

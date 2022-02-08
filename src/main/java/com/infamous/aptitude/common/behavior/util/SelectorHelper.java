@@ -22,4 +22,9 @@ public class SelectorHelper {
     public static void clearTargetSelector(Mob mob) {
         mob.targetSelector.removeAllGoals();
     }
+
+    public static boolean hasSelectorFile(Mob mob) {
+        ResourceLocation etLocation = mob.getType().getRegistryName();
+        return Aptitude.selectorManager.hasSelectorEntry(etLocation);
+    }
 }

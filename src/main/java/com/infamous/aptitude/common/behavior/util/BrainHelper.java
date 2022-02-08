@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
+import com.infamous.aptitude.common.util.AptitudeResources;
 import com.infamous.aptitude.mixin.BrainAccessor;
 import com.infamous.aptitude.mixin.LivingEntityAccessor;
 import com.mojang.datafixers.util.Pair;
@@ -19,7 +20,6 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.Map;
@@ -124,5 +124,14 @@ public class BrainHelper {
 
     public static<E extends LivingEntity> Brain<E> getBrainCast(E mob) {
         return (Brain<E>) mob.getBrain();
+    }
+
+    public static boolean shouldTickBrain(Mob mob) {
+        return !mob.getType().is(AptitudeResources.EXCLUDE_BRAIN_TICK);
+    }
+
+    public static boolean hasBrainFile(LivingEntity mob) {
+        ResourceLocation etLocation = mob.getType().getRegistryName();
+        return Aptitude.brainManager.hasBrainEntry(etLocation);
     }
 }
