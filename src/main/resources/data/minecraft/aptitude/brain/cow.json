@@ -1,4 +1,5 @@
 {
+  "replace_brain": true,
   "memory_types": [
     "minecraft:mobs",
     "minecraft:visible_mobs",
@@ -18,9 +19,9 @@
   "core_activities": [
     "minecraft:core"
   ],
-  "default_activity": {
-    "type": "minecraft:idle",
-    "set_active": true
+  "default_activity": "minecraft:idle",
+  "brain_creation_callback": {
+    "type": "aptitude:entity_use_default_activity"
   },
   "rotating_activities": [
     "minecraft:fight",
@@ -53,7 +54,7 @@
       }
     ]
   },
-  "activities_by_priority": [
+  "activities_with_behaviors": [
     {
       "activity": "minecraft:core",
       "priority_start": 0,

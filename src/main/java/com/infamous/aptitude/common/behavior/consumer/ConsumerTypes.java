@@ -209,6 +209,13 @@ public class ConsumerTypes {
                 };
             });
 
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_USE_DEFAULT_ACTIVITY = register("entity_use_default_activity",
+            jsonObject -> {
+                return livingEntity -> {
+                    livingEntity.getBrain().useDefaultActivity();
+                };
+            });
+
     private static <U extends Consumer<?>> RegistryObject<ConsumerType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return CONSUMER_TYPES.register(name, () -> new ConsumerType<>(jsonFactory));
     }

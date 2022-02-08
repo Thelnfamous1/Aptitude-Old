@@ -1,7 +1,7 @@
 package com.infamous.aptitude;
 
 import com.infamous.aptitude.common.behavior.BehaviorTypes;
-import com.infamous.aptitude.common.behavior.BrainManager;
+import com.infamous.aptitude.common.manager.brain.BrainManager;
 import com.infamous.aptitude.common.behavior.consumer.BiConsumerTypes;
 import com.infamous.aptitude.common.behavior.consumer.ConsumerTypes;
 import com.infamous.aptitude.common.behavior.custom.memory.AptitudeMemoryModuleTypes;
@@ -10,6 +10,7 @@ import com.infamous.aptitude.common.behavior.functions.BiFunctionTypes;
 import com.infamous.aptitude.common.behavior.functions.FunctionTypes;
 import com.infamous.aptitude.common.behavior.predicates.BiPredicateTypes;
 import com.infamous.aptitude.common.behavior.predicates.PredicateTypes;
+import com.infamous.aptitude.common.manager.selector.SelectorManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -25,6 +26,7 @@ public class Aptitude
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MOD_ID = "aptitude";
     public static BrainManager brainManager;
+    public static SelectorManager selectorManager;
 
     public Aptitude() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();

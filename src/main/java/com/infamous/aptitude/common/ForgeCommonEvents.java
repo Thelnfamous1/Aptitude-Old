@@ -1,8 +1,10 @@
 package com.infamous.aptitude.common;
 
 import com.infamous.aptitude.Aptitude;
-import com.infamous.aptitude.common.behavior.BrainManager;
+import com.infamous.aptitude.common.behavior.util.SelectorHelper;
+import com.infamous.aptitude.common.manager.brain.BrainManager;
 import com.infamous.aptitude.common.behavior.util.BrainHelper;
+import com.infamous.aptitude.common.manager.selector.SelectorManager;
 import com.infamous.aptitude.common.util.AptitudeResources;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
@@ -33,7 +35,9 @@ public class ForgeCommonEvents {
     @SubscribeEvent
     public static void onReloadListener(AddReloadListenerEvent event){
         Aptitude.brainManager = new BrainManager();
+        Aptitude.selectorManager = new SelectorManager();
         event.addListener(Aptitude.brainManager);
+        event.addListener(Aptitude.selectorManager);
     }
 
     @SubscribeEvent
@@ -48,14 +52,26 @@ public class ForgeCommonEvents {
             hoglin.setImmuneToZombification(true);
         }
 
-        if(event.getEntity() instanceof Mob mob && hasBrainFile(mob)){
+        if(event.getEntity() instanceof Mob mob){
             ServerLevel serverLevel = (ServerLevel) event.getWorld();
             MinecraftServer server = serverLevel.getServer();
-            server.tell(new TickTask(server.getTickCount() + 1, () -> {
-                BrainHelper.clearAIAndRemakeBrain(mob, serverLevel);
-                performSpecificMobHandling(event);
-            }));
+            if(hasSelectorFile(mob)){
+                server.tell(new TickTask(server.getTickCount() + 1, () -> {
+                    SelectorHelper.remakeSelectors(mob);
+                }));
+            }
+            if(hasBrainFile(mob)){
+                server.tell(new TickTask(server.getTickCount() + 1, () -> {
+                    BrainHelper.remakeBrain(mob, serverLevel);
+                }));
+            }
+            performSpecificMobHandling(event);
         }
+    }
+
+    private static boolean hasSelectorFile(Mob mob) {
+        ResourceLocation etLocation = mob.getType().getRegistryName();
+        return Aptitude.selectorManager.hasSelectorEntry(etLocation);
     }
 
     // TODO: Make data-driven
@@ -103,12 +119,8 @@ public class ForgeCommonEvents {
 
     @SubscribeEvent
     public static void onMobPickUpLootEvent(MobPickUpLootEvent event){
-        Mob mob = event.getMob();
-        ItemStack stack = event.getItemStack();
-
-        if(hasBrainFile(mob)){
-            // TODO
-        }
+        //Mob mob = event.getMob();
+        //ItemStack stack = event.getItemStack();
     }
 
     private static boolean shouldTickBrain(Mob mob) {
@@ -117,7 +129,7 @@ public class ForgeCommonEvents {
 
     private static boolean hasBrainFile(Mob mob) {
         ResourceLocation etLocation = mob.getType().getRegistryName();
-        return Aptitude.brainManager.hasBrainFile(etLocation);
+        return Aptitude.brainManager.hasBrainEntry(etLocation);
     }
 
 }

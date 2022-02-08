@@ -1,0 +1,8 @@
+{
+  "goal_selector": {
+    "replace_goal_selector": true
+  },
+  "target_selector": {
+    "replace_target_selector": true
+  }
+}

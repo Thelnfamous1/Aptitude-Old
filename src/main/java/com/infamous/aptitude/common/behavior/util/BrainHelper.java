@@ -29,12 +29,6 @@ import java.util.function.Consumer;
 
 public class BrainHelper {
 
-    public static void clearAIAndRemakeBrain(Mob mob, ServerLevel serverLevel) {
-        mob.goalSelector.removeAllGoals();
-        mob.targetSelector.removeAllGoals();
-        remakeBrain(mob, serverLevel);
-    }
-
     public static <E extends LivingEntity> void remakeBrain(E mob, ServerLevel serverLevel){
         ResourceLocation etLocation = mob.getType().getRegistryName();
 
@@ -44,18 +38,18 @@ public class BrainHelper {
         Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>> activityRequirements = Aptitude.brainManager.getActivityRequirements(etLocation);
         Map<Activity, Set<MemoryModuleType<?>>> activityMemoriesToEraseWhenStopped = Aptitude.brainManager.getActivityMemoriesToEraseWhenStopped(etLocation);
         Set<Activity> coreActivities = Aptitude.brainManager.getCoreActivities(etLocation);
-        Pair<Activity, Boolean> defaultActivity = Aptitude.brainManager.getDefaultActivity(etLocation);
+        Activity defaultActivity = Aptitude.brainManager.getDefaultActivity(etLocation);
 
-        Brain<E> newBrain = replaceBrain(mob, serverLevel);
+        Consumer<LivingEntity> brainCreationCallback = Aptitude.brainManager.getBrainCreationCallback(etLocation);
+
+        Brain<E> brain = Aptitude.brainManager.replaceBrain(etLocation) ? replaceBrain(mob, serverLevel) : getBrainCast(mob);
         // Add custom memory module types and sensor types
-        remakeWithCustomMemoriesAndSensors(memoryTypes, sensorTypes, newBrain);
+        remakeWithCustomMemoriesAndSensors(memoryTypes, sensorTypes, brain);
         // Add custom behaviors
-        remakeWithCustomBehaviors(prioritizedBehaviorsByActivity, activityRequirements, activityMemoriesToEraseWhenStopped, newBrain);
-        newBrain.setCoreActivities(coreActivities);
-        newBrain.setDefaultActivity(defaultActivity.getFirst());
-        if(defaultActivity.getSecond()){
-            newBrain.useDefaultActivity();
-        }
+        remakeWithCustomBehaviors(prioritizedBehaviorsByActivity, activityRequirements, activityMemoriesToEraseWhenStopped, brain);
+        brain.setCoreActivities(coreActivities);
+        brain.setDefaultActivity(defaultActivity);
+        brainCreationCallback.accept(mob); //brain.useDefaultActivity();
 
     }
 
@@ -122,14 +116,13 @@ public class BrainHelper {
         }
     }
 
-    public static <E extends Mob> void updateActivity(E mob) {
+    public static <E extends LivingEntity> void updateActivity(E mob) {
         ResourceLocation etLocation = mob.getType().getRegistryName();
-        Consumer<?> updateActivityCallback = Aptitude.brainManager.getUpdateActivityCallback(etLocation);
-        Consumer<E> updateActivityCallbackCast = (Consumer<E>)updateActivityCallback;
-        updateActivityCallbackCast.accept(mob);
+        Consumer<LivingEntity> updateActivityCallback = Aptitude.brainManager.getUpdateActivityCallback(etLocation);
+        updateActivityCallback.accept(mob);
     }
 
-    public static<E extends Mob> Brain<E> getBrainCast(E mob) {
+    public static<E extends LivingEntity> Brain<E> getBrainCast(E mob) {
         return (Brain<E>) mob.getBrain();
     }
 }
