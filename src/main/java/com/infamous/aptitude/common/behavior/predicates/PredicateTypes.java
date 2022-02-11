@@ -22,6 +22,7 @@ import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.ToolAction;
@@ -255,6 +256,12 @@ public class PredicateTypes {
                 return livingEntity -> {
                     return livingEntity.level.getRandom().nextFloat() < randomChance;
                 };
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<ItemStack>>> ITEM_IS = register("item_is",
+            jsonObject -> {
+
+                return Ingredient.fromJson(jsonObject.get("is"));
             });
 
     private static <U extends Predicate<?>> RegistryObject<PredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {

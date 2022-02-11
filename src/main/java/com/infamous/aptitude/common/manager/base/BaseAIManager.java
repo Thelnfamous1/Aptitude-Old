@@ -42,8 +42,12 @@ public class BaseAIManager extends SimpleJsonResourceReloadListener {
         return this.getBaseAIContainer(location).getAddedToWorld();
     }
 
-    public Consumer<LivingEntity> finalizeSpawn(ResourceLocation location){
-        return this.getBaseAIContainer(location).getFinalizeSpawn();
+    public Consumer<LivingEntity> firstSpawn(ResourceLocation location){
+        return this.getBaseAIContainer(location).getFirstSpawn();
+    }
+
+    public BiConsumer<LivingEntity, LivingEntity> attackedBy(ResourceLocation location) {
+        return this.getBaseAIContainer(location).getAttackedBy();
     }
 
     private BaseAIContainer getBaseAIContainer(ResourceLocation location){

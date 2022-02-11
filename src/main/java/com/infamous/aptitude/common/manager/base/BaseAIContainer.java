@@ -12,19 +12,24 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
 public class BaseAIContainer {
-    private Consumer<LivingEntity> addedToWorld = le -> {};
-    private Consumer<LivingEntity> finalizeSpawn = le -> {};
-    private BiPredicate<LivingEntity, ItemStack> wantsToPickUp = ((le, stack) -> false);
-    private BiConsumer<LivingEntity, ItemEntity> pickUpItem = (le, itemEntity) -> {};
-
     public static final BaseAIContainer EMPTY =  new BaseAIContainer();
+
+    private Consumer<LivingEntity> addedToWorld = le -> {};
+    private Consumer<LivingEntity> firstSpawn = le -> {};
+    private BiPredicate<LivingEntity, ItemStack> wantsToPickUp = (le, is) -> false;
+    private BiConsumer<LivingEntity, ItemEntity> pickUpItem = (le, ie) -> {};
+    private BiConsumer<LivingEntity, LivingEntity> attackedBy = (victim, attacker) -> {};
 
     public Consumer<LivingEntity> getAddedToWorld() {
         return addedToWorld;
     }
 
-    public Consumer<LivingEntity> getFinalizeSpawn() {
-        return finalizeSpawn;
+    public Consumer<LivingEntity> getFirstSpawn() {
+        return firstSpawn;
+    }
+
+    public BiConsumer<LivingEntity, LivingEntity> getAttackedBy() {
+        return attackedBy;
     }
 
     public BiPredicate<LivingEntity, ItemStack> getWantsToPickUp() {
@@ -43,9 +48,10 @@ public class BaseAIContainer {
         BaseAIContainer baseAIContainer = new BaseAIContainer();
 
         baseAIContainer.addedToWorld = ConsumerHelper.parseConsumerOrDefault(jsonObject, "added_to_world", "type", le -> {});
-        baseAIContainer.finalizeSpawn = ConsumerHelper.parseConsumerOrDefault(jsonObject, "finalize_spawn", "type", le -> {});
-        baseAIContainer.wantsToPickUp = PredicateHelper.parseBiPredicateOrDefault(jsonObject, "wants_to_pick_up", "type", (livingEntity, stack) -> false);
-        baseAIContainer.pickUpItem = ConsumerHelper.parseBiConsumerOrDefault(jsonObject, "pick_up_item", "type", ((livingEntity, itemEntity) -> {}));
+        baseAIContainer.firstSpawn = ConsumerHelper.parseConsumerOrDefault(jsonObject, "first_spawn", "type", le -> {});
+        baseAIContainer.attackedBy = ConsumerHelper.parseBiConsumerOrDefault(jsonObject, "attacked_by", "type", (victim, attacker) -> {});
+        baseAIContainer.wantsToPickUp = PredicateHelper.parseBiPredicateOrDefault(jsonObject, "wants_to_pick_up", "type", (le, is) -> false);
+        baseAIContainer.pickUpItem = ConsumerHelper.parseBiConsumerOrDefault(jsonObject, "pick_up_item", "type", (le, ie) -> {});
 
         return baseAIContainer;
     }

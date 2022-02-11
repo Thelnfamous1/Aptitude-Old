@@ -13,10 +13,10 @@ import java.util.function.Consumer;
 
 public class BaseAIHelper {
 
-    public static void finalizeSpawn(LivingEntity mob) {
+    public static void firstSpawn(LivingEntity mob) {
         ResourceLocation etLocation = mob.getType().getRegistryName();
-        Consumer<LivingEntity> finalizeSpawn = Aptitude.baseAIManager.finalizeSpawn(etLocation);
-        finalizeSpawn.accept(mob);
+        Consumer<LivingEntity> firstSpawn = Aptitude.baseAIManager.firstSpawn(etLocation);
+        firstSpawn.accept(mob);
     }
 
     public static boolean hasBaseAIFile(LivingEntity mob) {
@@ -40,5 +40,11 @@ public class BaseAIHelper {
         ResourceLocation etLocation = mob.getType().getRegistryName();
         Consumer<LivingEntity> addedToWorld = Aptitude.baseAIManager.addedToWorld(etLocation);
         addedToWorld.accept(mob);
+    }
+
+    public static void attackedBy(LivingEntity victim, LivingEntity attacker) {
+        ResourceLocation etLocation = victim.getType().getRegistryName();
+        BiConsumer<LivingEntity, LivingEntity> attackedBy = Aptitude.baseAIManager.attackedBy(etLocation);
+        attackedBy.accept(victim, attacker);
     }
 }

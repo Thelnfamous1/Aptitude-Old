@@ -7,23 +7,17 @@ import com.infamous.aptitude.common.manager.brain.BrainManager;
 import com.infamous.aptitude.common.behavior.util.BrainHelper;
 import com.infamous.aptitude.common.manager.selector.SelectorManager;
 import com.infamous.aptitude.common.manager.base.BaseAIManager;
-import net.minecraft.core.GlobalPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.TimeUtil;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -40,7 +34,7 @@ public class ForgeCommonEvents {
         event.addListener(Aptitude.baseAIManager);
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onEntityJoinWorld(EntityJoinWorldEvent event){
         if(event.getWorld().isClientSide){
             return;
@@ -77,14 +71,14 @@ public class ForgeCommonEvents {
                 }));
                 if(!event.loadedFromDisk()){
                     server.tell(new TickTask(server.getTickCount() + 1, () -> {
-                        BaseAIHelper.finalizeSpawn(le);
+                        BaseAIHelper.firstSpawn(le);
                     }));
                 }
             }
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onCustomServerAiStepEvent(CustomServerAiStepEvent event){
         Mob mob = event.getMob();
 
@@ -104,6 +98,17 @@ public class ForgeCommonEvents {
             event.setCanceled(true);
             if(BaseAIHelper.wantsToPickUp(mob, itemEntity.getItem())){
                 BaseAIHelper.pickUpItem(mob, itemEntity);
+            }
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onAttacked(LivingAttackEvent event){
+        if(!event.isCanceled()){
+            LivingEntity victim = event.getEntityLiving();
+            Entity sourceEntity = event.getSource().getEntity();
+            if(sourceEntity instanceof LivingEntity attacker && BaseAIHelper.hasBaseAIFile(victim)){
+                BaseAIHelper.attackedBy(victim, attacker);
             }
         }
     }

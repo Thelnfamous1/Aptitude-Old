@@ -10,20 +10,14 @@
       }
     ]
   },
-  "finalize_spawn": {
-    "type": "aaptitude:ll_of_consumer",
+  "first_spawn": {
+    "type": "aaptitude:all_of_consumer",
     "consumers": [
       {
-        "type": "aptitude:predicated_consumer",
-        "predicate": {
-          "type": "aptitude:is_adult"
-        },
-        "consumer": {
-          "type": "aptitude:entity_set_equipment_in_slot",
-          "slot": "mainhand",
-          "equipment": {
-            "item": "minecraft:golden_axe"
-          }
+        "type": "aptitude:entity_set_equipment_in_slot",
+        "slot": "mainhand",
+        "equipment": {
+          "item": "minecraft:golden_axe"
         }
       },
       {
@@ -36,8 +30,15 @@
     ]
   },
   "wants_to_pick_up": {
+    "type": "aptitude:bipredicate_of_predicates",
+    "predicate_for_second": {
+      "type": "aptitude:item_is",
+      "is": {
+        "item": "minecraft:golden_axe"
+      }
+    }
   },
   "pick_up_item": {
-
+    "type": "aptitude:entity_pick_up_equipment"
   }
 }

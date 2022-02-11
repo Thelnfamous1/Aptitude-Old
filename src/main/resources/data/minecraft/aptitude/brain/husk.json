@@ -24,7 +24,7 @@
   "sensor_types": [
     "minecraft:nearest_living_entities",
     "minecraft:nearest_players",
-    "minecraft:nearest_items",
+    "aptitude:nearest_items",
     "minecraft:hurt_by",
     "aptitude:husk_specific_sensor"
   ],

@@ -3,17 +3,21 @@ package com.infamous.aptitude.common.behavior.predicates;
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.*;
+import com.infamous.aptitude.common.util.ReflectionHelper;
 import net.minecraft.advancements.critereon.EntityTypePredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.monster.piglin.Piglin;
+import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -193,6 +197,40 @@ public class BiPredicateTypes {
 
                 return (livingEntity, o) -> {
                     return (new Random(livingEntity.level.getGameTime())).nextFloat() < randomChance;
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<?, ?>>> BIPREDICATE_OF_PREDICATES = register("bipredicate_of_predicates",
+            jsonObject -> {
+                Predicate<Object> predicateForFirst = PredicateHelper.parsePredicateOrDefault(jsonObject, "predicate_for_first", "type", o -> true);
+                Predicate<Object> predicateForSecond = PredicateHelper.parsePredicateOrDefault(jsonObject, "predicate_for_second", "type", o -> true);
+
+                return (o1, o2) -> {
+                    return predicateForFirst.test(o1) && predicateForSecond.test(o2);
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, ItemStack>>> ENTITY_CAN_ADD_ITEM_TO_INVENTORY = register("entity_can_add_item_to_inventory",
+            jsonObject -> {
+
+                return (livingEntity, itemStack) -> {
+                    return livingEntity instanceof InventoryCarrier ic && ic.getInventory() instanceof SimpleContainer sc && sc.canAddItem(itemStack);
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, ItemStack>>> ENTITY_WANTS_TO_PICK_UP_ITEM = register("entity_wants_to_pick_up_item",
+            jsonObject -> {
+
+                return (livingEntity, itemStack) -> {
+                    return livingEntity instanceof Mob mob && mob.wantsToPickUp(itemStack);
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, ItemStack>>> ENTITY_CAN_REPLACE_CURRENT_ITEM = register("entity_can_replace_current_item",
+            jsonObject -> {
+
+                return (livingEntity, itemStack) -> {
+                    return livingEntity instanceof Mob mob && ReflectionHelper.reflectCanReplaceCurrentItem(mob, itemStack);
                 };
             });
 
