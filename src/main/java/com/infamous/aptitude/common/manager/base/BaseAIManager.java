@@ -38,6 +38,10 @@ public class BaseAIManager extends SimpleJsonResourceReloadListener {
         return this.getBaseAIContainer(location).getWantsToPickUp();
     }
 
+    public Consumer<LivingEntity> addedToWorld(ResourceLocation location) {
+        return this.getBaseAIContainer(location).getAddedToWorld();
+    }
+
     public Consumer<LivingEntity> finalizeSpawn(ResourceLocation location){
         return this.getBaseAIContainer(location).getFinalizeSpawn();
     }

@@ -12,11 +12,16 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
 public class BaseAIContainer {
+    private Consumer<LivingEntity> addedToWorld = le -> {};
     private Consumer<LivingEntity> finalizeSpawn = le -> {};
     private BiPredicate<LivingEntity, ItemStack> wantsToPickUp = ((le, stack) -> false);
     private BiConsumer<LivingEntity, ItemEntity> pickUpItem = (le, itemEntity) -> {};
 
     public static final BaseAIContainer EMPTY =  new BaseAIContainer();
+
+    public Consumer<LivingEntity> getAddedToWorld() {
+        return addedToWorld;
+    }
 
     public Consumer<LivingEntity> getFinalizeSpawn() {
         return finalizeSpawn;
@@ -37,9 +42,10 @@ public class BaseAIContainer {
     public static BaseAIContainer of(JsonObject jsonObject){
         BaseAIContainer baseAIContainer = new BaseAIContainer();
 
-        baseAIContainer.finalizeSpawn = ConsumerHelper.parseConsumer(jsonObject, "finalize_spawn", "type");
-        baseAIContainer.wantsToPickUp = PredicateHelper.parseBiPredicate(jsonObject, "wants_to_pick_up", "type");
-        baseAIContainer.pickUpItem = ConsumerHelper.parseBiConsumer(jsonObject, "pick_up_item", "type");
+        baseAIContainer.addedToWorld = ConsumerHelper.parseConsumerOrDefault(jsonObject, "added_to_world", "type", le -> {});
+        baseAIContainer.finalizeSpawn = ConsumerHelper.parseConsumerOrDefault(jsonObject, "finalize_spawn", "type", le -> {});
+        baseAIContainer.wantsToPickUp = PredicateHelper.parseBiPredicateOrDefault(jsonObject, "wants_to_pick_up", "type", (livingEntity, stack) -> false);
+        baseAIContainer.pickUpItem = ConsumerHelper.parseBiConsumerOrDefault(jsonObject, "pick_up_item", "type", ((livingEntity, itemEntity) -> {}));
 
         return baseAIContainer;
     }

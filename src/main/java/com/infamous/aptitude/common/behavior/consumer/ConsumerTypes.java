@@ -5,8 +5,10 @@ import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.infamous.aptitude.common.behavior.util.ConsumerHelper;
+import com.infamous.aptitude.common.behavior.util.FunctionHelper;
 import com.infamous.aptitude.common.behavior.util.PredicateHelper;
 import com.infamous.aptitude.mixin.LivingEntityAccessor;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
@@ -15,11 +17,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.*;
 
@@ -55,9 +60,10 @@ public class ConsumerTypes {
             jsonObject -> {
                 MemoryModuleType<Boolean> memoryType = BehaviorHelper.parseMemoryType(jsonObject, "memory");
                 boolean value = GsonHelper.getAsBoolean(jsonObject, "value");
-                Long expireTime = GsonHelper.getAsLong(jsonObject, "expire_time", Long.MAX_VALUE);
+                Function<LivingEntity, Long> expireTimeFunction = BehaviorHelper.parseExpireTimeFunction(jsonObject, "expire_time", "type");
 
                 return livingEntity -> {
+                    long expireTime = expireTimeFunction.apply(livingEntity);
                     livingEntity.getBrain().setMemoryWithExpiry(memoryType, value, expireTime);
                 };
             });
@@ -222,6 +228,47 @@ public class ConsumerTypes {
                 List<Consumer<Object>> consumers = ConsumerHelper.parseConsumers(jsonObject, "consumers", "type");
                 return o -> {
                     consumers.forEach(consumer -> consumer.accept(o));
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_SET_EQUIPMENT_IN_SLOT = register("entity_set_equipment_in_slot",
+            jsonObject -> {
+            EquipmentSlot equipmentSlot = BehaviorHelper.parseEquipmentSlot(jsonObject, "slot");
+            ItemStack equipment = ShapedRecipe.itemStackFromJson(jsonObject.getAsJsonObject("equipment"));
+
+                return livingEntity -> {
+                    livingEntity.setItemSlot(equipmentSlot, equipment);
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_SET_CAN_PICK_UP_LOOT = register("entity_set_can_pick_up_loot",
+            jsonObject -> {
+                boolean canPickUpLoot = GsonHelper.getAsBoolean(jsonObject, "can_pick_up_loot", true);
+                return livingEntity -> {
+                    if(livingEntity instanceof Mob mob) mob.setCanPickUpLoot(canPickUpLoot);
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_SET_CAN_OPEN_DOORS = register("entity_set_can_open_doors",
+            jsonObject -> {
+                boolean canOpenDoors = GsonHelper.getAsBoolean(jsonObject, "can_open_doors", true);
+                return livingEntity -> {
+                    if(livingEntity instanceof Mob mob && GoalUtils.hasGroundPathNavigation(mob)){
+                        ((GroundPathNavigation)mob.getNavigation()).setCanOpenDoors(canOpenDoors);
+                    }
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> SET_GLOBAL_POSITION_MEMORY = register("entity_set_global_position_memory",
+            jsonObject -> {
+                MemoryModuleType<GlobalPos> memoryType = BehaviorHelper.parseMemoryType(jsonObject, "memory");
+                Function<LivingEntity, GlobalPos> globalPosFunction = FunctionHelper.parseFunction(jsonObject, "global_position_function", "type");
+                Function<LivingEntity, Long> expireTimeFunction = BehaviorHelper.parseExpireTimeFunction(jsonObject, "expire_time", "type");
+
+                return livingEntity -> {
+                    long expireTime = expireTimeFunction.apply(livingEntity);
+                    GlobalPos value = globalPosFunction.apply(livingEntity);
+                    livingEntity.getBrain().setMemoryWithExpiry(memoryType, value, expireTime);
                 };
             });
 

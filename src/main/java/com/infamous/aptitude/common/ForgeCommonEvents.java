@@ -54,13 +54,18 @@ public class ForgeCommonEvents {
 
         ServerLevel serverLevel = (ServerLevel) event.getWorld();
         MinecraftServer server = serverLevel.getServer();
+
+        // mob-specific
         if(event.getEntity() instanceof Mob mob){
             if(SelectorHelper.hasSelectorFile(mob)){
                 server.tell(new TickTask(server.getTickCount() + 1, () -> {
                     SelectorHelper.remakeSelectors(mob);
                 }));
             }
-        } else if(event.getEntity() instanceof LivingEntity le){
+        }
+
+        // non-specific
+        if(event.getEntity() instanceof LivingEntity le){
             if(BrainHelper.hasBrainFile(le)){
                 server.tell(new TickTask(server.getTickCount() + 1, () -> {
                     BrainHelper.remakeBrain(le, serverLevel);
@@ -68,38 +73,12 @@ public class ForgeCommonEvents {
             }
             if(BaseAIHelper.hasBaseAIFile(le)){
                 server.tell(new TickTask(server.getTickCount() + 1, () -> {
-                    BaseAIHelper.finalizeSpawn(le);
+                    BaseAIHelper.addedToWorld(le);
                 }));
-            }
-        }
-    }
-
-    // TODO: Make data-driven
-    private static void performSpecificMobHandling(EntityJoinWorldEvent event) {
-        Entity mob = event.getEntity();
-        if(mob instanceof Zombie zombie) {
-            zombie.setCanPickUpLoot(true);
-            if (GoalUtils.hasGroundPathNavigation(zombie)) {
-                ((GroundPathNavigation)zombie.getNavigation()).setCanOpenDoors(true);
-            }
-            if(!event.loadedFromDisk()){ // "finalize spawn"
-                boolean baby = zombie.isBaby();
-                if(zombie.getType() == EntityType.ZOMBIE){
-                    if(!baby){
-                        if(zombie.getRandom().nextFloat() < 0.5F){
-                            zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.CROSSBOW));
-                        } else{
-                            zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
-                        }
-                    }
-                    int waitBeforeHunting = TimeUtil.rangeOfSeconds(30, 120).sample(zombie.level.random);
-                    zombie.getBrain().setMemoryWithExpiry(MemoryModuleType.HUNTED_RECENTLY, true, (long)waitBeforeHunting);
-                } else if(zombie.getType() == EntityType.HUSK){
-                    if(!baby){
-                        zombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_AXE));
-                    }
-                    GlobalPos globalpos = GlobalPos.of(zombie.level.dimension(), zombie.blockPosition());
-                    zombie.getBrain().setMemory(MemoryModuleType.HOME, globalpos);
+                if(!event.loadedFromDisk()){
+                    server.tell(new TickTask(server.getTickCount() + 1, () -> {
+                        BaseAIHelper.finalizeSpawn(le);
+                    }));
                 }
             }
         }

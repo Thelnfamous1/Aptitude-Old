@@ -6,8 +6,11 @@ import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.infamous.aptitude.common.behavior.util.FunctionHelper;
 import com.infamous.aptitude.common.behavior.util.PredicateHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
@@ -124,6 +127,21 @@ public class FunctionTypes {
                 float value = GsonHelper.getAsFloat(jsonObject, "value", 0);
                 return livingEntity -> {
                     return value;
+                };
+            });
+
+    public static final RegistryObject<FunctionType<Function<LivingEntity, Long>>> ENTITY_GET_LONG_FROM_UNIFORM_INT = register("entity_get_long_from_uniform_int",
+            jsonObject -> {
+                UniformInt uniformInt = BehaviorHelper.parseUniformInt(jsonObject, "uniform_int");
+                return livingEntity -> {
+                    return (long) uniformInt.sample(livingEntity.level.random);
+                };
+            });
+
+    public static final RegistryObject<FunctionType<Function<LivingEntity, GlobalPos>>> ENTITY_GET_GLOBAL_POSITION_FROM_SELF = register("entity_get_global_position_from_self",
+            jsonObject -> {
+                return livingEntity -> {
+                    return GlobalPos.of(livingEntity.level.dimension(), livingEntity.blockPosition());
                 };
             });
 

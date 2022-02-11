@@ -34,8 +34,10 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class BehaviorHelper {
 
@@ -260,5 +262,14 @@ public class BehaviorHelper {
     public static EquipmentSlot parseEquipmentSlot(JsonObject jsonObject, String slotMemberName) {
         String equipmentSlotString = GsonHelper.getAsString(jsonObject, slotMemberName);
         return EquipmentSlot.byName(equipmentSlotString);
+    }
+
+    public static Function<LivingEntity, Long> parseExpireTimeFunction(JsonObject jsonObject, String memberName, String typeMemberName) {
+        if(jsonObject.has(memberName) && jsonObject.get(memberName).isJsonObject()){
+            return FunctionHelper.parseFunction(jsonObject, memberName, typeMemberName);
+        } else{
+            long expireTime = GsonHelper.getAsLong(jsonObject, memberName, Long.MAX_VALUE);
+            return livingEntity -> expireTime;
+        }
     }
 }

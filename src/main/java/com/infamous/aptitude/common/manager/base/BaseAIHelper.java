@@ -35,4 +35,10 @@ public class BaseAIHelper {
         BiConsumer<LivingEntity, ItemEntity> pickUpItem = Aptitude.baseAIManager.pickUpItem(etLocation);
         pickUpItem.accept(mob, itemEntity);
     }
+
+    public static void addedToWorld(LivingEntity mob) {
+        ResourceLocation etLocation = mob.getType().getRegistryName();
+        Consumer<LivingEntity> addedToWorld = Aptitude.baseAIManager.addedToWorld(etLocation);
+        addedToWorld.accept(mob);
+    }
 }

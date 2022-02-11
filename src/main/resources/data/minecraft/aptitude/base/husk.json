@@ -1,0 +1,43 @@
+{
+  "added_to_world": {
+    "type": "aptitude:all_of_consumer",
+    "consumers": [
+      {
+        "type": "aptitude:entity_set_can_pick_up_loot"
+      },
+      {
+        "type": "aptitude:entity_set_can_open_doors"
+      }
+    ]
+  },
+  "finalize_spawn": {
+    "type": "aaptitude:ll_of_consumer",
+    "consumers": [
+      {
+        "type": "aptitude:predicated_consumer",
+        "predicate": {
+          "type": "aptitude:is_adult"
+        },
+        "consumer": {
+          "type": "aptitude:entity_set_equipment_in_slot",
+          "slot": "mainhand",
+          "equipment": {
+            "item": "minecraft:golden_axe"
+          }
+        }
+      },
+      {
+        "type": "aptitude:entity_set_global_position_memory",
+        "memory": "minecraft:home",
+        "global_position_function": {
+          "type": "aptitude:entity_get_global_position_from_self"
+        }
+      }
+    ]
+  },
+  "wants_to_pick_up": {
+  },
+  "pick_up_item": {
+
+  }
+}
