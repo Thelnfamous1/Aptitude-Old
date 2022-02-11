@@ -11,7 +11,7 @@
     ]
   },
   "first_spawn": {
-    "type": "aaptitude:all_of_consumer",
+    "type": "aptitude:all_of_consumer",
     "consumers": [
       {
         "type": "aptitude:entity_set_equipment_in_slot",

@@ -48,7 +48,7 @@
           "type": "aptitude:entity_get_long_from_uniform_int",
           "uniform_int": {
             "minInclusive": 600,
-            "maxIncluisve": 2400
+            "maxInclusive": 2400
           }
         }
       }
@@ -118,6 +118,7 @@
                   "type": "aptitude:negate_predicate",
                   "predicate": {
                     "type": "aptitude:entity_item_in_slot_is",
+                    "slot": "offhand",
                     "item_in_slot_is": {
                       "tag": "minecraft:piglin_loved"
                     }
@@ -133,43 +134,53 @@
             }
           },
           {
-            "type": "aptitude:bipredicate_of_predicates",
-            "predicate_for_first": {
-              "type": "aptitude:entity_can_add_item_to_inventory"
-            },
-            "predicate_for_second": {
-              "type": "aptitude:item_is",
-              "is": {
-                "item": "minecraft:gold_nugget"
+            "type": "aptitude:all_of_bipredicate",
+            "bipredicates": [
+              {
+                "type": "aptitude:bipredicate_of_predicates",
+                "predicate_for_second": {
+                  "type": "aptitude:item_is",
+                  "is": {
+                    "item": "minecraft:gold_nugget"
+                  }
+                }
+              },
+              {
+                "type": "aptitude:entity_can_add_item_to_inventory"
               }
-            }
+            ]
           },
           {
-            "type": "aptitude:bipredicate_of_predicates",
-            "predicate_for_first": {
-              "type": "aptitude:all_of_predicate",
-              "predicates": [
-                {
-                  "type": "aptitude:negate_predicate",
-                  "predicate": {
-                    "type": "aptitude:memory_status_check",
-                    "addContext": {
-                        "type": "minecraft:ate_recently",
-                        "status": "value_present"
+            "type": "aptitude:all_of_bipredicate",
+            "bipredicates": [
+              {
+                "type": "aptitude:bipredicate_of_predicates",
+                "predicate_for_first": {
+                  "type": "aptitude:all_of_predicate",
+                  "predicates": [
+                    {
+                      "type": "aptitude:negate_predicate",
+                      "predicate": {
+                        "type": "aptitude:memory_status_check",
+                        "addContext": {
+                          "type": "minecraft:ate_recently",
+                          "status": "value_present"
+                        }
+                      }
                     }
-                  }
+                  ]
                 },
-                {
-                  "type": "aptitude:entity_can_add_item_to_inventory"
+                "predicate_for_second": {
+                  "type": "aptitude:item_is",
+                  "is": {
+                    "tag": "minecraft:piglin_food"
+                  }
                 }
-              ]
-            },
-            "predicate_for_second": {
-              "type": "aptitude:item_is",
-              "is": {
-                "tag": "minecraft:piglin_food"
+              },
+              {
+                "type": "aptitude:entity_can_add_item_to_inventory"
               }
-            }
+            ]
           },
           {
             "type": "aptitude:all_of_bipredicate",
@@ -207,6 +218,7 @@
                       "type": "aptitude:negate_predicate",
                       "predicate": {
                         "type": "aptitude:entity_item_in_slot_is",
+                        "slot": "offhand",
                         "item_in_slot_is": {
                           "tag": "minecraft:piglin_loved"
                         }

@@ -139,6 +139,7 @@ public class BehaviorHelper {
         JsonObject interval = GsonHelper.getAsJsonObject(jsonObject, memberName);
         int minInclusive = GsonHelper.getAsInt(interval, "minInclusive", 0);
         int maxInclusive = GsonHelper.getAsInt(interval, "maxInclusive", 0);
+        if(minInclusive > maxInclusive) throw new JsonParseException("maxInclusive must not be less than minInclusive");
         return UniformInt.of(minInclusive, maxInclusive);
     }
 

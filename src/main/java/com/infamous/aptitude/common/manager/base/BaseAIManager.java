@@ -68,7 +68,7 @@ public class BaseAIManager extends SimpleJsonResourceReloadListener {
                 stateContainerBuilder.put(location, baseAIContainer);
 
             } catch (Exception exception) {
-                LOGGER.error("Couldn't parse state for {}", location, exception);
+                LOGGER.error("Couldn't parse base AI for {}", location, exception);
             }
         });
         this.baseAIContainers = stateContainerBuilder.build();
