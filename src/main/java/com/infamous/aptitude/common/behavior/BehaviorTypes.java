@@ -333,6 +333,21 @@ public class BehaviorTypes {
                 return new DismountOrSkipMounting<>(maxWalkDistToRideTarget, dontRideIf);
             });
 
+    public static final RegistryObject<BehaviorType<AptitudeRetaliate>> RETALIATE = register("retaliate",
+            (jsonObject) -> {
+                BiPredicate<LivingEntity, LivingEntity> ignoreIf = PredicateHelper.parseBiPredicateOrDefault(jsonObject, "ignoreIf", "type", (le, le1) -> false);
+
+                return new AptitudeRetaliate(ignoreIf);
+            });
+
+    public static final RegistryObject<BehaviorType<AptitudeRetaliateAndBroadcast>> RETALIATE_AND_BROADCAST = register("retaliate_and_broadcast",
+            (jsonObject) -> {
+                BiPredicate<LivingEntity, LivingEntity> ignoreIf = PredicateHelper.parseBiPredicateOrDefault(jsonObject, "ignoreIf", "type", (le, le1) -> false);
+                BiPredicate<LivingEntity, LivingEntity> allyIgnoreIf = PredicateHelper.parseBiPredicateOrDefault(jsonObject, "allyIgnoreIf", "type", (le, le1) -> false);
+                MemoryModuleType<List<LivingEntity>> nearbyAlliesMemory = BehaviorHelper.parseMemoryType(jsonObject, "nearbyAlliesMemory");
+                return new AptitudeRetaliateAndBroadcast(ignoreIf, allyIgnoreIf, nearbyAlliesMemory);
+            });
+
     private static <U extends Behavior<?>> RegistryObject<BehaviorType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return BEHAVIOR_TYPES.register(name, () -> new BehaviorType<>(jsonFactory));
     }

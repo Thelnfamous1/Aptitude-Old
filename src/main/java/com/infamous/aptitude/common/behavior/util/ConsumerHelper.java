@@ -76,4 +76,16 @@ public class ConsumerHelper {
         });
         return consumers;
     }
+
+    public static <T, U> List<BiConsumer<T, U>> parseBiConsumers(JsonObject jsonObject, String memberName, String typeMemberName) {
+        JsonArray biConsumersArr = GsonHelper.getAsJsonArray(jsonObject, memberName);
+        List<BiConsumer<T, U>> biConsumers = new ArrayList<>();
+        biConsumersArr.forEach(jsonElement -> {
+            JsonObject elemObj = jsonElement.getAsJsonObject();
+            BiConsumerType<?> biConsumerType = parseBiConsumerType(elemObj, typeMemberName);
+            BiConsumer<T, U> biConsumer = (BiConsumer<T, U>) biConsumerType.fromJson(elemObj);
+            biConsumers.add(biConsumer);
+        });
+        return biConsumers;
+    }
 }

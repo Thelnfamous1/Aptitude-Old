@@ -25,6 +25,7 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.GameRules;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -32,10 +33,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -262,6 +260,29 @@ public class PredicateTypes {
             jsonObject -> {
 
                 return Ingredient.fromJson(jsonObject.get("is"));
+            });
+
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_BOOLEAN_GAME_RULE_CHECK = register("entity_boolean_game_rule_check",
+            jsonObject -> {
+                String gameRuleId = GsonHelper.getAsString(jsonObject, "game_rule_id");
+                String gameRuleCategoryStr = GsonHelper.getAsString(jsonObject, "game_rule_category");
+                GameRules.Category gameRuleCategory = GameRules.Category.valueOf(gameRuleCategoryStr.toUpperCase(Locale.ROOT));
+                GameRules.Key<GameRules.BooleanValue> booleanValueKey = new GameRules.Key<>(gameRuleId, gameRuleCategory);
+
+                return livingEntity -> {
+                    return livingEntity.level.getGameRules().getBoolean(booleanValueKey);
+                };
+            });
+
+
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_ACTIVE_ACTIVITY_CHECK = register("entity_active_activity_check",
+            jsonObject -> {
+                Activity activity = BehaviorHelper.parseActivity(jsonObject, "activity");
+                return le -> {
+                    return le.getBrain().isActive(activity);
+                };
             });
 
     private static <U extends Predicate<?>> RegistryObject<PredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {

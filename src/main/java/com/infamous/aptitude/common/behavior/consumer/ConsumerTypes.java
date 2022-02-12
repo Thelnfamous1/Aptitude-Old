@@ -16,6 +16,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.GoalUtils;
@@ -138,6 +139,7 @@ public class ConsumerTypes {
                 Predicate<LivingEntity> canBarter = PredicateHelper.parsePredicateOrDefault(jsonObject, "can_barter", "type", le -> !le.isBaby());
                 EquipmentSlot admireItemSlot = BehaviorHelper.parseEquipmentSlotOrDefault(jsonObject, "admire_item_slot", EquipmentSlot.OFFHAND);
                 Ingredient barterCurrency = Ingredient.fromJson(jsonObject.get("barter_currency"));
+                boolean doBarter = GsonHelper.getAsBoolean(jsonObject, "do_barter", true);
 
                 String barteringLootTableString = GsonHelper.getAsString(jsonObject, "bartering_loot_table", "");
                 ResourceLocation barteringLootTable = new ResourceLocation(barteringLootTableString);
@@ -150,7 +152,7 @@ public class ConsumerTypes {
                     livingEntity.setItemSlot(admireItemSlot, ItemStack.EMPTY);
                     if (canBarter.test(livingEntity)) {
                         boolean isBarterCurrency = barterCurrency.test(admireItem);
-                        if (isBarterCurrency) {
+                        if (isBarterCurrency && doBarter) {
                             BehaviorHelper.throwItems(livingEntity, BehaviorHelper.getBarterResponseItems(livingEntity, barteringLootTable));
                         } else {
                             boolean equippedItem = livingEntity instanceof Mob mob && mob.equipItemIfPossible(admireItem);
@@ -269,6 +271,38 @@ public class ConsumerTypes {
                     long expireTime = expireTimeFunction.apply(livingEntity);
                     GlobalPos value = globalPosFunction.apply(livingEntity);
                     livingEntity.getBrain().setMemoryWithExpiry(memoryType, value, expireTime);
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_SET_ANGRY_AT_FROM_MEMORY = register("entity_set_angry_at_from_memory",
+            jsonObject -> {
+                Function<LivingEntity, Optional<? extends LivingEntity>> fromMemoryFunction = FunctionHelper.parseFunction(jsonObject, "from_memory_function", "type");
+                MemoryModuleType<UUID> angryAtMemory = BehaviorHelper.parseMemoryTypeOrDefault(jsonObject, "angry_at_memory", MemoryModuleType.ANGRY_AT);
+                Function<LivingEntity, Long> expireTimeFunc = BehaviorHelper.parseExpireTimeFunction(jsonObject, "expire_time", "type");
+                return angry -> {
+                    Optional<? extends LivingEntity> fromMemory = fromMemoryFunction.apply(angry);
+                    if(fromMemory.isPresent()){
+                        long expireTime = expireTimeFunc.apply(angry);
+                        angry.getBrain().setMemoryWithExpiry(angryAtMemory, fromMemory.get().getUUID(), expireTime);
+                    }
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_ERASE_MEMORY = register("entity_erase_memory",
+            jsonObject -> {
+                MemoryModuleType<?> memoryType = BehaviorHelper.parseMemoryType(jsonObject, "memory_type");
+                return livingEntity -> {
+                    livingEntity.getBrain().eraseMemory(memoryType);
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_APPLY_CONSUMER_TO_LIST_OF_ENTITIES = register("entity_apply_consumer_to_list_of_entities",
+            jsonObject -> {
+                Function<LivingEntity, List<LivingEntity>> retrievalFunction = FunctionHelper.parseFunction(jsonObject, "retrieval_function", "type");
+                Consumer<LivingEntity> consumer = ConsumerHelper.parseConsumer(jsonObject, "consumer", "type");
+                return le -> {
+                    List<LivingEntity> entities = retrievalFunction.apply(le);
+                    entities.forEach(consumer);
                 };
             });
 

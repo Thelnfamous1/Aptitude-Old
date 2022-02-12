@@ -103,6 +103,53 @@
         },
         {
           "type": "aptitude:stop_being_angry_if_target_dead"
+        },
+        {
+          "type": "aptitude:retaliate_and_broadcast",
+          "ignoreIf": {
+            "type": "aptitude:bipredicate_of_predicates",
+            "predicate_for_second": {
+                "type": "aptitude:any_of_predicate",
+                "predicates": [
+                  {
+                    "type": "aptitude:entity_is_type",
+                    "entity_type_predicate": "minecraft:zombie"
+                  },
+                  {
+                    "type": "aptitude:entity_is_type",
+                    "entity_type_predicate": "minecraft:husk"
+                  }
+                ]
+            }
+          },
+          "allyIgnoreIf": {
+            "type": "aptitude:negate_bipredicate",
+            "bipredicate": {
+              "type": "aptitude:any_of_bipredicate",
+              "bipredicates": [
+                {
+                  "type": "aptitude:bipredicate_of_predicates",
+                  "predicate_for_second": {
+                    "type": "aptitude:negate_predicate",
+                    "predicate": {
+                      "type": "aptitude:entity_is_type",
+                      "entity_type_predicate": "minecraft:hoglin"
+                    }
+                  }
+                },
+                {
+                  "type": "aptitude:bipredicate_of_predicates",
+                  "predicate_for_first": {
+                    "type": "aptitude:entity_can_hunt"
+                  },
+                  "predicate_for_second": {
+                    "type": "aptitude:entity_can_be_hunted"
+                  }
+                }
+              ]
+            }
+          },
+          "nearbyAlliesMemory": "aptitude:nearby_adult_zombies"
         }
       ]
     },

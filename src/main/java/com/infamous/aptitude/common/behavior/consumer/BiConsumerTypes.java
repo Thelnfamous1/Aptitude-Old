@@ -2,28 +2,32 @@ package com.infamous.aptitude.common.behavior.consumer;
 
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
-import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
-import com.infamous.aptitude.common.behavior.util.ConsumerHelper;
-import com.infamous.aptitude.common.behavior.util.PredicateHelper;
-import com.infamous.aptitude.common.behavior.util.RangedAttackHelper;
+import com.infamous.aptitude.common.behavior.util.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.CrossbowAttackMob;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.GameRules;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.*;
 
 public class BiConsumerTypes {
@@ -133,6 +137,66 @@ public class BiConsumerTypes {
                 return (o, o1) -> {
                     consumerForFirst.accept(o);
                     consumerForSecond.accept(o1);
+                };
+            });
+
+    public static final RegistryObject<BiConsumerType<BiConsumer<?, ?>>> BIPREDICATED_BICONSUMER = register("bipredicated_biconsumer",
+            jsonObject -> {
+                BiPredicate<Object, Object> biPredicate = PredicateHelper.parseBiPredicate(jsonObject, "bipredicate", "type");
+                BiConsumer<Object, Object> biConsumer = ConsumerHelper.parseBiConsumer(jsonObject, "biconsumer", "type");
+                BiConsumer<Object, Object> defaultBiConsumer = ConsumerHelper.parseBiConsumerOrDefault(jsonObject, "default", "type", (o, o1) -> {});
+
+
+                return (o, o1) -> {
+                    if(biPredicate.test(o, o1)){
+                        biConsumer.accept(o, o1);
+                    } else{
+                        defaultBiConsumer.accept(o, o1);
+                    }
+                };
+            });
+
+    public static final RegistryObject<BiConsumerType<BiConsumer<?, ?>>> ALL_OF_BICONSUMER = register("all_of_biconsumer",
+            jsonObject -> {
+                List<BiConsumer<Object, Object>> biConsumers = ConsumerHelper.parseBiConsumers(jsonObject, "biconsumers", "type");
+
+                return (o, o1) -> {
+                    for(BiConsumer<Object, Object> biConsumer : biConsumers){
+                        biConsumer.accept(o, o1);
+                    }
+                };
+            });
+
+    public static final RegistryObject<BiConsumerType<BiConsumer<LivingEntity, LivingEntity>>> ENTITY_SET_ANGRY_AT = register("entity_set_angry_at",
+            jsonObject -> {
+                MemoryModuleType<UUID> angryAtMemory = BehaviorHelper.parseMemoryTypeOrDefault(jsonObject, "angry_at_memory", MemoryModuleType.ANGRY_AT);
+                Function<LivingEntity, Long> expireTimeFunc = BehaviorHelper.parseExpireTimeFunction(jsonObject, "expire_time", "type");
+                return (angry, target) -> {
+                    long expireTime = expireTimeFunc.apply(angry);
+                    angry.getBrain().setMemoryWithExpiry(angryAtMemory, target.getUUID(), expireTime);
+                };
+            });
+
+    public static final RegistryObject<BiConsumerType<BiConsumer<LivingEntity, LivingEntity>>> ENTITY_APPLY_BICONSUMER_TO_LIST_OF_ENTITIES = register("entity_apply_biconsumer_to_list_of_entities",
+            jsonObject -> {
+                Function<LivingEntity, List<LivingEntity>> retrievalFunction = FunctionHelper.parseFunction(jsonObject, "retrieval_function", "type");
+                BiConsumer<LivingEntity, LivingEntity> biConsumer = ConsumerHelper.parseBiConsumer(jsonObject, "biconsumer", "type");
+                return (le, le1) -> {
+                    List<LivingEntity> entities = retrievalFunction.apply(le);
+                    entities.forEach(e -> biConsumer.accept(e, le1));
+                };
+            });
+
+    public static final RegistryObject<BiConsumerType<BiConsumer<LivingEntity, LivingEntity>>> ENTITY_APPLY_BICONSUMER_TO_NEAREST_TARGET = register("entity_apply_biconsumer_to_nearest_target",
+            jsonObject -> {
+                Function<LivingEntity, Optional<LivingEntity>> retrievalFunction = FunctionHelper.parseFunction(jsonObject, "retrieval_function", "type");
+                BiConsumer<LivingEntity, LivingEntity> biConsumer = ConsumerHelper.parseBiConsumer(jsonObject, "biconsumer", "type");
+                return (le, target) -> {
+                    Optional<LivingEntity> retrievedTarget = retrievalFunction.apply(le);
+                    LivingEntity nearestTarget = BehaviorUtils.getNearestTarget(le, retrievedTarget, target);
+                    if (retrievedTarget.isEmpty() || retrievedTarget.get() != nearestTarget) {
+                        biConsumer.accept(le, nearestTarget);
+                    }
                 };
             });
 

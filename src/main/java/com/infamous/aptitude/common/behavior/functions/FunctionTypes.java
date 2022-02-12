@@ -1,5 +1,6 @@
 package com.infamous.aptitude.common.behavior.functions;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
@@ -145,7 +146,13 @@ public class FunctionTypes {
                 };
             });
 
-
+    public static final RegistryObject<FunctionType<Function<LivingEntity, List<LivingEntity>>>> ENTITY_RETRIEVE_LIST_OF_ENTITIES_FROM_MEMORY = register("entity_retrieve_list_of_entities_from_memory",
+            jsonObject -> {
+                MemoryModuleType<List<LivingEntity>> memoryType = BehaviorHelper.parseMemoryType(jsonObject, "memory_type");
+                return le -> {
+                    return le.getBrain().getMemory(memoryType).orElse(ImmutableList.of());
+                };
+            });
 
     private static <U extends Function<?, ?>> RegistryObject<FunctionType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return FUNCTION_TYPES.register(name, () -> new FunctionType<>(jsonFactory));

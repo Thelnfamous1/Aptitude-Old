@@ -1,5 +1,6 @@
 package com.infamous.aptitude.common.behavior.util;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -7,32 +8,32 @@ import com.google.gson.JsonParseException;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.BehaviorType;
 import com.infamous.aptitude.common.behavior.BehaviorTypes;
-import com.infamous.aptitude.common.util.ReflectionHelper;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.hoglin.Hoglin;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -40,7 +41,6 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Function;
@@ -310,5 +310,96 @@ public class BehaviorHelper {
             mob.setGuaranteedDrop(EquipmentSlot.OFFHAND);
             mob.setPersistenceRequired();
         }
+    }
+
+    protected static void wasHurtBy(LivingEntity victim, LivingEntity attacker) {
+        if (!(attacker instanceof Piglin)) {
+            Brain<?> brain = victim.getBrain();
+            if (victim.isBaby()) {
+                brain.setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, attacker, 100L);
+                if (Sensor.isEntityAttackableIgnoringLineOfSight(victim, attacker)) {
+                    broadcastAngerTarget(victim, attacker);
+                }
+
+            } else if (attacker.getType() == EntityType.HOGLIN && hoglinsOutnumberPiglins(victim)) {
+                setAvoidTargetAndDontHuntForAWhile(victim, attacker);
+                broadcastRetreat(victim, attacker);
+            } else {
+                //maybeRetaliate(victim, attacker);
+            }
+        }
+    }
+
+    private static void broadcastRetreat(LivingEntity p_34930_, LivingEntity p_34931_) {
+        getVisibleAdultPiglins(p_34930_).stream().filter((p_34985_) -> {
+            return p_34985_ instanceof Piglin;
+        }).forEach((p_34819_) -> {
+            retreatFromNearestTarget((Piglin)p_34819_, p_34931_);
+        });
+    }
+
+    private static void retreatFromNearestTarget(LivingEntity p_34950_, LivingEntity p_34951_) {
+        Brain<?> brain = p_34950_.getBrain();
+        LivingEntity $$3 = BehaviorUtils.getNearestTarget(p_34950_, brain.getMemory(MemoryModuleType.AVOID_TARGET), p_34951_);
+        $$3 = BehaviorUtils.getNearestTarget(p_34950_, brain.getMemory(MemoryModuleType.ATTACK_TARGET), $$3);
+        setAvoidTargetAndDontHuntForAWhile(p_34950_, $$3);
+    }
+
+    private static boolean hoglinsOutnumberPiglins(LivingEntity p_35013_) {
+        int i = p_35013_.getBrain().getMemory(MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT).orElse(0) + 1;
+        int j = p_35013_.getBrain().getMemory(MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT).orElse(0);
+        return j > i;
+    }
+
+    private static void setAvoidTargetAndDontHuntForAWhile(LivingEntity coward, LivingEntity target) {
+        coward.getBrain().eraseMemory(MemoryModuleType.ANGRY_AT);
+        coward.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
+        coward.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+        //coward.getBrain().setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, target, (long)RETREAT_DURATION.sample(coward.level.random));
+        dontKillAnyMoreHoglinsForAWhile(coward);
+    }
+
+    public static Optional<LivingEntity> getAvoidTarget(LivingEntity p_34987_) {
+        return p_34987_.getBrain().hasMemoryValue(MemoryModuleType.AVOID_TARGET) ? p_34987_.getBrain().getMemory(MemoryModuleType.AVOID_TARGET) : Optional.empty();
+    }
+
+    protected static void broadcastAngerTarget(LivingEntity p_34896_, LivingEntity p_34897_) {
+        getAdultAllies(p_34896_).forEach((p_34890_) -> {
+            //if (p_34897_.getType() != EntityType.HOGLIN || p_34890_.canHunt() && ((Hoglin)p_34897_).canBeHunted()) {
+                //setAngerTargetIfCloserThanCurrent(p_34890_, p_34897_);
+            //}
+        });
+    }
+
+    protected static void setAngerTarget(LivingEntity attacker, LivingEntity target) {
+        if (Sensor.isEntityAttackableIgnoringLineOfSight(attacker, target)) {
+            attacker.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+            attacker.getBrain().setMemoryWithExpiry(MemoryModuleType.ANGRY_AT, target.getUUID(), 600L);
+            /*
+            if (target.getType() == EntityType.HOGLIN && attacker.canHunt()) {
+                dontKillAnyMoreHoglinsForAWhile(attacker);
+            }
+             */
+
+            if (target.getType() == EntityType.PLAYER && attacker.level.getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER)) {
+                attacker.getBrain().setMemoryWithExpiry(MemoryModuleType.UNIVERSAL_ANGER, true, 600L);
+            }
+        }
+    }
+
+    private static Optional<LivingEntity> getAngerTarget(LivingEntity attacker) {
+        return BehaviorUtils.getLivingEntityFromUUIDMemory(attacker, MemoryModuleType.ANGRY_AT);
+    }
+
+    protected static void dontKillAnyMoreHoglinsForAWhile(LivingEntity p_34923_) {
+        //p_34923_.getBrain().setMemoryWithExpiry(MemoryModuleType.HUNTED_RECENTLY, true, (long)TIME_BETWEEN_HUNTS.sample(p_34923_.level.random));
+    }
+
+    private static List<AbstractPiglin> getVisibleAdultPiglins(LivingEntity p_35005_) {
+        return p_35005_.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS).orElse(ImmutableList.of());
+    }
+
+    private static List<AbstractPiglin> getAdultAllies(LivingEntity p_34961_) {
+        return p_34961_.getBrain().getMemory(MemoryModuleType.NEARBY_ADULT_PIGLINS).orElse(ImmutableList.of());
     }
 }

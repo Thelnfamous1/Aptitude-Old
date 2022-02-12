@@ -12,6 +12,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.monster.piglin.Piglin;
@@ -231,6 +232,35 @@ public class BiPredicateTypes {
 
                 return (livingEntity, itemStack) -> {
                     return livingEntity instanceof Mob mob && ReflectionHelper.reflectCanReplaceCurrentItem(mob, itemStack);
+                };
+            });
+
+
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, LivingEntity>>> ENTITY_OTHER_TARGET_MUCH_FURTHER_AWAY_THAN_CURRENT_ATTACK_TARGET = register("entity_other_target_much_further_away_than_current_attack_target",
+            jsonObject -> {
+                double extraDistanceAllowed = GsonHelper.getAsDouble(jsonObject, "extra_distance_allowed", 0);
+
+                return (attacker, target) -> {
+                    return BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(attacker, target, extraDistanceAllowed);
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, LivingEntity>>> ENTITY_APPLY_BIPREDICATE_TO_RETRIEVED_ENTITY = register("entity_apply_bipredicate_to_retrieved_entity",
+            jsonObject -> {
+                Function<LivingEntity, Optional<LivingEntity>> retrievalFunction = FunctionHelper.parseFunction(jsonObject, "retrieval_function", "type");
+                BiPredicate<LivingEntity, LivingEntity> biPredicate = PredicateHelper.parseBiPredicate(jsonObject, "bipredicate", "type");
+
+                return (le, le1) -> {
+                    Optional<LivingEntity> retrievedEntity = retrievalFunction.apply(le);
+                    return retrievedEntity.filter(livingEntity -> biPredicate.test(livingEntity, le1)).isPresent();
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, LivingEntity>>> ENTITY_IS_SAME_TYPE_AS = register("entity_is_same_type_as",
+            jsonObject -> {
+                return (le, le1) -> {
+                    return le.getType() == le1.getType();
                 };
             });
 
