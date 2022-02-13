@@ -1,0 +1,162 @@
+{
+  "type": "aptitude:bipredicated_biconsumer",
+  "bipredicate": {
+    "type": "aptitude:bipredicate_of_predicates",
+    "predicate_for_second": {
+      "type": "aptitude:negate_predicate",
+      "predicate": {
+        "type": "aptitude:entity_is_type",
+        "entity_type_predicate": "minecraft:zombie"
+      }
+    }
+  },
+  "biconsumer": {
+    "type": "aptitude:all_of_biconsumer",
+    "biconsumers": [
+      {
+        "type": "aptitude:biconsumer_of_consumers",
+        "consumer_for_first": {
+          "type": "aptitude:predicated_consumer",
+          "predicate": {
+            "type": "aptitude:negate_predicate",
+            "predicate": {
+              "type": "aptitude:entity_has_empty_slot",
+              "slot": "offhand"
+            }
+          },
+          "consumer": {
+            "type": "aptitude:custom_consumer",
+            "location": "minecraft:zombie/stop_holding_offhand_item_no_barter"
+          }
+        }
+      },
+      {
+        "type": "aptitude:biconsumer_of_consumers",
+        "consumer_for_first": {
+          "type": "aptitude:all_of_consumer",
+          "consumers": [
+            {
+              "type": "aptitude:entity_erase_memory",
+              "memory_type": "minecraft:celebrate_location"
+            },
+            {
+              "type": "aptitude:entity_erase_memory",
+              "memory_type": "minecraft:dancing"
+            },
+            {
+              "type": "aptitude:entity_erase_memory",
+              "memory_type": "minecraft:admiring_item"
+            }
+          ]
+        }
+      },
+      {
+        "type": "aptitude:bipredicated_biconsumer",
+        "bipredicate": {
+          "type": "aptitude:bipredicate_of_predicates",
+          "predicate_for_second": {
+            "type": "aptitude:entity_is_type",
+            "entity_type_predicate": "minecraft:player"
+          }
+        },
+        "biconsumer": {
+          "type": "aptitude:biconsumer_of_consumers",
+          "consumer_for_first": {
+            "type": "aptitude:set_boolean_memory",
+            "memory": "minecraft:admiring_disabled",
+            "value": true,
+            "expire_time": 400
+          }
+        }
+      },
+      {
+        "type": "aptitude:bipredicated_biconsumer",
+        "bipredicate": {
+          "type": "aptitude:entity_apply_bipredicate_to_retrieved_entity",
+          "retrieval_function": {
+            "type": "aptitude:retrieve_entity_from_memory",
+            "addContext": {
+              "memory_type": "minecraft:avoid_target"
+            }
+          },
+          "bipredicate": {
+            "type": "aptitude:negate_bipredicate",
+            "bipredicate": {
+              "type": "aptitude:entity_is_same_type_as"
+            }
+          }
+        },
+        "biconsumer": {
+          "type": "aptitude:biconsumer_of_consumers",
+          "consumer_for_first": {
+            "type": "aptitude:entity_erase_memory",
+            "memory_type": "minecraft:avoid_target"
+          }
+        }
+      },
+      {
+        "type": "aptitude:bipredicated_biconsumer",
+        "bipredicate": {
+          "type": "aptitude:bipredicate_of_predicates",
+          "predicate_for_first": {
+            "type": "aptitude:is_baby"
+          }
+        },
+        "biconsumer": {
+          "type": "aptitude:all_of_biconsumer",
+          "biconsumers": [
+            {
+              "type": "aptitude:entity_set_entity_memory",
+              "memory_type": "minecraft:avoid_target",
+              "expire_time": 100
+            },
+            {
+              "type": "aptitude:bipredicated_biconsumer",
+              "bipredicate": {
+                "type": "aptitude:entity_is_attackable_ignoring_line_of_sight"
+              },
+              "biconsumer": {
+                "type": "aptitude:custom_biconsumer",
+                "location": "minecraft:zombie/broadcast_anger_target"
+              }
+            }
+          ]
+        },
+        "default": {
+          "type": "aptitude:bipredicated_biconsumer",
+          "bipredicate": {
+            "type": "aptitude:bipredicate_of_predicates",
+            "predicate_for_first": {
+              "type": "aptitude:outnumbered_adult",
+              "addContext": {
+                "sameType": "aptitude:visible_adult_zombie_count",
+                "otherType": "minecraft:visible_adult_hoglin_count"
+              }
+            },
+            "predicate_for_second": {
+              "type": "aptitude:entity_is_type",
+              "entity_type_predicate": "minecraft:hoglin"
+            }
+          },
+          "biconsumer": {
+            "type": "aptitude:all_of_biconsumer",
+            "biconsumers": [
+              {
+                "type": "aptitude:custom_biconsumer",
+                "location": "minecraft:zombie/set_avoid_target_and_dont_hunt_for_a_while"
+              },
+              {
+                "type": "aptitude:custom_biconsumer",
+                "location": "minecraft:zombie/broadcast_retreat"
+              }
+            ]
+          },
+          "default": {
+            "type": "aptitude:custom_biconsumer",
+            "location": "minecraft:zombie/maybe_retaliate"
+          }
+        }
+      }
+    ]
+  }
+}

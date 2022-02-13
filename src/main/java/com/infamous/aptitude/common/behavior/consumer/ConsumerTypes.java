@@ -306,6 +306,23 @@ public class ConsumerTypes {
                 };
             });
 
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_APPLY_BICONSUMER_TO_RETRIEVED_ENTITY = register("entity_apply_biconsumer_to_retrieved_entity",
+            jsonObject -> {
+                Function<LivingEntity, Optional<LivingEntity>> retrievalFunction = FunctionHelper.parseFunction(jsonObject, "retrieval_function", "type");
+                BiConsumer<LivingEntity, LivingEntity> consumer = ConsumerHelper.parseBiConsumer(jsonObject, "biconsumer", "type");
+                return le -> {
+                    Optional<LivingEntity> retrievedEntity = retrievalFunction.apply(le);
+                    retrievedEntity.ifPresent(e -> consumer.accept(le, e));
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<?>>> CUSTOM_CONSUMER = register("custom_consumer",
+            jsonObject -> {
+                String locationString = GsonHelper.getAsString(jsonObject, "location");
+                ResourceLocation location = new ResourceLocation(locationString);
+                return Aptitude.customLogicManager.getConsumer(location);
+            });
+
     private static <U extends Consumer<?>> RegistryObject<ConsumerType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return CONSUMER_TYPES.register(name, () -> new ConsumerType<>(jsonFactory));
     }

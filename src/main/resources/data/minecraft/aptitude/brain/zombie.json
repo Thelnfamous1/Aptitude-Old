@@ -63,152 +63,8 @@
     "minecraft:idle"
   ],
   "update_activity_callback": {
-    "type": "aptitude:update_activity",
-    "on_changed_callback": {
-      "type": "aptitude:play_activity_sound",
-      "play_first_valid": [
-        {
-          "predicate": {
-            "type": "aptitude:active_non_core_activity_check",
-            "activity": "minecraft:fight"
-          },
-          "sound_event": "minecraft:entity.piglin.angry"
-        },
-        {
-          "predicate": {
-            "type": "aptitude:all_of_predicate",
-            "predicates": [
-              {
-                "type": "aptitude:active_non_core_activity_check",
-                "activity": "minecraft:avoid"
-              },
-              {
-                "type": "aptitude:memory_value_check",
-                "addContext": {
-                  "memory_type": "minecraft:avoid_target",
-                  "filter_bipredicate": {
-                    "type": "aptitude:entity_within_distance",
-                    "distance": 12.0
-                  }
-                }
-              }
-            ]
-          },
-          "sound_event": "minecraft:entity.piglin.retreat"
-        },
-        {
-          "predicate": {
-            "type": "aptitude:active_non_core_activity_check",
-            "activity": "minecraft:admire_item"
-          },
-          "sound_event": "minecraft:entity.piglin.admiring_item"
-        },
-        {
-          "predicate": {
-            "type": "aptitude:active_non_core_activity_check",
-            "activity": "minecraft:celebrate"
-          },
-          "sound_event": "minecraft:entity.piglin.celebrate"
-        },
-        {
-          "predicate": {
-            "type": "aptitude:memory_status_check",
-            "addContext": [
-              {
-                "type": "minecraft:nearest_player_holding_wanted_item",
-                "status": "value_present"
-              }
-            ]
-          },
-          "sound_event": "minecraft:entity.piglin.jealous"
-        },
-        {
-          "predicate": {
-            "type": "aptitude:memory_status_check",
-            "addContext": [
-              {
-                "type": "minecraft:nearest_repellent",
-                "status": "value_present"
-              }
-            ]
-          },
-          "sound_event": "minecraft:entity.piglin.retreat"
-        },
-        {
-          "predicate": {
-            "type": "aptitude:always_true"
-          },
-          "sound_event": "minecraft:entity.piglin.ambient"
-        }
-      ]
-    },
-    "additional_callbacks": [
-      {
-        "type": "aptitude:update_aggression_flag",
-        "predicate": {
-          "type": "aptitude:memory_status_check",
-          "addContext": {
-              "type": "minecraft:attack_target",
-              "status": "value_present"
-          }
-        }
-      },
-      {
-        "type": "aptitude:entity_stop_riding",
-        "predicate": {
-          "type": "aptitude:all_of_predicate",
-          "predicates": [
-            {
-              "type": "aptitude:negate_predicate",
-              "predicate": {
-                "type": "aptitude:memory_status_check",
-                "addContext": {
-                  "type": "minecraft:ride_target",
-                  "status": "value_present"
-                }
-              }
-            },
-            {
-              "type": "aptitude:entity_riding_valid_mount",
-              "rider_predicate": {
-                "type": "aptitude:is_baby"
-              },
-              "mount_predicate": {
-                "type": "aptitude:all_of_predicate",
-                "predicates": [
-                  {
-                    "type": "aptitude:any_of_predicate",
-                    "predicates": [
-                      {
-                        "type": "aptitude:entity_is_type",
-                        "entity_type_predicate": "minecraft:hoglin"
-                      },
-                      {
-                        "type": "aptitude:entity_is_type",
-                        "entity_type_predicate": "minecraft:zombie"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "aptitude:is_baby"
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "type": "aptitude:entity_update_celebration_flag",
-        "predicate": {
-          "type": "aptitude:memory_status_check",
-          "addContext": {
-            "type": "minecraft:dancing",
-            "status": "value_present"
-          }
-        }
-      }
-    ]
+    "type": "aptitude:custom_consumer",
+    "location": "minecraft:zombie/update_activity"
   },
   "activities_with_behaviors": [
     {
@@ -241,14 +97,8 @@
         {
           "type": "aptitude:copy_memory_with_expiry",
           "predicate": {
-            "type": "aptitude:memory_value_check",
-            "addContext": {
-              "memory_type": "minecraft:nearest_visible_zombified",
-              "filter_bipredicate": {
-                "type": "aptitude:entity_within_distance",
-                "distance": 6.0
-              }
-            }
+            "type": "aptitude:custom_predicate",
+            "location": "minecraft:zombie/is_near_zombified"
           },
           "sourceMemory": "minecraft:nearest_visible_zombified",
           "targetMemory": "minecraft:avoid_target",
@@ -280,14 +130,8 @@
             ]
           },
           "stopHoldingItem": {
-            "type": "aptitude:entity_finish_admiring_and_maybe_barter",
-            "barter_currency": {
-              "item": "minecraft:gold_ingot"
-            },
-            "bartering_loot_table": "minecraft:gameplay/piglin_bartering",
-            "loved_items": {
-              "tag": "minecraft:piglin_loved"
-            }
+            "type": "aptitude:custom_consumer",
+            "location": "minecraft:zombie/stop_holding_offhand_item"
           }
         },
         {
@@ -301,17 +145,8 @@
           "type": "aptitude:start_celebrating_if_target_dead",
           "celebrateDuration": 300,
           "dancePredicate": {
-            "type": "aptitude:all_of_bipredicate",
-            "bipredicates": [
-              {
-                "type": "aptitude:entity_target_is_type",
-                "entity_type_predicate": "minecraft:hoglin"
-              },
-              {
-                "type": "aptitude:entity_game_time_seeded_random_float_chance",
-                "random_chance": 0.1
-              }
-            ]
+            "type": "aptitude:custom_bipredicate",
+            "location": "minecraft:zombie/wants_to_dance"
           }
         },
         {
@@ -330,69 +165,6 @@
             }
           },
           "memoryType": "minecraft:dancing"
-        },
-        {
-          "type": "aptitude:retaliate_and_broadcast",
-          "ignoreIf": {
-            "type": "aptitude:any_of_bipredicate",
-            "bipredicates": [
-              {
-                "type": "aptitude:bipredicate_of_predicates",
-                "predicate_for_second": {
-                  "type": "aptitude:entity_is_type",
-                  "entity_type_predicate": "minecraft:zombie"
-                }
-              },
-              {
-                "type": "aptitude:bipredicate_of_predicates",
-                "predicate_for_first": {
-                  "type": "aptitude:outnumbered_adult",
-                  "addContext": {
-                    "sameType": "aptitude:visible_adult_zombie_count",
-                    "otherType": "minecraft:visible_adult_hoglin_count"
-                  }
-                },
-                "predicate_for_second": {
-                  "type": "aptitude:entity_is_type",
-                  "entity_type_predicate": "minecraft:hoglin"
-                }
-              },
-              {
-                "type": "aptitude:bipredicate_of_predicates",
-                "predicate_for_first": {
-                  "type": "aptitude:is_baby"
-                }
-              }
-            ]
-          },
-          "allyIgnoreIf": {
-            "type": "aptitude:negate_bipredicate",
-            "bipredicate": {
-              "type": "aptitude:any_of_bipredicate",
-              "bipredicates": [
-                {
-                  "type": "aptitude:bipredicate_of_predicates",
-                  "predicate_for_second": {
-                    "type": "aptitude:negate_predicate",
-                    "predicate": {
-                      "type": "aptitude:entity_is_type",
-                      "entity_type_predicate": "minecraft:hoglin"
-                    }
-                  }
-                },
-                {
-                  "type": "aptitude:bipredicate_of_predicates",
-                  "predicate_for_first": {
-                    "type": "aptitude:entity_can_hunt"
-                  },
-                  "predicate_for_second": {
-                    "type": "aptitude:entity_can_be_hunted"
-                  }
-                }
-              ]
-            }
-          },
-          "nearbyAlliesMemory": "aptitude:nearby_adult_zombies"
         }
       ]
     },
@@ -403,19 +175,8 @@
         {
           "type": "aptitude:set_entity_look_target",
           "predicate": {
-            "type": "aptitude:all_of_predicate",
-            "predicates": [
-              {
-                "type": "aptitude:entity_is_type",
-                "entity_type_predicate": "minecraft:player"
-              },
-              {
-                "type": "aptitude:entity_is_holding",
-                "is_holding": {
-                  "tag": "minecraft:piglin_loved"
-                }
-              }
-            ]
+            "type": "aptitude:custom_predicate",
+            "location": "minecraft:zombie/is_player_holding_loved_item"
           },
           "maxDistSq": 14.0
         },
@@ -425,71 +186,8 @@
             "type": "aptitude:is_adult"
           },
           "targetFinderFunction": {
-            "type": "aptitude:predicated_function",
-            "predicate": {
-              "type": "aptitude:negate_predicate",
-              "predicate": {
-                "type": "aptitude:memory_value_check",
-                "addContext": {
-                  "memory_type": "minecraft:nearest_visible_zombified",
-                  "filter_bipredicate": {
-                    "type": "aptitude:entity_within_distance",
-                    "distance": 6.0
-                  }
-                }
-              }
-            },
-            "function": {
-              "type": "aptitude:retrieve_first_valid_entity",
-              "functions": [
-                {
-                  "type": "aptitude:retrieve_entity_from_uuid_memory",
-                  "addContext": {
-                    "memory_type": "minecraft:angry_at",
-                    "filter_bipredicate": {
-                      "type": "aptitude:entity_is_attackable_ignoring_line_of_sight"
-                    }
-                  }
-                },
-                {
-                  "type": "aptitude:predicated_function",
-                  "predicate": {
-                    "type": "aptitude:memory_status_check",
-                    "addContext": {
-                      "type": "minecraft:universal_anger",
-                      "status": "value_present"
-                    }
-                  },
-                  "function": {
-                    "type": "aptitude:retrieve_entity_from_memory",
-                    "addContext": {
-                      "memory_type": "minecraft:nearest_visible_targetable_player"
-                    }
-                  },
-                  "default": {
-                    "type": "aptitude:empty_optional"
-                  }
-                },
-                {
-                  "type": "aptitude:retrieve_entity_from_memory",
-                  "addContext": {
-                    "memory_type": "minecraft:nearest_visible_nemesis"
-                  }
-                },
-                {
-                  "type": "aptitude:retrieve_entity_from_memory",
-                  "addContext": {
-                    "memory_type": "minecraft:nearest_targetable_player_not_wearing_gold",
-                    "filter_bipredicate": {
-                      "type": "aptitude:entity_is_attackable"
-                    }
-                  }
-                }
-              ]
-            },
-            "default": {
-              "type": "aptitude:empty_optional"
-            }
+            "type": "aptitude:custom_function",
+            "location": "minecraft:zombie/find_nearest_valid_attack_target"
           }
         },
         {
@@ -643,74 +341,8 @@
           "stopAttackingWhen": {
             "type": "aptitude:negate_bipredicate",
             "bipredicate": {
-              "type": "aptitude:entity_matches_entity_from_memory",
-              "retrieval_function": {
-                "type": "aptitude:predicated_function",
-                "predicate": {
-                  "type": "aptitude:negate_predicate",
-                  "predicate": {
-                    "type": "aptitude:memory_value_check",
-                    "addContext": {
-                      "memory_type": "minecraft:nearest_visible_zombified",
-                      "filter_bipredicate": {
-                        "type": "aptitude:entity_within_distance",
-                        "distance": 6.0
-                      }
-                    }
-                  }
-                },
-                "function": {
-                  "type": "aptitude:retrieve_first_valid_entity",
-                  "functions": [
-                    {
-                      "type": "aptitude:retrieve_entity_from_uuid_memory",
-                      "addContext": {
-                        "memory_type": "minecraft:angry_at",
-                        "filter_bipredicate": {
-                          "type": "aptitude:entity_is_attackable_ignoring_line_of_sight"
-                        }
-                      }
-                    },
-                    {
-                      "type": "aptitude:predicated_function",
-                      "predicate": {
-                        "type": "aptitude:memory_status_check",
-                        "addContext": {
-                          "type": "minecraft:universal_anger",
-                          "status": "value_present"
-                        }
-                      },
-                      "function": {
-                        "type": "aptitude:retrieve_entity_from_memory",
-                        "addContext": {
-                          "memory_type": "minecraft:nearest_visible_targetable_player"
-                        }
-                      },
-                      "default": {
-                        "type": "aptitude:empty_optional"
-                      }
-                    },
-                    {
-                      "type": "aptitude:retrieve_entity_from_memory",
-                      "addContext": {
-                        "memory_type": "minecraft:nearest_visible_nemesis"
-                      }
-                    },
-                    {
-                      "type": "aptitude:retrieve_entity_from_memory",
-                      "addContext": {
-                        "memory_type": "minecraft:nearest_targetable_player_not_wearing_gold",
-                        "filter_bipredicate": {
-                          "type": "aptitude:entity_is_attackable"
-                        }
-                      }
-                    }
-                  ]
-                },
-                "default": {
-                  "type": "aptitude:empty_optional"
-                }
-              }
+              "type": "aptitude:custom_bipredicate",
+              "location": "minecraft:zombie/is_nearest_valid_attack_target"
             }
           }
         },
@@ -783,14 +415,8 @@
         {
           "type": "aptitude:erase_memory_if",
           "predicate": {
-            "type": "aptitude:memory_value_check",
-            "addContext": {
-              "memory_type": "minecraft:nearest_visible_zombified",
-              "filter_bipredicate": {
-                "type": "aptitude:entity_within_distance",
-                "distance": 6.0
-              }
-            }
+            "type": "aptitude:custom_predicate",
+            "location": "minecraft:zombie/is_near_zombified"
           },
           "memoryType": "minecraft:attack_target"
         }
@@ -822,19 +448,8 @@
         {
           "type": "aptitude:set_entity_look_target",
           "predicate": {
-            "type": "aptitude:all_of_predicate",
-            "predicates": [
-              {
-                "type": "aptitude:entity_is_type",
-                "entity_type_predicate": "minecraft:player"
-              },
-              {
-                "type": "aptitude:entity_is_holding",
-                "is_holding": {
-                  "tag": "minecraft:piglin_loved"
-                }
-              }
-            ]
+            "type": "aptitude:custom_predicate",
+            "location": "minecraft:zombie/is_player_holding_loved_item"
           },
           "maxDistSq": 14.0
         },
@@ -844,71 +459,8 @@
             "type": "aptitude:is_adult"
           },
           "targetFinderFunction": {
-            "type": "aptitude:predicated_function",
-            "predicate": {
-              "type": "aptitude:negate_predicate",
-              "predicate": {
-                "type": "aptitude:memory_value_check",
-                "addContext": {
-                  "memory_type": "minecraft:nearest_visible_zombified",
-                  "filter_bipredicate": {
-                    "type": "aptitude:entity_within_distance",
-                    "distance": 6.0
-                  }
-                }
-              }
-            },
-            "function": {
-              "type": "aptitude:retrieve_first_valid_entity",
-              "functions": [
-                {
-                  "type": "aptitude:retrieve_entity_from_uuid_memory",
-                  "addContext": {
-                    "memory_type": "minecraft:angry_at",
-                    "filter_bipredicate": {
-                      "type": "aptitude:entity_is_attackable_ignoring_line_of_sight"
-                    }
-                  }
-                },
-                {
-                  "type": "aptitude:predicated_function",
-                  "predicate": {
-                    "type": "aptitude:memory_status_check",
-                    "addContext": {
-                      "type": "minecraft:universal_anger",
-                      "status": "value_present"
-                    }
-                  },
-                  "function": {
-                    "type": "aptitude:retrieve_entity_from_memory",
-                    "addContext": {
-                      "memory_type": "minecraft:nearest_visible_targetable_player"
-                    }
-                  },
-                  "default": {
-                    "type": "aptitude:empty_optional"
-                  }
-                },
-                {
-                  "type": "aptitude:retrieve_entity_from_memory",
-                  "addContext": {
-                    "memory_type": "minecraft:nearest_visible_nemesis"
-                  }
-                },
-                {
-                  "type": "aptitude:retrieve_entity_from_memory",
-                  "addContext": {
-                    "memory_type": "minecraft:nearest_targetable_player_not_wearing_gold",
-                    "filter_bipredicate": {
-                      "type": "aptitude:entity_is_attackable"
-                    }
-                  }
-                }
-              ]
-            },
-            "default": {
-              "type": "aptitude:empty_optional"
-            }
+            "type": "aptitude:custom_function",
+            "location": "minecraft:zombie/find_nearest_valid_attack_target"
           }
         },
         {
@@ -981,14 +533,8 @@
         {
           "type": "aptitude:go_to_wanted_item",
           "predicate": {
-            "type": "aptitude:negate_predicate",
-            "predicate": {
-              "type": "aptitude:entity_item_in_slot_is",
-              "slot": "offhand",
-              "item_in_slot_is": {
-                "tag": "minecraft:piglin_loved"
-              }
-            }
+            "type": "aptitude:custom_predicate",
+            "location": "minecraft:zombie/is_not_holding_loved_item_in_offhand"
           },
           "speedModifer": 1.0,
           "ignore_walk_target": true,
@@ -1105,72 +651,8 @@
         {
           "type": "aptitude:erase_memory_if",
           "predicate": {
-            "type": "aptitude:any_of_predicate",
-            "predicates": [
-              {
-                "type": "aptitude:memory_status_check",
-                "addContext": {
-                  "type": "minecraft:avoid_target",
-                  "status": "value_absent"
-                }
-              },
-              {
-                "type": "aptitude:all_of_predicate",
-                "predicates": [
-                  {
-                    "type": "aptitude:memory_value_check",
-                    "addContext": {
-                      "memory_type": "minecraft:avoid_target",
-                      "filter_predicate": {
-                        "type": "aptitude:entity_is_type",
-                        "entity_type_predicate": "minecraft:hoglin"
-                      }
-                    }
-                  },
-                  {
-                    "type": "aptitude:negate_predicate",
-                    "predicate": {
-                      "type": "aptitude:outnumbered_adult",
-                      "addContext": {
-                        "sameType": "aptitude:visible_adult_zombie_count",
-                        "otherType": "minecraft:visible_adult_hoglin_count"
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                "type": "aptitude:memory_value_check",
-                "addContext": {
-                  "memory_type": "minecraft:avoid_target",
-                  "filter_predicate": {
-                    "type": "aptitude:any_of_predicate",
-                    "predicates": [
-                      {
-                        "type": "aptitude:entity_is_type",
-                        "entity_type_predicate": "minecraft:zombified_piglin"
-                      },
-                      {
-                        "type": "aptitude:entity_is_type",
-                        "entity_type_predicate": "minecraft:zoglin"
-                      }
-                    ]
-                  },
-                  "filter_bipredicate": {
-                    "type": "aptitude:negate_bipredicate",
-                    "bipredicate": {
-                      "type": "aptitude:entity_matches_entity_from_memory",
-                      "retrieval_function": {
-                        "type": "aptitude:retrieve_entity_from_memory",
-                        "addContext": {
-                          "memory_type": "minecraft:nearest_visible_zombified"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            ]
+            "type": "aptitude:custom_predicate",
+            "location": "minecraft:zombie/wants_to_stop_fleeing"
           },
           "memoryType": "minecraft:avoid_target"
         }
@@ -1196,19 +678,8 @@
         {
           "type": "aptitude:set_entity_look_target",
           "predicate": {
-            "type": "aptitude:all_of_predicate",
-            "predicates": [
-              {
-                "type": "aptitude:entity_is_type",
-                "entity_type_predicate": "minecraft:player"
-              },
-              {
-                "type": "aptitude:entity_is_holding",
-                "is_holding": {
-                  "tag": "minecraft:piglin_loved"
-                }
-              }
-            ]
+            "type": "aptitude:custom_predicate",
+            "location": "minecraft:zombie/is_player_holding_loved_item"
           },
           "maxDistSq": 8.0
         },
@@ -1256,8 +727,8 @@
           "type": "aptitude:dismount_or_skip_mounting",
           "maxWalkDistToRideTarget": 8,
           "dontRideIf": {
-            "type": "aptitude:entity_wants_to_stop_riding_mount",
-            "can_ride_adults": false
+            "type": "aptitude:custom_bipredicate",
+            "location": "minecraft:zombie/wants_to_stop_riding"
           }
         }
       ]

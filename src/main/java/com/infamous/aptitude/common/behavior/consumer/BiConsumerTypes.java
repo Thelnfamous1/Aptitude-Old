@@ -129,7 +129,7 @@ public class BiConsumerTypes {
                 };
             });
 
-    public static final RegistryObject<BiConsumerType<BiConsumer<?, ?>>> BICONSUMER_OF_CONSUMERS = register("biconsumer_of_consumer",
+    public static final RegistryObject<BiConsumerType<BiConsumer<?, ?>>> BICONSUMER_OF_CONSUMERS = register("biconsumer_of_consumers",
             jsonObject -> {
                 Consumer<Object> consumerForFirst = ConsumerHelper.parseConsumerOrDefault(jsonObject, "consumer_for_first", "type", o -> {});
                 Consumer<Object> consumerForSecond = ConsumerHelper.parseConsumerOrDefault(jsonObject, "consumer_for_second", "type", o -> {});
@@ -194,10 +194,28 @@ public class BiConsumerTypes {
                 return (le, target) -> {
                     Optional<LivingEntity> retrievedTarget = retrievalFunction.apply(le);
                     LivingEntity nearestTarget = BehaviorUtils.getNearestTarget(le, retrievedTarget, target);
-                    if (retrievedTarget.isEmpty() || retrievedTarget.get() != nearestTarget) {
+                    BiPredicate<LivingEntity, LivingEntity> nearestBetterThanRetrieved = PredicateHelper.parseBiPredicateOrDefault(jsonObject, "nearest_better_than_retrieved", "type", (retrieved, nearest) -> true);
+                    if (retrievedTarget.isEmpty() || nearestBetterThanRetrieved.test(retrievedTarget.get(), nearestTarget)) {
                         biConsumer.accept(le, nearestTarget);
                     }
                 };
+            });
+
+    public static final RegistryObject<BiConsumerType<BiConsumer<LivingEntity, LivingEntity>>> ENTITY_SET_ENTITY_MEMORY = register("entity_set_entity_memory",
+            jsonObject -> {
+                MemoryModuleType<LivingEntity> memoryType = BehaviorHelper.parseMemoryType(jsonObject, "memory_type");
+                Function<LivingEntity, Long> expireTimeFunction = BehaviorHelper.parseExpireTimeFunction(jsonObject, "expire_time", "type");
+                return (le, target) -> {
+                    long expireTime = expireTimeFunction.apply(le);
+                    le.getBrain().setMemoryWithExpiry(memoryType, target, expireTime);
+                };
+            });
+
+    public static final RegistryObject<BiConsumerType<BiConsumer<?, ?>>> CUSTOM_BICONSUMER = register("custom_biconsumer",
+            jsonObject -> {
+                String locationString = GsonHelper.getAsString(jsonObject, "location");
+                ResourceLocation location = new ResourceLocation(locationString);
+                return Aptitude.customLogicManager.getBiConsumer(location);
             });
 
 

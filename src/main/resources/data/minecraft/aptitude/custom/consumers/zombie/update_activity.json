@@ -1,0 +1,51 @@
+{
+  "type": "aptitude:update_activity",
+  "on_changed_callback": {
+    "type": "aptitude:custom_consumer",
+    "location": "minecraft:zombie/play_activity_sound"
+  },
+  "additional_callbacks": [
+    {
+      "type": "aptitude:update_aggression_flag",
+      "predicate": {
+        "type": "aptitude:memory_status_check",
+        "addContext": {
+          "type": "minecraft:attack_target",
+          "status": "value_present"
+        }
+      }
+    },
+    {
+      "type": "aptitude:entity_stop_riding",
+      "predicate": {
+        "type": "aptitude:all_of_predicate",
+        "predicates": [
+          {
+            "type": "aptitude:negate_predicate",
+            "predicate": {
+              "type": "aptitude:memory_status_check",
+              "addContext": {
+                "type": "minecraft:ride_target",
+                "status": "value_present"
+              }
+            }
+          },
+          {
+            "type": "aptitude:custom_predicate",
+            "location": "minecraft:zombie/is_baby_riding_baby"
+          }
+        ]
+      }
+    },
+    {
+      "type": "aptitude:entity_update_celebration_flag",
+      "predicate": {
+        "type": "aptitude:memory_status_check",
+        "addContext": {
+          "type": "minecraft:dancing",
+          "status": "value_present"
+        }
+      }
+    }
+  ]
+}

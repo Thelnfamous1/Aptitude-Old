@@ -1,0 +1,73 @@
+{
+  "type": "aptitude:entity_apply_biconsumer_to_list_of_entities",
+  "retrieval_function": {
+    "type": "aptitude:entity_retrieve_list_of_entities_from_memory",
+    "memory_type": "aptitude:nearby_adult_zombies"
+  },
+  "biconsumer": {
+    "type": "aptitude:entity_apply_biconsumer_to_nearest_target",
+    "retrieval_function": {
+      "type": "aptitude:retrieve_entity_from_memory",
+      "addContext": {
+        "memory_type": "minecraft:avoid_target"
+      }
+    },
+    "biconsumer": {
+      "type": "aptitude:entity_apply_biconsumer_to_nearest_target",
+      "retrieval_function": {
+        "type": "aptitude:retrieve_entity_from_memory",
+        "addContext": {
+          "memory_type": "minecraft:attack_target"
+        }
+      },
+      "biconsumer": {
+        "type": "aptitude:all_of_biconsumer",
+        "biconsumers": [
+          {
+            "type": "aptitude:biconsumer_of_consumers",
+            "consumer_for_first": {
+              "type": "aptitude:all_of_consumer",
+              "consumers": [
+                {
+                  "type": "aptitude:entity_erase_memory",
+                  "memory_type": "minecraft:angry_at"
+                },
+                {
+                  "type": "aptitude:entity_erase_memory",
+                  "memory_type": "minecraft:attack_target"
+                },
+                {
+                  "type": "aptitude:entity_erase_memory",
+                  "memory_type": "minecraft:walk_target"
+                },
+                {
+                  "type": "aptitude:set_boolean_memory",
+                  "memory": "minecraft:hunted_recently",
+                  "value": true,
+                  "expire_time": {
+                    "type": "aptitude:entity_get_long_from_uniform_int",
+                    "uniform_int": {
+                      "minInclusive": 600,
+                      "maxInclusive": 2400
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "aptitude:entity_set_entity_memory",
+            "memory_type": "minecraft:avoid_target",
+            "expire_time": {
+              "type": "aptitude:entity_get_long_from_uniform_int",
+              "uniform_int": {
+                "minInclusive": 100,
+                "maxInclusive": 400
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

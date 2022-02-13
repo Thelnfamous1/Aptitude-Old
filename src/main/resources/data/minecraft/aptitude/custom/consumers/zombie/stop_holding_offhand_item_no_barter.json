@@ -1,0 +1,11 @@
+{
+  "type": "aptitude:entity_finish_admiring_and_maybe_barter",
+  "barter_currency": {
+    "item": "minecraft:gold_ingot"
+  },
+  "do_barter": false,
+  "bartering_loot_table": "minecraft:gameplay/piglin_bartering",
+  "loved_items": {
+    "tag": "minecraft:piglin_loved"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "type": "aptitude:bipredicated_biconsumer",
+  "bipredicate": {
+    "type": "aptitude:bipredicate_of_predicates",
+    "predicate_for_first": {
+      "type": "aptitude:memory_status_check",
+      "addContext": {
+        "type": "minecraft:nearest_visible_targetable_player",
+        "status": "value_present"
+      }
+    }
+  },
+  "biconsumer": {
+    "type": "aptitude:biconsumer_of_consumers",
+    "consumer_for_first": {
+      "type": "aptitude:entity_apply_biconsumer_to_retrieved_entity",
+      "retrieval_function": {
+        "type": "aptitude:retrieve_entity_from_memory",
+        "addContext": {
+          "memory_type": "minecraft:nearest_visible_targetable_player"
+        }
+      },
+      "biconsumer": {
+        "type": "aptitude:custom_biconsumer",
+        "location": "minecraft:zombie/set_anger_target"
+      }
+    }
+  },
+  "default": {
+    "type": "aptitude:custom_biconsumer",
+    "location": "minecraft:zombie/set_anger_target"
+  }
+}

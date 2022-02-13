@@ -154,6 +154,13 @@ public class FunctionTypes {
                 };
             });
 
+    public static final RegistryObject<FunctionType<Function<?, ?>>> CUSTOM_FUNCTION = register("custom_function",
+            jsonObject -> {
+                String locationString = GsonHelper.getAsString(jsonObject, "location");
+                ResourceLocation location = new ResourceLocation(locationString);
+                return Aptitude.customLogicManager.getFunction(location);
+            });
+
     private static <U extends Function<?, ?>> RegistryObject<FunctionType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return FUNCTION_TYPES.register(name, () -> new FunctionType<>(jsonFactory));
     }

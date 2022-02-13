@@ -1,0 +1,26 @@
+{
+  "type": "aptitude:bipredicated_biconsumer",
+  "bipredicate": {
+    "type": "aptitude:bipredicate_of_predicates",
+    "predicate_for_second": {
+      "type": "aptitude:negate_predicate",
+      "predicate": {
+        "type": "aptitude:any_of_predicate",
+        "predicates": [
+          {
+            "type": "aptitude:entity_is_type",
+            "entity_type_predicate": "minecraft:zombie"
+          },
+          {
+            "type": "aptitude:entity_is_type",
+            "entity_type_predicate": "minecraft:husk"
+          }
+        ]
+      }
+    }
+  },
+  "biconsumer": {
+    "type": "aptitude:custom_biconsumer",
+    "location": "minecraft:zombie/maybe_retaliate"
+  }
+}

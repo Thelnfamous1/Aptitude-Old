@@ -1,0 +1,72 @@
+{
+  "type": "aptitude:bipredicated_biconsumer",
+  "bipredicate": {
+    "type": "aptitude:all_of_bipredicate",
+    "bipredicates": [
+      {
+        "type": "aptitude:bipredicate_of_predicates",
+        "predicate_for_first": {
+          "type": "aptitude:negate_predicate",
+          "predicate": {
+            "type": "aptitude:entity_active_activity_check",
+            "activity": "minecraft:avoid"
+          }
+        }
+      },
+      {
+        "type": "aptitude:entity_is_attackable_ignoring_line_of_sight"
+      },
+      {
+        "type": "aptitude:negate_bipredicate",
+        "bipredicate": {
+          "type": "aptitude:entity_other_target_much_further_away_than_current_attack_target",
+          "extra_distance_allowed": 4.0
+        }
+      }
+    ]
+  },
+  "biconsumer": {
+    "type": "aptitude:bipredicated_biconsumer",
+    "bipredicate": {
+      "type": "aptitude:bipredicate_of_predicates",
+      "predicate_for_first": {
+        "type": "aptitude:entity_boolean_game_rule_check",
+        "game_rule_id": "universalAnger",
+        "game_rule_category": "mobs"
+      },
+      "predicate_for_second": {
+        "type": "aptitude:entity_is_type",
+        "entity_type_predicate": "minecraft:player"
+      }
+    },
+    "biconsumer": {
+      "type": "aptitude:all_of_biconsumer",
+      "biconsumers": [
+        {
+          "type": "aptitude:custom_biconsumer",
+          "location": "minecraft:zombie/set_anger_target_to_nearest_targetable_player_if_found"
+        },
+        {
+          "type": "aptitude:biconsumer_of_consumers",
+          "consumer_for_first": {
+            "type": "aptitude:custom_consumer",
+            "location": "minecraft:zombie/broadcast_universal_anger"
+          }
+        }
+      ]
+    },
+    "default": {
+      "type": "aptitude:all_of_biconsumer",
+      "biconsumers": [
+        {
+          "type": "aptitude:custom_biconsumer",
+          "location": "minecraft:zombie/set_anger_target"
+        },
+        {
+          "type": "aptitude:custom_biconsumer",
+          "location": "minecraft:zombie/broadcast_anger_target"
+        }
+      ]
+    }
+  }
+}

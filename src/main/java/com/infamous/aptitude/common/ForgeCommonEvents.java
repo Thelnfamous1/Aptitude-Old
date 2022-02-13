@@ -5,6 +5,7 @@ import com.infamous.aptitude.common.behavior.util.SelectorHelper;
 import com.infamous.aptitude.common.manager.base.BaseAIHelper;
 import com.infamous.aptitude.common.manager.brain.BrainManager;
 import com.infamous.aptitude.common.behavior.util.BrainHelper;
+import com.infamous.aptitude.common.manager.custom.CustomLogicManager;
 import com.infamous.aptitude.common.manager.selector.SelectorManager;
 import com.infamous.aptitude.common.manager.base.BaseAIManager;
 import net.minecraft.server.MinecraftServer;
@@ -29,9 +30,11 @@ public class ForgeCommonEvents {
         Aptitude.brainManager = new BrainManager();
         Aptitude.selectorManager = new SelectorManager();
         Aptitude.baseAIManager = new BaseAIManager();
+        Aptitude.customLogicManager = new CustomLogicManager();
         event.addListener(Aptitude.brainManager);
         event.addListener(Aptitude.selectorManager);
         event.addListener(Aptitude.baseAIManager);
+        event.addListener(Aptitude.customLogicManager);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

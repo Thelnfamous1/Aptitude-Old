@@ -84,4 +84,14 @@ public class PredicateHelper {
         if(jsonObject.has(memberName)) return parseBiPredicate(jsonObject, memberName, typeMemberName);
         return defaultPredicate;
     }
+
+    public static <U> Predicate<U> parsePredicate(JsonObject jsonObject, String typeMemberName) {
+        PredicateType<?> predicateType = parsePredicateType(jsonObject, typeMemberName);
+        return (Predicate<U>) predicateType.fromJson(jsonObject);
+    }
+
+    public static <T, U> BiPredicate<T, U> parseBiPredicate(JsonObject jsonObject, String typeMemberName) {
+        BiPredicateType<?> biPredicateType = parseBiPredicateType(jsonObject, typeMemberName);
+        return (BiPredicate<T, U>) biPredicateType.fromJson(jsonObject);
+    }
 }

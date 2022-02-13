@@ -21,13 +21,14 @@
         }
       },
       {
-        "type": "aptitude:entity_set_global_position_memory",
-        "memory": "minecraft:home",
-        "global_position_function": {
-          "type": "aptitude:entity_get_global_position_from_self"
-        }
+        "type": "aptitude:custom_consumer",
+        "location": "minecraft:husk/init_memories"
       }
     ]
+  },
+  "attacked_by": {
+    "type": "aptitude:custom_biconsumer",
+    "location": "minecraft:husk/was_hurt_by"
   },
   "wants_to_pick_up": {
     "type": "aptitude:bipredicate_of_predicates",

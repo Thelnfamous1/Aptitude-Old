@@ -38,6 +38,13 @@ public class BiFunctionTypes {
                 };
             });
 
+    public static final RegistryObject<BiFunctionType<BiFunction<?, ?, ?>>> CUSTOM_BIFUNCTION = register("custom_bifunction",
+            jsonObject -> {
+                String locationString = GsonHelper.getAsString(jsonObject, "location");
+                ResourceLocation location = new ResourceLocation(locationString);
+                return Aptitude.customLogicManager.getBiFunction(location);
+            });
+
     private static <U extends BiFunction<?, ?, ?>> RegistryObject<BiFunctionType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return BIFUNCTION_TYPES.register(name, () -> new BiFunctionType<>(jsonFactory));
     }

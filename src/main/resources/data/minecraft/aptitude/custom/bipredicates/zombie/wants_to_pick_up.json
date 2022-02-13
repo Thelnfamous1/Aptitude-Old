@@ -1,0 +1,152 @@
+{
+  "type": "aptitude:all_of_bipredicate",
+  "bipredicates": [
+    {
+      "type": "aptitude:negate_bipredicate",
+      "bipredicate": {
+        "type": "aptitude:any_of_bipredicate",
+        "bipredicates": [
+          {
+            "type": "aptitude:bipredicate_of_predicates",
+            "predicate_for_first": {
+              "type": "aptitude:is_baby"
+            },
+            "predicate_for_second": {
+              "type": "aptitude:item_is",
+              "is": {
+                "tag": "minecraft:ignored_by_piglin_babies"
+              }
+            }
+          },
+          {
+            "type": "aptitude:bipredicate_of_predicates",
+            "predicate_for_second": {
+              "type": "aptitude:item_is",
+              "is": {
+                "tag": "minecraft:piglin_repellents"
+              }
+            }
+          },
+          {
+            "type": "aptitude:bipredicate_of_predicates",
+            "predicate_for_first": {
+              "type": "aptitude:memory_status_check",
+              "addContext": [
+                {
+                  "type": "minecraft:admiring_disabled",
+                  "status": "value_present"
+                },
+                {
+                  "type": "minecraft:attack_target",
+                  "status": "value_present"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "aptitude:any_of_bipredicate",
+      "bipredicates": [
+        {
+          "type": "aptitude:bipredicate_of_predicates",
+          "predicate_for_first": {
+            "type": "aptitude:custom_predicate",
+            "location": "minecraft:zombie/is_not_holding_loved_item_in_offhand"
+          },
+          "predicate_for_second": {
+            "type": "aptitude:item_is",
+            "is": {
+              "item": "minecraft:gold_ingot"
+            }
+          }
+        },
+        {
+          "type": "aptitude:all_of_bipredicate",
+          "bipredicates": [
+            {
+              "type": "aptitude:bipredicate_of_predicates",
+              "predicate_for_second": {
+                "type": "aptitude:item_is",
+                "is": {
+                  "item": "minecraft:gold_nugget"
+                }
+              }
+            },
+            {
+              "type": "aptitude:entity_can_add_item_to_inventory"
+            }
+          ]
+        },
+        {
+          "type": "aptitude:all_of_bipredicate",
+          "bipredicates": [
+            {
+              "type": "aptitude:bipredicate_of_predicates",
+              "predicate_for_first": {
+                "type": "aptitude:all_of_predicate",
+                "predicates": [
+                  {
+                    "type": "aptitude:negate_predicate",
+                    "predicate": {
+                      "type": "aptitude:memory_status_check",
+                      "addContext": {
+                        "type": "minecraft:ate_recently",
+                        "status": "value_present"
+                      }
+                    }
+                  }
+                ]
+              },
+              "predicate_for_second": {
+                "type": "aptitude:item_is",
+                "is": {
+                  "tag": "minecraft:piglin_food"
+                }
+              }
+            },
+            {
+              "type": "aptitude:entity_can_add_item_to_inventory"
+            }
+          ]
+        },
+        {
+          "type": "aptitude:all_of_bipredicate",
+          "bipredicates": [
+            {
+              "type": "aptitude:entity_can_replace_current_item"
+            },
+            {
+              "type": "aptitude:bipredicate_of_predicates",
+              "predicate_for_second": {
+                "type": "aptitude:negate_predicate",
+                "predicate": {
+                  "type": "aptitude:item_is",
+                  "is": {
+                    "tag": "minecraft:piglin_loved"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "aptitude:all_of_bipredicate",
+          "bipredicates": [
+            {
+              "type": "aptitude:bipredicate_of_predicates",
+              "predicate_for_first": {
+                "type": "aptitude:custom_predicate",
+                "location": "minecraft:zombie/is_not_holding_loved_item_in_offhand"
+              }
+            },
+            {
+              "type": "aptitude:entity_can_add_item_to_inventory"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

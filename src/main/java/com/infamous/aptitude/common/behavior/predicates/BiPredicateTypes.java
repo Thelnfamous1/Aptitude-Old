@@ -264,6 +264,20 @@ public class BiPredicateTypes {
                 };
             });
 
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, LivingEntity>>> ENTITY_IS_ENTITY = register("entity_is_entity",
+            jsonObject -> {
+                return (le, le1) -> {
+                    return le == le1;
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<?, ?>>> CUSTOM_BIPREDICATE = register("custom_bipredicate",
+            jsonObject -> {
+                String locationString = GsonHelper.getAsString(jsonObject, "location");
+                ResourceLocation location = new ResourceLocation(locationString);
+                return Aptitude.customLogicManager.getBiPredicate(location);
+            });
+
 
     private static <U extends BiPredicate<?, ?>> RegistryObject<BiPredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return BIPREDICATE_TYPES.register(name, () -> new BiPredicateType<>(jsonFactory));

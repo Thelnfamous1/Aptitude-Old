@@ -1,0 +1,12 @@
+{
+  "type": "aptitude:play_activity_sound",
+  "play_first_valid": [
+    {
+      "predicate": {
+        "type": "aptitude:active_non_core_activity_check",
+        "activity": "minecraft:fight"
+      },
+      "sound_event": "minecraft:entity.piglin_brute.angry"
+    }
+  ]
+}

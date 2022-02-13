@@ -1,0 +1,38 @@
+{
+  "type": "aptitude:entity_apply_biconsumer_to_list_of_entities",
+  "retrieval_function": {
+    "type": "aptitude:entity_retrieve_list_of_entities_from_memory",
+    "memory_type": "aptitude:nearby_adult_zombies"
+  },
+  "biconsumer": {
+    "type": "aptitude:bipredicated_biconsumer",
+    "bipredicate": {
+      "type": "aptitude:any_of_bipredicate",
+      "bipredicates": [
+        {
+          "type": "aptitude:bipredicate_of_predicates",
+          "predicate_for_second": {
+            "type": "aptitude:negate_predicate",
+            "predicate": {
+              "type": "aptitude:entity_is_type",
+              "entity_type_predicate": "minecraft:hoglin"
+            }
+          }
+        },
+        {
+          "type": "aptitude:bipredicate_of_predicates",
+          "predicate_for_first": {
+            "type": "aptitude:entity_can_hunt"
+          },
+          "predicate_for_second": {
+            "type": "aptitude:entity_can_be_hunted"
+          }
+        }
+      ]
+    },
+    "biconsumer": {
+      "type": "aptitude:custom_biconsumer",
+      "location": "minecraft:zombie/set_anger_target_if_closer_than_current"
+    }
+  }
+}

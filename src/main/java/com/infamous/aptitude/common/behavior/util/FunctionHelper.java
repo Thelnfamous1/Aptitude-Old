@@ -67,4 +67,14 @@ public class FunctionHelper {
         if(functionType == null) throw new JsonParseException("Invalid function type: " + biFunctionTypeString);
         return functionType;
     }
+
+    public static <T, R> Function<T, R> parseFunction(JsonObject jsonObject, String typeMemberName){
+        FunctionType<?> predicateType = parseFunctionType(jsonObject, typeMemberName);
+        return (Function<T, R>) predicateType.fromJson(jsonObject);
+    }
+
+    public static <T, U, R> BiFunction<T, U, R> parseBiFunction(JsonObject jsonObject, String typeMemberName){
+        BiFunctionType<?> predicateType = parseBiFunctionType(jsonObject, typeMemberName);
+        return (BiFunction<T, U, R>) predicateType.fromJson(jsonObject);
+    }
 }

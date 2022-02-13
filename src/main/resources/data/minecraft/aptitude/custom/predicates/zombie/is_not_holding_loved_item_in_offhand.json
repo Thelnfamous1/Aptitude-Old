@@ -1,0 +1,19 @@
+{
+  "type": "aptitude:any_of_predicate",
+  "predicates": [
+    {
+      "type": "aptitude:entity_has_empty_slot",
+      "slot": "offhand"
+    },
+    {
+      "type": "aptitude:negate_predicate",
+      "predicate": {
+        "type": "aptitude:entity_item_in_slot_is",
+        "slot": "offhand",
+        "item_in_slot_is": {
+          "tag": "minecraft:piglin_loved"
+        }
+      }
+    }
+  ]
+}

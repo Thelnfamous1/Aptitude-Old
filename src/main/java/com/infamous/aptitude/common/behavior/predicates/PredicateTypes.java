@@ -275,14 +275,19 @@ public class PredicateTypes {
                 };
             });
 
-
-
     public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_ACTIVE_ACTIVITY_CHECK = register("entity_active_activity_check",
             jsonObject -> {
                 Activity activity = BehaviorHelper.parseActivity(jsonObject, "activity");
                 return le -> {
                     return le.getBrain().isActive(activity);
                 };
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<?>>> CUSTOM_PREDICATE = register("custom_predicate",
+            jsonObject -> {
+                String locationString = GsonHelper.getAsString(jsonObject, "location");
+                ResourceLocation location = new ResourceLocation(locationString);
+                return Aptitude.customLogicManager.getPredicate(location);
             });
 
     private static <U extends Predicate<?>> RegistryObject<PredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {

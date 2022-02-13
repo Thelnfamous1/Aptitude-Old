@@ -1,0 +1,19 @@
+{
+  "type": "aptitude:entity_apply_biconsumer_to_nearest_target",
+  "retrieval_function": {
+    "type": "aptitude:retrieve_entity_from_uuid_memory",
+    "addContext": {
+      "memory_type": "minecraft:angry_at"
+    }
+  },
+  "nearest_better_than_retrieved": {
+    "type": "aptitude:negate_bipredicate",
+    "bipredicate": {
+      "type": "aptitude:entity_is_entity"
+    }
+  },
+  "biconsumer": {
+    "type": "aptitude:custom_biconsumer",
+    "location": "minecraft:zombie/set_anger_target"
+  }
+}

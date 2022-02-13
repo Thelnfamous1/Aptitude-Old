@@ -1,0 +1,33 @@
+{
+  "type": "aptitude:entity_matches_entity_from_memory",
+  "retrieval_function": {
+    "type": "aptitude:retrieve_first_valid_entity",
+    "functions": [
+      {
+        "type": "aptitude:retrieve_entity_from_uuid_memory",
+        "addContext": {
+          "memory_type": "minecraft:angry_at",
+          "filter_bipredicate": {
+            "type": "aptitude:entity_is_attackable_ignoring_line_of_sight"
+          }
+        }
+      },
+      {
+        "type": "aptitude:retrieve_entity_from_memory",
+        "addContext": {
+          "memory_type": "minecraft:nearest_visible_targetable_player",
+          "filter_bipredicate": {
+            "type": "aptitude:entity_within_distance",
+            "distance": 12.0
+          }
+        }
+      },
+      {
+        "type": "aptitude:retrieve_entity_from_memory",
+        "addContext": {
+          "memory_type": "minecraft:nearest_visible_nemesis"
+        }
+      }
+    ]
+  }
+}

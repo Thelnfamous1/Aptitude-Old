@@ -1,0 +1,27 @@
+{
+  "type": "aptitude:entity_riding_valid_mount",
+  "rider_predicate": {
+    "type": "aptitude:is_baby"
+  },
+  "mount_predicate": {
+    "type": "aptitude:all_of_predicate",
+    "predicates": [
+      {
+        "type": "aptitude:any_of_predicate",
+        "predicates": [
+          {
+            "type": "aptitude:entity_is_type",
+            "entity_type_predicate": "minecraft:hoglin"
+          },
+          {
+            "type": "aptitude:entity_is_type",
+            "entity_type_predicate": "minecraft:zombie"
+          }
+        ]
+      },
+      {
+        "type": "aptitude:is_baby"
+      }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "type": "aptitude:entity_apply_consumer_to_list_of_entities",
+  "retrieval_function": {
+    "type": "aptitude:entity_retrieve_list_of_entities_from_memory",
+    "memory_type": "aptitude:nearby_adult_zombies"
+  },
+  "consumer": {
+    "type": "aptitude:predicated_consumer",
+    "predicate": {
+      "type": "aptitude:memory_status_check",
+      "addContext": {
+        "type": "minecraft:nearest_visible_targetable_player",
+        "status": "value_present"
+      }
+    },
+    "consumer": {
+      "type": "aptitude:entity_apply_biconsumer_to_retrieved_entity",
+      "retrieval_function": {
+        "type": "aptitude:retrieve_entity_from_memory",
+        "addContext": {
+          "memory_type": "minecraft:nearest_visible_targetable_player"
+        }
+      },
+      "biconsumer": {
+        "type": "aptitude:custom_biconsumer",
+        "location": "minecraft:zombie/set_anger_target"
+      }
+    }
+  }
+}

@@ -10,6 +10,7 @@ import com.infamous.aptitude.common.behavior.functions.BiFunctionTypes;
 import com.infamous.aptitude.common.behavior.functions.FunctionTypes;
 import com.infamous.aptitude.common.behavior.predicates.BiPredicateTypes;
 import com.infamous.aptitude.common.behavior.predicates.PredicateTypes;
+import com.infamous.aptitude.common.manager.custom.CustomLogicManager;
 import com.infamous.aptitude.common.manager.selector.SelectorManager;
 import com.infamous.aptitude.common.manager.base.BaseAIManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -29,6 +30,7 @@ public class Aptitude
     public static BrainManager brainManager;
     public static SelectorManager selectorManager;
     public static BaseAIManager baseAIManager;
+    public static CustomLogicManager customLogicManager;
 
     public Aptitude() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();

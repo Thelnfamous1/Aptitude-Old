@@ -1,0 +1,12 @@
+{
+  "type": "aptitude:set_boolean_memory",
+  "memory": "minecraft:hunted_recently",
+  "value": true,
+  "expire_time": {
+    "type": "aptitude:entity_get_long_from_uniform_int",
+    "uniform_int": {
+      "minInclusive": 600,
+      "maxInclusive": 2400
+    }
+  }
+}

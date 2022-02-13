@@ -1,0 +1,10 @@
+{
+  "type": "aptitude:memory_value_check",
+  "addContext": {
+    "memory_type": "minecraft:nearest_visible_zombified",
+    "filter_bipredicate": {
+      "type": "aptitude:entity_within_distance",
+      "distance": 6.0
+    }
+  }
+}

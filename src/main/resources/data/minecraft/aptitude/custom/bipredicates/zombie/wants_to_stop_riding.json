@@ -1,0 +1,4 @@
+{
+  "type": "aptitude:entity_wants_to_stop_riding_mount",
+  "can_ride_adults": false
+}

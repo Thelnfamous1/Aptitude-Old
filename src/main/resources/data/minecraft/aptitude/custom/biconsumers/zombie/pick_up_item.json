@@ -1,0 +1,26 @@
+{
+  "type": "aptitude:entity_pick_up_wanted_item",
+  "takes_all": {
+    "type": "aptitude:item_is",
+    "is": {
+      "item": "minecraft:gold_nugget"
+    }
+  },
+  "loved_items": {
+    "type": "aptitude:item_is",
+    "is": {
+      "tag": "minecraft:piglin_loved"
+    }
+  },
+  "time_trying_to_reach_wanted_item_memory": "minecraft:time_trying_to_reach_admire_item",
+  "handling_item_memory": "minecraft:admiring_item",
+  "handling_item_time": 120,
+  "food_items": {
+    "type": "aptitude:item_is",
+    "is": {
+      "tag": "minecraft:piglin_food"
+    }
+  },
+  "consumed_item_memory": "minecraft:ate_recently",
+  "consumed_item_time": 200
+}

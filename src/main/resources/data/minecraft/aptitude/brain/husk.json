@@ -40,50 +40,8 @@
     "minecraft:idle"
   ],
   "update_activity_callback": {
-    "type": "aptitude:update_activity",
-    "on_changed_callback": {
-      "type": "aptitude:play_activity_sound",
-      "play_first_valid": [
-        {
-          "predicate": {
-            "type": "aptitude:active_non_core_activity_check",
-            "activity": "minecraft:fight"
-          },
-          "sound_event": "minecraft:entity.piglin_brute.angry"
-        }
-      ]
-    },
-    "additional_callbacks": [
-      {
-        "type": "aptitude:update_aggression_flag",
-        "predicate": {
-          "type": "aptitude:memory_status_check",
-          "addContext": {
-              "type": "minecraft:attack_target",
-              "status": "value_present"
-          }
-        }
-      },
-      {
-        "type": "aptitude:predicated_consumer",
-        "predicate": {
-          "type": "aptitude:entity_random_float_chance",
-          "random_chance": 0.0125
-        },
-        "consumer": {
-          "type": "aptitude:play_activity_sound",
-          "play_first_valid": [
-            {
-              "predicate": {
-                "type": "aptitude:active_non_core_activity_check",
-                "activity": "minecraft:fight"
-              },
-              "sound_event": "minecraft:entity.piglin_brute.angry"
-            }
-          ]
-        }
-      }
-    ]
+    "type": "aptitude:custom_consumer",
+    "location": "minecraft:husk/update_activity"
   },
   "activities_with_behaviors": [
     {
@@ -103,53 +61,6 @@
         },
         {
           "type": "aptitude:stop_being_angry_if_target_dead"
-        },
-        {
-          "type": "aptitude:retaliate_and_broadcast",
-          "ignoreIf": {
-            "type": "aptitude:bipredicate_of_predicates",
-            "predicate_for_second": {
-                "type": "aptitude:any_of_predicate",
-                "predicates": [
-                  {
-                    "type": "aptitude:entity_is_type",
-                    "entity_type_predicate": "minecraft:zombie"
-                  },
-                  {
-                    "type": "aptitude:entity_is_type",
-                    "entity_type_predicate": "minecraft:husk"
-                  }
-                ]
-            }
-          },
-          "allyIgnoreIf": {
-            "type": "aptitude:negate_bipredicate",
-            "bipredicate": {
-              "type": "aptitude:any_of_bipredicate",
-              "bipredicates": [
-                {
-                  "type": "aptitude:bipredicate_of_predicates",
-                  "predicate_for_second": {
-                    "type": "aptitude:negate_predicate",
-                    "predicate": {
-                      "type": "aptitude:entity_is_type",
-                      "entity_type_predicate": "minecraft:hoglin"
-                    }
-                  }
-                },
-                {
-                  "type": "aptitude:bipredicate_of_predicates",
-                  "predicate_for_first": {
-                    "type": "aptitude:entity_can_hunt"
-                  },
-                  "predicate_for_second": {
-                    "type": "aptitude:entity_can_be_hunted"
-                  }
-                }
-              ]
-            }
-          },
-          "nearbyAlliesMemory": "aptitude:nearby_adult_zombies"
         }
       ]
     },
@@ -160,34 +71,8 @@
         {
           "type": "aptitude:start_attacking",
           "targetFinderFunction": {
-            "type": "aptitude:retrieve_first_valid_entity",
-            "functions": [
-              {
-                "type": "aptitude:retrieve_entity_from_uuid_memory",
-                "addContext": {
-                  "memory_type": "minecraft:angry_at",
-                  "filter_bipredicate": {
-                    "type": "aptitude:entity_is_attackable_ignoring_line_of_sight"
-                  }
-                }
-              },
-              {
-                "type": "aptitude:retrieve_entity_from_memory",
-                "addContext": {
-                  "memory_type": "minecraft:nearest_visible_targetable_player",
-                  "filter_bipredicate": {
-                    "type": "aptitude:entity_within_distance",
-                    "distance": 12.0
-                  }
-                }
-              },
-              {
-                "type": "aptitude:retrieve_entity_from_memory",
-                "addContext": {
-                  "memory_type": "minecraft:nearest_visible_nemesis"
-                }
-              }
-            ]
+            "type": "aptitude:custom_function",
+            "location": "minecraft:husk/find_nearest_valid_attack_target"
           }
         },
         {
@@ -307,37 +192,8 @@
           "stopAttackingWhen": {
             "type": "aptitude:negate_bipredicate",
             "bipredicate": {
-              "type": "aptitude:entity_matches_entity_from_memory",
-              "retrieval_function": {
-                "type": "aptitude:retrieve_first_valid_entity",
-                "functions": [
-                  {
-                    "type": "aptitude:retrieve_entity_from_uuid_memory",
-                    "addContext": {
-                      "memory_type": "minecraft:angry_at",
-                      "filter_bipredicate": {
-                        "type": "aptitude:entity_is_attackable_ignoring_line_of_sight"
-                      }
-                    }
-                  },
-                  {
-                    "type": "aptitude:retrieve_entity_from_memory",
-                    "addContext": {
-                      "memory_type": "minecraft:nearest_visible_targetable_player",
-                      "filter_bipredicate": {
-                        "type": "aptitude:entity_within_distance",
-                        "distance": 12.0
-                      }
-                    }
-                  },
-                  {
-                    "type": "aptitude:retrieve_entity_from_memory",
-                    "addContext": {
-                      "memory_type": "minecraft:nearest_visible_nemesis"
-                    }
-                  }
-                ]
-              }
+              "type": "aptitude:custom_bipredicate",
+              "location": "minecraft:husk/is_nearest_valid_attack_target"
             }
           }
         },

@@ -315,13 +315,7 @@ public class BehaviorHelper {
     protected static void wasHurtBy(LivingEntity victim, LivingEntity attacker) {
         if (!(attacker instanceof Piglin)) {
             Brain<?> brain = victim.getBrain();
-            if (victim.isBaby()) {
-                brain.setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, attacker, 100L);
-                if (Sensor.isEntityAttackableIgnoringLineOfSight(victim, attacker)) {
-                    broadcastAngerTarget(victim, attacker);
-                }
-
-            } else if (attacker.getType() == EntityType.HOGLIN && hoglinsOutnumberPiglins(victim)) {
+            if (attacker.getType() == EntityType.HOGLIN && hoglinsOutnumberPiglins(victim)) {
                 setAvoidTargetAndDontHuntForAWhile(victim, attacker);
                 broadcastRetreat(victim, attacker);
             } else {
@@ -338,11 +332,11 @@ public class BehaviorHelper {
         });
     }
 
-    private static void retreatFromNearestTarget(LivingEntity p_34950_, LivingEntity p_34951_) {
-        Brain<?> brain = p_34950_.getBrain();
-        LivingEntity $$3 = BehaviorUtils.getNearestTarget(p_34950_, brain.getMemory(MemoryModuleType.AVOID_TARGET), p_34951_);
-        $$3 = BehaviorUtils.getNearestTarget(p_34950_, brain.getMemory(MemoryModuleType.ATTACK_TARGET), $$3);
-        setAvoidTargetAndDontHuntForAWhile(p_34950_, $$3);
+    private static void retreatFromNearestTarget(LivingEntity victim, LivingEntity attacker) {
+        Brain<?> brain = victim.getBrain();
+        LivingEntity nearestTarget = BehaviorUtils.getNearestTarget(victim, brain.getMemory(MemoryModuleType.AVOID_TARGET), attacker);
+        nearestTarget = BehaviorUtils.getNearestTarget(victim, brain.getMemory(MemoryModuleType.ATTACK_TARGET), nearestTarget);
+        setAvoidTargetAndDontHuntForAWhile(victim, nearestTarget);
     }
 
     private static boolean hoglinsOutnumberPiglins(LivingEntity p_35013_) {

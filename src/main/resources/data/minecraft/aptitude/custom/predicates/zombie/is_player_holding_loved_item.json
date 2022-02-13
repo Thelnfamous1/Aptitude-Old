@@ -1,0 +1,15 @@
+{
+  "type": "aptitude:all_of_predicate",
+  "predicates": [
+    {
+      "type": "aptitude:entity_is_type",
+      "entity_type_predicate": "minecraft:player"
+    },
+    {
+      "type": "aptitude:entity_is_holding",
+      "is_holding": {
+        "tag": "minecraft:piglin_loved"
+      }
+    }
+  ]
+}
