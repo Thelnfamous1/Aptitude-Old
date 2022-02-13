@@ -34,7 +34,7 @@
               "predicates": [
                 {
                   "type": "aptitude:custom_predicate",
-                  "location": "minecraft:zombie/is_admiring_disalbed"
+                  "location": "minecraft:zombie/is_admiring_disabled"
                 },
                 {
                   "type": "aptitude:memory_status_check",

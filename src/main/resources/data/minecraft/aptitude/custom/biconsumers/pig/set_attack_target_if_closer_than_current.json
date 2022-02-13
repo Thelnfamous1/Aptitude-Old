@@ -20,7 +20,7 @@
     },
     "biconsumer": {
       "type": "aptitude:custom_biconsumer",
-      "location": "minecraft:zombie/set_attack_target"
+      "location": "minecraft:pig/set_attack_target"
     }
   }
 }

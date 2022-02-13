@@ -1,70 +1,7 @@
 {
   "type": "aptitude:entity_matches_entity_from_memory",
   "retrieval_function": {
-    "type": "aptitude:predicated_function",
-    "predicate": {
-      "type": "aptitude:negate_predicate",
-      "predicate": {
-        "type": "aptitude:memory_value_check",
-        "addContext": {
-          "memory_type": "minecraft:nearest_visible_zombified",
-          "filter_bipredicate": {
-            "type": "aptitude:entity_within_distance",
-            "distance": 6.0
-          }
-        }
-      }
-    },
-    "function": {
-      "type": "aptitude:retrieve_first_valid_entity",
-      "functions": [
-        {
-          "type": "aptitude:retrieve_entity_from_uuid_memory",
-          "addContext": {
-            "memory_type": "minecraft:angry_at",
-            "filter_bipredicate": {
-              "type": "aptitude:entity_is_attackable_ignoring_line_of_sight"
-            }
-          }
-        },
-        {
-          "type": "aptitude:predicated_function",
-          "predicate": {
-            "type": "aptitude:memory_status_check",
-            "addContext": {
-              "type": "minecraft:universal_anger",
-              "status": "value_present"
-            }
-          },
-          "function": {
-            "type": "aptitude:retrieve_entity_from_memory",
-            "addContext": {
-              "memory_type": "minecraft:nearest_visible_targetable_player"
-            }
-          },
-          "default": {
-            "type": "aptitude:empty_optional"
-          }
-        },
-        {
-          "type": "aptitude:retrieve_entity_from_memory",
-          "addContext": {
-            "memory_type": "minecraft:nearest_visible_nemesis"
-          }
-        },
-        {
-          "type": "aptitude:retrieve_entity_from_memory",
-          "addContext": {
-            "memory_type": "minecraft:nearest_targetable_player_not_wearing_gold",
-            "filter_bipredicate": {
-              "type": "aptitude:entity_is_attackable"
-            }
-          }
-        }
-      ]
-    },
-    "default": {
-      "type": "aptitude:empty_optional"
-    }
+    "type": "aptitude:custom_function",
+    "location": "minecraft:zombie/find_nearest_valid_attack_target"
   }
 }
