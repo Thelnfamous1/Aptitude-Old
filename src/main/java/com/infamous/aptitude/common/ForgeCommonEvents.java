@@ -11,13 +11,16 @@ import com.infamous.aptitude.common.manager.base.BaseAIManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -101,6 +104,18 @@ public class ForgeCommonEvents {
             event.setCanceled(true);
             if(BaseAIHelper.wantsToPickUp(mob, itemEntity.getItem())){
                 BaseAIHelper.pickUpItem(mob, itemEntity);
+            }
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event){
+        Player player = event.getPlayer();
+        InteractionHand hand = event.getHand();
+        Entity entity = event.getTarget();
+        if(entity instanceof LivingEntity interactable){
+            if(BaseAIHelper.hasBaseAIFile(interactable)){
+                // TODO
             }
         }
     }
