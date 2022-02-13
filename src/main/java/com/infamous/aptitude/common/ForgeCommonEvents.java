@@ -109,6 +109,9 @@ public class ForgeCommonEvents {
     public static void onAttacked(LivingAttackEvent event){
         if(!event.isCanceled()){
             LivingEntity victim = event.getEntityLiving();
+
+            if(victim.level.isClientSide) return;
+
             Entity sourceEntity = event.getSource().getEntity();
             if(sourceEntity instanceof LivingEntity attacker && BaseAIHelper.hasBaseAIFile(victim)){
                 BaseAIHelper.attackedBy(victim, attacker);
