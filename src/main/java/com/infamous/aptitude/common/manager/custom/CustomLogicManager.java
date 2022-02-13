@@ -1,10 +1,7 @@
 package com.infamous.aptitude.common.manager.custom;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.infamous.aptitude.common.behavior.util.ConsumerHelper;
 import com.infamous.aptitude.common.behavior.util.FunctionHelper;
 import com.infamous.aptitude.common.behavior.util.PredicateHelper;
@@ -30,71 +27,77 @@ public class CustomLogicManager extends SimpleJsonResourceReloadListener {
     public static final String BIPREDICATES_DIR = "bipredicates/";
     public static final String FUNCTIONS_DIR = "functions/";
     public static final String BIFUNCTIONS_DIR = "bifunctions/";
-    private Map<ResourceLocation, Consumer<?>> customConsumers = ImmutableMap.of();
-    private Map<ResourceLocation, BiConsumer<?, ?>> customBiConsumers = ImmutableMap.of();
-    private Map<ResourceLocation, Predicate<?>> customPredicates = ImmutableMap.of();
-    private Map<ResourceLocation, BiPredicate<?, ?>> customBiPredicates = ImmutableMap.of();
-    private Map<ResourceLocation, Function<?, ?>> customFunctions = ImmutableMap.of();
-    private Map<ResourceLocation, BiFunction<?, ?, ?>> customBiFunctions = ImmutableMap.of();
+    private Map<ResourceLocation, JsonObject> customConsumers = ImmutableMap.of();
+    private Map<ResourceLocation, JsonObject> customBiConsumers = ImmutableMap.of();
+    private Map<ResourceLocation, JsonObject> customPredicates = ImmutableMap.of();
+    private Map<ResourceLocation, JsonObject> customBiPredicates = ImmutableMap.of();
+    private Map<ResourceLocation, JsonObject> customFunctions = ImmutableMap.of();
+    private Map<ResourceLocation, JsonObject> customBiFunctions = ImmutableMap.of();
 
     public CustomLogicManager() {
         super(GSON, "aptitude/custom");
     }
 
     public <T> Consumer<T> getConsumer(ResourceLocation location){
-        return (Consumer<T>) this.customConsumers.get(location);
+        JsonObject consumer = this.customConsumers.get(location);
+        if(consumer == null) throw new JsonParseException("Could not find custom consumer " + location);
+        return ConsumerHelper.parseConsumer(consumer, "type");
     }
 
     public <T, U> BiConsumer<T, U> getBiConsumer(ResourceLocation location){
-        return (BiConsumer<T, U>) this.customBiConsumers.get(location);
+        JsonObject biConsumer = this.customBiConsumers.get(location);
+        if(biConsumer == null) throw new JsonParseException("Could not find custom biconsumer " + location);
+        return ConsumerHelper.parseBiConsumer(biConsumer, "type");
     }
 
     public <T> Predicate<T> getPredicate(ResourceLocation location){
-        return (Predicate<T>) this.customPredicates.get(location);
+        JsonObject predicate = this.customPredicates.get(location);
+        if(predicate == null) throw new JsonParseException("Could not find custom predicate " + location);
+        return PredicateHelper.parsePredicate(predicate, "type");
     }
 
     public <T, U> BiPredicate<T, U> getBiPredicate(ResourceLocation location){
-        return (BiPredicate<T, U>) this.customBiPredicates.get(location);
+        JsonObject biPredicate = this.customBiPredicates.get(location);
+        if(biPredicate == null) throw new JsonParseException("Could not find custom bipredicate " + location);
+        return PredicateHelper.parseBiPredicate(biPredicate, "type");
     }
 
     public <T, R> Function<T, R> getFunction(ResourceLocation location){
-        return (Function<T, R>) this.customConsumers.get(location);
+        JsonObject function = this.customFunctions.get(location);
+        if(function == null) throw new JsonParseException("Could not find custom function " + location);
+        return FunctionHelper.parseFunction(function, "type");
     }
 
     public <T, U, R> BiFunction<T, U, R> getBiFunction(ResourceLocation location){
-        return (BiFunction<T, U, R>) this.customBiFunctions.get(location);
+        JsonObject biFunction = this.customBiFunctions.get(location);
+        if(biFunction == null) throw new JsonParseException("Could not find custom biFunction " + location);
+        return FunctionHelper.parseBiFunction(biFunction, "type");
     }
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> locationElementMap, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        ImmutableMap.Builder<ResourceLocation, Consumer<?>> customConsumersBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<ResourceLocation, BiConsumer<?, ?>> customBiConsumersBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<ResourceLocation, Predicate<?>> customPredicatesBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<ResourceLocation, BiPredicate<?, ?>> customBiPredicatesBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<ResourceLocation, Function<?, ?>> customFunctionsBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<ResourceLocation, BiFunction<?, ?, ?>> customBiFunctionsBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<ResourceLocation, JsonObject> customConsumersBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<ResourceLocation, JsonObject> customBiConsumersBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<ResourceLocation, JsonObject> customPredicatesBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<ResourceLocation, JsonObject> customBiPredicatesBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<ResourceLocation, JsonObject> customFunctionsBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<ResourceLocation, JsonObject> customBiFunctionsBuilder = ImmutableMap.builder();
 
         locationElementMap.forEach((location, jsonElement) -> {
             try{
                 JsonObject topElement = GsonHelper.convertToJsonObject(jsonElement, "top element");
                 if(location.getPath().startsWith(CONSUMERS_DIR)){
-                    Consumer<Object> consumer = ConsumerHelper.parseConsumer(topElement, "type");
-                    customConsumersBuilder.put(withoutDirectoryPrefix(location, CONSUMERS_DIR), consumer);
+                    customConsumersBuilder.put(withoutDirectoryPrefix(location, CONSUMERS_DIR), topElement);
                 } else if(location.getPath().startsWith(BICONSUMERS_DIR)){
-                    BiConsumer<Object, Object> biConsumer = ConsumerHelper.parseBiConsumer(topElement, "type");
-                    customBiConsumersBuilder.put(withoutDirectoryPrefix(location, BICONSUMERS_DIR), biConsumer);
+                    customBiConsumersBuilder.put(withoutDirectoryPrefix(location, BICONSUMERS_DIR), topElement);
                 } else if(location.getPath().startsWith(PREDICATES_DIR)){
-                    Predicate<Object> predicate = PredicateHelper.parsePredicate(topElement, "type");
-                    customPredicatesBuilder.put(withoutDirectoryPrefix(location, PREDICATES_DIR), predicate);
+                    customPredicatesBuilder.put(withoutDirectoryPrefix(location, PREDICATES_DIR), topElement);
                 } else if(location.getPath().startsWith(BIPREDICATES_DIR)){
-                    BiPredicate<Object, Object> biPredicate = PredicateHelper.parseBiPredicate(topElement, "type");
-                    customBiPredicatesBuilder.put(withoutDirectoryPrefix(location, BIPREDICATES_DIR), biPredicate);
+                    customBiPredicatesBuilder.put(withoutDirectoryPrefix(location, BIPREDICATES_DIR), topElement);
                 } else if(location.getPath().startsWith(FUNCTIONS_DIR)){
-                    Function<Object, Object> function = FunctionHelper.parseFunction(topElement, "type");
-                    customFunctionsBuilder.put(withoutDirectoryPrefix(location, FUNCTIONS_DIR), function);
+                    customFunctionsBuilder.put(withoutDirectoryPrefix(location, FUNCTIONS_DIR), topElement);
                 } else if(location.getPath().startsWith(BIFUNCTIONS_DIR)){
-                    BiFunction<Object, Object, Object> biFunction = FunctionHelper.parseBiFunction(topElement, "type");
-                    customBiFunctionsBuilder.put(withoutDirectoryPrefix(location, BIFUNCTIONS_DIR), biFunction);
+                    customBiFunctionsBuilder.put(withoutDirectoryPrefix(location, BIFUNCTIONS_DIR), topElement);
                 } else{
                     LOGGER.info("Found unusable resource for custom logic: {}", location);
                 }

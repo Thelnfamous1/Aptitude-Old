@@ -27,10 +27,10 @@ public class Aptitude
     // Directly reference a log4j logger.
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MOD_ID = "aptitude";
+    public static CustomLogicManager customLogicManager;
     public static BrainManager brainManager;
     public static SelectorManager selectorManager;
     public static BaseAIManager baseAIManager;
-    public static CustomLogicManager customLogicManager;
 
     public Aptitude() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();

@@ -27,14 +27,14 @@ public class ForgeCommonEvents {
 
     @SubscribeEvent
     public static void onReloadListener(AddReloadListenerEvent event){
+        Aptitude.customLogicManager = new CustomLogicManager();
         Aptitude.brainManager = new BrainManager();
         Aptitude.selectorManager = new SelectorManager();
         Aptitude.baseAIManager = new BaseAIManager();
-        Aptitude.customLogicManager = new CustomLogicManager();
+        event.addListener(Aptitude.customLogicManager);
         event.addListener(Aptitude.brainManager);
         event.addListener(Aptitude.selectorManager);
         event.addListener(Aptitude.baseAIManager);
-        event.addListener(Aptitude.customLogicManager);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

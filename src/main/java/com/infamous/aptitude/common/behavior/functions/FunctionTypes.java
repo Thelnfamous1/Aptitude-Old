@@ -2,6 +2,7 @@ package com.infamous.aptitude.common.behavior.functions;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.infamous.aptitude.common.behavior.util.FunctionHelper;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -65,6 +67,9 @@ public class FunctionTypes {
 
                 return le -> {
                     Brain<?> brain = le.getBrain();
+                    if(!brain.checkMemory(memoryType, MemoryStatus.REGISTERED)){
+                        return Optional.empty();
+                    }
                     return brain.getMemory(memoryType).filter(filterPredicate).filter(e -> filterBiPredicate.test(le, e));
 
 
@@ -94,6 +99,9 @@ public class FunctionTypes {
                 return le -> {
                     Brain<?> brain = le.getBrain();
                     Predicate<LivingEntity> jointFilterPredicate = e -> filterPredicate.test(e) && filterBiPredicate.test(le, e);
+                    if(!brain.checkMemory(memoryType, MemoryStatus.REGISTERED)){
+                        return Optional.empty();
+                    }
                     return brain.getMemory(memoryType).orElse(NearestVisibleLivingEntities.empty()).findClosest(jointFilterPredicate);
                 };
             });
@@ -150,7 +158,11 @@ public class FunctionTypes {
             jsonObject -> {
                 MemoryModuleType<List<LivingEntity>> memoryType = BehaviorHelper.parseMemoryType(jsonObject, "memory_type");
                 return le -> {
-                    return le.getBrain().getMemory(memoryType).orElse(ImmutableList.of());
+                    Brain<?> brain = le.getBrain();
+                    if(!brain.checkMemory(memoryType, MemoryStatus.REGISTERED)){
+                        return ImmutableList.of();
+                    }
+                    return brain.getMemory(memoryType).orElse(ImmutableList.of());
                 };
             });
 

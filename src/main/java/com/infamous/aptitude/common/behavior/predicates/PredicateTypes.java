@@ -108,6 +108,14 @@ public class PredicateTypes {
                         return false;
                     } else {
                         Brain<?> brain = le.getBrain();
+
+                        if(!brain.checkMemory(otherType, MemoryStatus.REGISTERED)){
+                            return false;
+                        }
+
+                        if(!brain.checkMemory(sameType, MemoryStatus.REGISTERED)){
+                            return false;
+                        }
                         Optional<?> otherTypeMemory = brain.getMemory(otherType);
                         Optional<?> sameTypeMemory = brain.getMemory(sameType);
                         int otherTypeCount = otherTypeMemory.map(Integer.class::cast).orElse(0);
