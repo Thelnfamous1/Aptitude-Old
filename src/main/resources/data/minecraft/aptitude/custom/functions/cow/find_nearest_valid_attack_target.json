@@ -1,0 +1,25 @@
+{
+  "type": "aptitude:retrieve_entity_from_visible_entities_memory",
+  "addContext": {
+    "memory_type": "minecraft:visible_mobs",
+    "filter_predicate": {
+      "type": "aptitude:negate_predicate",
+      "predicate": {
+        "type": "aptitude:any_of_predicate",
+        "predicates": [
+          {
+            "type": "aptitude:entity_is_type",
+            "entity_type_predicate": "minecraft:creeper"
+          },
+          {
+            "type": "aptitude:entity_is_type",
+            "entity_type_predicate": "minecraft:cow"
+          }
+        ]
+      }
+    },
+    "filter_bipredicate": {
+      "type": "aptitude:entity_is_attackable"
+    }
+  }
+}

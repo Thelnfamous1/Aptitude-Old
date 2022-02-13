@@ -22,14 +22,8 @@
           }
         },
         {
-          "type": "aptitude:negate_predicate",
-          "predicate": {
-            "type": "aptitude:outnumbered_adult",
-            "addContext": {
-              "sameType": "aptitude:visible_adult_zombie_count",
-              "otherType": "minecraft:visible_adult_hoglin_count"
-            }
-          }
+          "type": "aptitude:custom_predicate",
+          "location": "minecraft:zombie/zombies_equal_or_outnumber_hoglins"
         }
       ]
     },
@@ -38,17 +32,8 @@
       "addContext": {
         "memory_type": "minecraft:avoid_target",
         "filter_predicate": {
-          "type": "aptitude:any_of_predicate",
-          "predicates": [
-            {
-              "type": "aptitude:entity_is_type",
-              "entity_type_predicate": "minecraft:zombified_piglin"
-            },
-            {
-              "type": "aptitude:entity_is_type",
-              "entity_type_predicate": "minecraft:zoglin"
-            }
-          ]
+          "type": "aptitude:custom_predicate",
+          "location": "minecraft:zombie/is_zombified"
         },
         "filter_bipredicate": {
           "type": "aptitude:negate_bipredicate",

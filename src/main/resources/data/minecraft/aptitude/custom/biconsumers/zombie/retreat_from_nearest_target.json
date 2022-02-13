@@ -1,0 +1,22 @@
+{
+  "type": "aptitude:entity_apply_biconsumer_to_nearest_target",
+  "retrieval_function": {
+    "type": "aptitude:retrieve_entity_from_memory",
+    "addContext": {
+      "memory_type": "minecraft:avoid_target"
+    }
+  },
+  "biconsumer": {
+    "type": "aptitude:entity_apply_biconsumer_to_nearest_target",
+    "retrieval_function": {
+      "type": "aptitude:retrieve_entity_from_memory",
+      "addContext": {
+        "memory_type": "minecraft:attack_target"
+      }
+    },
+    "biconsumer": {
+      "type": "aptitude:custom_biconsumer",
+      "location": "minecraft:zombie/set_avoid_target_and_dont_hunt_for_a_while"
+    }
+  }
+}

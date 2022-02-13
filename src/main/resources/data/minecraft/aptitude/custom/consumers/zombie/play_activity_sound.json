@@ -46,13 +46,8 @@
     },
     {
       "predicate": {
-        "type": "aptitude:memory_status_check",
-        "addContext": [
-          {
-            "type": "minecraft:nearest_player_holding_wanted_item",
-            "status": "value_present"
-          }
-        ]
+        "type": "aptitude:custom_predicate",
+        "location": "minecraft:zombie/sees_player_holding_loved_item"
       },
       "sound_event": "minecraft:entity.piglin.jealous"
     },

@@ -1,0 +1,24 @@
+{
+  "attacked_by": {
+    "type": "aptitude:bipredicated_biconsumer",
+    "bipredicate": {
+      "type": "aptitude:all_of_bipredicate",
+      "bipredicates": [
+        {
+          "type": "aptitude:entity_can_attack"
+        },
+        {
+          "type": "aptitude:negate_bipredicate",
+          "bipredicate": {
+            "type": "aptitude:entity_other_target_much_further_away_than_current_attack_target",
+            "extra_distance_allowed": 4.0
+          }
+        }
+      ]
+    },
+    "biconsumer": {
+      "type": "aptitude:custom_biconsumer",
+      "location": "minecraft:cow/set_attack_target"
+    }
+  }
+}

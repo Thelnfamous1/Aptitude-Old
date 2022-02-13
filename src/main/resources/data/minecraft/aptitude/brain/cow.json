@@ -28,31 +28,8 @@
     "minecraft:idle"
   ],
   "update_activity_callback": {
-    "type": "aptitude:update_activity",
-    "on_changed_callback": {
-      "type": "aptitude:play_activity_sound",
-      "play_first_valid": [
-        {
-          "predicate": {
-            "type": "aptitude:active_non_core_activity_check",
-            "activity": "minecraft:fight"
-          },
-          "sound_event": "minecraft:entity.zoglin.angry"
-        }
-      ]
-    },
-    "additional_callbacks": [
-      {
-        "type": "aptitude:update_aggression_flag",
-        "predicate": {
-          "type": "aptitude:memory_status_check",
-          "addContext": {
-            "type": "minecraft:attack_target",
-            "status": "value_present"
-          }
-        }
-      }
-    ]
+    "type": "aptitude:custom_consumer",
+    "location": "minecraft:cow/update_activity"
   },
   "activities_with_behaviors": [
     {
@@ -76,29 +53,8 @@
         {
           "type": "aptitude:start_attacking",
           "targetFinderFunction": {
-            "type": "aptitude:retrieve_entity_from_visible_entities_memory",
-            "addContext": {
-              "memory_type": "minecraft:visible_mobs",
-              "filter_predicate": {
-                "type": "aptitude:negate_predicate",
-                "predicate": {
-                  "type": "aptitude:any_of_predicate",
-                  "predicates": [
-                    {
-                      "type": "aptitude:entity_is_type",
-                      "entity_type_predicate": "minecraft:creeper"
-                    },
-                    {
-                      "type": "aptitude:entity_is_type",
-                      "entity_type_predicate": "minecraft:cow"
-                    }
-                  ]
-                }
-              },
-              "filter_bipredicate": {
-                "type": "aptitude:entity_is_attackable"
-              }
-            }
+            "type": "aptitude:custom_function",
+            "location": "minecraft:cow/find_nearest_valid_attack_target"
           }
         },
         {

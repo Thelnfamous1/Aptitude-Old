@@ -113,8 +113,13 @@ public class ForgeCommonEvents {
             if(victim.level.isClientSide) return;
 
             Entity sourceEntity = event.getSource().getEntity();
-            if(sourceEntity instanceof LivingEntity attacker && BaseAIHelper.hasBaseAIFile(victim)){
-                BaseAIHelper.attackedBy(victim, attacker);
+            if(sourceEntity instanceof LivingEntity attacker){
+                if(BaseAIHelper.hasBaseAIFile(attacker)){
+                    BaseAIHelper.attacked(attacker, victim);
+                }
+                if(BaseAIHelper.hasBaseAIFile(victim)) {
+                    BaseAIHelper.attackedBy(victim, attacker);
+                }
             }
         }
     }

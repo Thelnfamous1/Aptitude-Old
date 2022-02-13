@@ -1,0 +1,26 @@
+{
+  "type": "aptitude:bipredicated_biconsumer",
+  "bipredicate": {
+    "type": "aptitude:bipredicate_of_predicates",
+    "predicate_for_first": {
+      "type": "aptitude:negate_predicate",
+      "predicate": {
+        "type": "aptitude:custom_predicate",
+        "location": "minecraft:pig/is_pacified"
+      }
+    }
+  },
+  "biconsumer": {
+    "type": "aptitude:entity_apply_biconsumer_to_nearest_target",
+    "retrieval_function": {
+      "type": "aptitude:retrieve_entity_from_memory",
+      "addContext": {
+        "memory_type": "minecraft:attack_target"
+      }
+    },
+    "biconsumer": {
+      "type": "aptitude:custom_biconsumer",
+      "location": "minecraft:zombie/set_attack_target"
+    }
+  }
+}

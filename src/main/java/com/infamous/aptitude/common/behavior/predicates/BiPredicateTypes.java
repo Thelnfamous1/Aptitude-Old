@@ -278,6 +278,11 @@ public class BiPredicateTypes {
                 return Aptitude.customLogicManager.getBiPredicate(location);
             });
 
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, LivingEntity>>> ENTITY_CAN_ATTACK = register("entity_can_attack",
+            jsonObject -> {
+                return LivingEntity::canAttack;
+            });
+
 
     private static <U extends BiPredicate<?, ?>> RegistryObject<BiPredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return BIPREDICATE_TYPES.register(name, () -> new BiPredicateType<>(jsonFactory));

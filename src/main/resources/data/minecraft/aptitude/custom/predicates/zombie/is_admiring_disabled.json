@@ -1,0 +1,9 @@
+{
+  "type": "aptitude:memory_status_check",
+  "addContext": [
+    {
+      "type": "minecraft:nearest_player_holding_wanted_item",
+      "status": "value_present"
+    }
+  ]
+}

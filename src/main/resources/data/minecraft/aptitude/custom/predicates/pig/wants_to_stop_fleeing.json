@@ -1,0 +1,15 @@
+{
+  "type": "aptitude:all_of_predicate",
+  "predicates": [
+    {
+      "type": "aptitude:is_adult"
+    },
+    {
+      "type": "aptitude:negate_predicate",
+      "predicate": {
+        "type":"aptitude:custom_predicate",
+        "location": "minecraft:pig/piglins_outnumber_pigs"
+      }
+    }
+  ]
+}

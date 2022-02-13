@@ -1,0 +1,38 @@
+{
+  "type": "aptitude:all_of_biconsumer",
+  "biconsumers": [
+    {
+      "type": "aptitude:biconsumer_of_consumers",
+      "consumer_for_first": {
+        "type": "aptitude:all_of_consumer",
+        "consumers": [
+          {
+            "type": "aptitude:entity_erase_memory",
+            "memory_type": "minecraft:pacified"
+          },
+          {
+            "type": "aptitude:entity_erase_memory",
+            "memory_type": "minecraft:breed_target"
+          }
+        ]
+      }
+    },
+    {
+      "type": "aptitude:bipredicated_biconsumer",
+      "bipredicate": {
+        "type": "aptitude:bipredicate_of_predicates",
+        "predicate_for_first": {
+          "type": "aptitude:is_baby"
+        }
+      },
+      "biconsumer": {
+        "type": "aptitude:custom_biconsumer",
+        "location": "minecraft:pig/retreat_from_nearest_target"
+      },
+      "default": {
+        "type": "aptitude:custom_biconsumer",
+        "location": "minecraft:pig/maybe_retaliate"
+      }
+    }
+  ]
+}

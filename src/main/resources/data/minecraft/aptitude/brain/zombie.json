@@ -296,11 +296,8 @@
             {
               "type": "aptitude:run_if",
               "predicate": {
-                "type": "aptitude:memory_status_check",
-                "addContext": {
-                  "type": "minecraft:nearest_player_holding_wanted_item",
-                  "status": "value_absent"
-                }
+                "type": "aptitude:custom_predicate",
+                "location": "minecraft:zombie/doesnt_see_any_player_holding_loved_item"
               },
               "wrappedBehavior": {
                 "type": "aptitude:set_walk_target_from_look_target",
@@ -628,11 +625,8 @@
             {
               "type": "aptitude:run_if",
               "predicate": {
-                "type": "aptitude:memory_status_check",
-                "addContext": {
-                  "type": "minecraft:nearest_player_holding_wanted_item",
-                  "status": "value_absent"
-                }
+                "type": "aptitude:custom_predicate",
+                "location": "minecraft:zombie/doesnt_see_any_player_holding_loved_item"
               },
               "wrappedBehavior": {
                 "type": "aptitude:set_walk_target_from_look_target",

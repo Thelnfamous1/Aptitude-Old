@@ -1,0 +1,32 @@
+{
+  "type": "aptitude:play_activity_sound",
+  "play_first_valid": [
+    {
+      "predicate": {
+        "type": "aptitude:active_non_core_activity_check",
+        "activity": "minecraft:avoid"
+      },
+      "sound_event": "minecraft:entity.hoglin.retreat"
+    },
+    {
+      "predicate": {
+        "type": "aptitude:active_non_core_activity_check",
+        "activity": "minecraft:fight"
+      },
+      "sound_event": "minecraft:entity.hoglin.angry"
+    },
+    {
+      "predicate": {
+        "type": "aptitude:custom_predicate",
+        "location": "minecraft:pig/is_near_repellent"
+      },
+      "sound_event": "minecraft:entity.hoglin.retreat"
+    },
+    {
+      "predicate": {
+        "type": "aptitude:always_true"
+      },
+      "sound_event": "minecraft:entity.hoglin.ambient"
+    }
+  ]
+}

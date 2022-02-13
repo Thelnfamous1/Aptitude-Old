@@ -18,11 +18,8 @@
         "consumer_for_first": {
           "type": "aptitude:predicated_consumer",
           "predicate": {
-            "type": "aptitude:negate_predicate",
-            "predicate": {
-              "type": "aptitude:entity_has_empty_slot",
-              "slot": "offhand"
-            }
+            "type": "aptitude:custom_predicate",
+            "location": "minecraft:zombie/is_holding_item_in_offhand"
           },
           "consumer": {
             "type": "aptitude:custom_consumer",
@@ -127,11 +124,8 @@
           "bipredicate": {
             "type": "aptitude:bipredicate_of_predicates",
             "predicate_for_first": {
-              "type": "aptitude:outnumbered_adult",
-              "addContext": {
-                "sameType": "aptitude:visible_adult_zombie_count",
-                "otherType": "minecraft:visible_adult_hoglin_count"
-              }
+              "type": "aptitude:custom_predicate",
+              "location": "minecraft:zombie/hoglins_outnumber_zombies"
             },
             "predicate_for_second": {
               "type": "aptitude:entity_is_type",

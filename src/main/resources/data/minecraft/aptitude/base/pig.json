@@ -1,0 +1,10 @@
+{
+  "attacked_by": {
+    "type": "aptitude:custom_biconsumer",
+    "location": "minecraft:pig/was_hurt_by"
+  },
+  "attacked": {
+    "type": "aptitude:custom_biconsumer",
+    "location": "minecraft:pig/on_hit_target"
+  }
+}

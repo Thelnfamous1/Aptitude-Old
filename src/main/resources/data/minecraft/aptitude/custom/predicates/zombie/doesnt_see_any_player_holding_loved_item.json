@@ -1,0 +1,7 @@
+{
+  "type": "aptitude:negate_predicate",
+  "predicate": {
+    "type": "aptitude:custom_predicate",
+    "location": "minecraft:zombie/sees_player_holding_loved_item"
+  }
+}

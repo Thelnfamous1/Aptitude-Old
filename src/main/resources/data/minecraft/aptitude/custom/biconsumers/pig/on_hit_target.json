@@ -1,0 +1,40 @@
+{
+  "type": "aptitude:bipredicated_biconsumer",
+  "bipredicate": {
+    "type": "aptitude:bipredicate_of_predicates",
+    "predicate_for_first": {
+      "type": "aptitude:is_adult"
+    }
+  },
+  "biconsumer": {
+    "type": "aptitude:bipredicated_biconsumer",
+    "bipredicate": {
+      "type": "aptitude:bipredicate_of_predicates",
+      "predicate_for_first": {
+        "type": "aptitude:custom_predicate",
+        "location": "minecraft:pig/piglins_outnumber_pigs"
+      },
+      "predicate_for_second": {
+        "type": "aptitude:entity_is_type",
+        "entity_type_predicate": "minecraft:piglin"
+      }
+    },
+    "biconsumer": {
+      "type": "aptitude:all_of_biconsumer",
+      "biconsumers": [
+        {
+          "type": "aptitude:custom_biconsumer",
+          "location": "minecraft:pig/set_avoid_target"
+        },
+        {
+          "type": "aptitude:custom_biconsumer",
+          "location": "minecraft:pig/broadcast_retreat"
+        }
+      ]
+    },
+    "default": {
+      "type": "aptitude:custom_biconsumer",
+      "location": "minecraft:pig/broadcast_attack_target"
+    }
+  }
+}

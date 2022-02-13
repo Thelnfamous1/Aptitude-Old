@@ -19,6 +19,7 @@ public class BaseAIContainer {
     private BiPredicate<LivingEntity, ItemStack> wantsToPickUp = (le, is) -> false;
     private BiConsumer<LivingEntity, ItemEntity> pickUpItem = (le, ie) -> {};
     private BiConsumer<LivingEntity, LivingEntity> attackedBy = (victim, attacker) -> {};
+    private BiConsumer<LivingEntity, LivingEntity> attacked = (attacker, target) -> {};
 
     public Consumer<LivingEntity> getAddedToWorld() {
         return addedToWorld;
@@ -30,6 +31,10 @@ public class BaseAIContainer {
 
     public BiConsumer<LivingEntity, LivingEntity> getAttackedBy() {
         return attackedBy;
+    }
+
+    public BiConsumer<LivingEntity, LivingEntity> getAttacked() {
+        return attacked;
     }
 
     public BiPredicate<LivingEntity, ItemStack> getWantsToPickUp() {
@@ -50,6 +55,7 @@ public class BaseAIContainer {
         baseAIContainer.addedToWorld = ConsumerHelper.parseConsumerOrDefault(jsonObject, "added_to_world", "type", le -> {});
         baseAIContainer.firstSpawn = ConsumerHelper.parseConsumerOrDefault(jsonObject, "first_spawn", "type", le -> {});
         baseAIContainer.attackedBy = ConsumerHelper.parseBiConsumerOrDefault(jsonObject, "attacked_by", "type", (victim, attacker) -> {});
+        baseAIContainer.attacked = ConsumerHelper.parseBiConsumerOrDefault(jsonObject, "attacked", "type", (attacker, target) -> {});
         baseAIContainer.wantsToPickUp = PredicateHelper.parseBiPredicateOrDefault(jsonObject, "wants_to_pick_up", "type", (le, is) -> false);
         baseAIContainer.pickUpItem = ConsumerHelper.parseBiConsumerOrDefault(jsonObject, "pick_up_item", "type", (le, ie) -> {});
 

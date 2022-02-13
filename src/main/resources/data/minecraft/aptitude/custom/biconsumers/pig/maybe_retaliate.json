@@ -1,0 +1,66 @@
+{
+  "type": "aptitude:bipredicated_biconsumer",
+  "bipredicate": {
+    "type": "aptitude:all_of_bipredicate",
+    "bipredicates": [
+      {
+        "type": "aptitude:any_of_bipredicate",
+        "bipredicates": [
+          {
+            "type": "aptitude:bipredicate_of_predicates",
+            "predicate_for_first": {
+              "type": "aptitude:negate_predicate",
+              "predicate": {
+                "type": "aptitude:entity_active_activity_check",
+                "activity": "minecraft:avoid"
+              }
+            }
+          },
+          {
+            "type": "aptitude:bipredicate_of_predicates",
+            "predicate_for_second": {
+              "type": "aptitude:negate_predicate",
+              "predicate": {
+                "type": "aptitude:entity_is_type",
+                "entity_type_predicate": "minecraft:piglin"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "type": "aptitude:bipredicate_of_predicates",
+        "predicate_for_second": {
+          "type": "aptitude:negate_predicate",
+          "predicate": {
+            "type": "aptitude:entity_is_type",
+            "entity_type_predicate": "minecraft:pig"
+          }
+        }
+      },
+      {
+        "type": "aptitude:negate_bipredicate",
+        "bipredicate": {
+          "type": "aptitude:entity_other_target_much_further_away_than_current_attack_target",
+          "extra_distance_allowed": 4.0
+        }
+      },
+      {
+        "type": "aptitude:entity_is_attackable"
+      }
+    ]
+  },
+  "biconsumer": {
+    "type": "aptitude:all_of_biconsumer",
+    "biconsumers": [
+      {
+        "type": "aptitude:custom_biconsumer",
+        "location": "minecraft:pig/set_attack_target"
+      },
+      {
+        "type": "aptitude:custom_biconsumer",
+        "location": "minecraft:pig/broadcast_attack_target"
+      }
+    ]
+  }
+}

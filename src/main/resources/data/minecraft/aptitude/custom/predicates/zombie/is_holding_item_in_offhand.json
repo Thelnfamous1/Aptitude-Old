@@ -1,0 +1,7 @@
+{
+  "type": "aptitude:negate_predicate",
+  "predicate": {
+    "type": "aptitude:entity_has_empty_slot",
+    "slot": "offhand"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "aptitude:any_of_predicate",
+  "predicates": [
+    {
+      "type": "aptitude:entity_is_type",
+      "entity_type_predicate": "minecraft:zombified_piglin"
+    },
+    {
+      "type": "aptitude:entity_is_type",
+      "entity_type_predicate": "minecraft:zoglin"
+    }
+  ]
+}

@@ -30,15 +30,18 @@
           {
             "type": "aptitude:bipredicate_of_predicates",
             "predicate_for_first": {
-              "type": "aptitude:memory_status_check",
-              "addContext": [
+              "type": "aptitude:all_of_predicate",
+              "predicates": [
                 {
-                  "type": "minecraft:admiring_disabled",
-                  "status": "value_present"
+                  "type": "aptitude:custom_predicate",
+                  "location": "minecraft:zombie/is_admiring_disalbed"
                 },
                 {
-                  "type": "minecraft:attack_target",
-                  "status": "value_present"
+                  "type": "aptitude:memory_status_check",
+                  "addContext": {
+                    "type": "minecraft:attack_target",
+                    "status": "value_present"
+                  }
                 }
               ]
             }
@@ -90,11 +93,8 @@
                   {
                     "type": "aptitude:negate_predicate",
                     "predicate": {
-                      "type": "aptitude:memory_status_check",
-                      "addContext": {
-                        "type": "minecraft:ate_recently",
-                        "status": "value_present"
-                      }
+                      "type": "aptitude:custom_predicate",
+                      "location": "minecraft:zombie/has_eaten_recently"
                     }
                   }
                 ]

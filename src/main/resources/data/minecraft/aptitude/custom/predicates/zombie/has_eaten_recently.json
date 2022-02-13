@@ -1,0 +1,9 @@
+{
+  "type": "aptitude:memory_status_check",
+  "addContext": [
+    {
+      "type": "minecraft:ate_recently",
+      "status": "value_present"
+    }
+  ]
+}

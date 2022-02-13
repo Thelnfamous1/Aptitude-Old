@@ -47,4 +47,10 @@ public class BaseAIHelper {
         BiConsumer<LivingEntity, LivingEntity> attackedBy = Aptitude.baseAIManager.attackedBy(etLocation);
         attackedBy.accept(victim, attacker);
     }
+
+    public static void attacked(LivingEntity victim, LivingEntity attacker) {
+        ResourceLocation etLocation = victim.getType().getRegistryName();
+        BiConsumer<LivingEntity, LivingEntity> attacked = Aptitude.baseAIManager.attacked(etLocation);
+        attacked.accept(victim, attacker);
+    }
 }

@@ -1,0 +1,19 @@
+{
+  "type": "aptitude:update_activity",
+  "on_changed_callback": {
+    "type": "aptitude:custom_consumer",
+    "location": "minecraft:cow/play_activity_sound"
+  },
+  "additional_callbacks": [
+    {
+      "type": "aptitude:update_aggression_flag",
+      "predicate": {
+        "type": "aptitude:memory_status_check",
+        "addContext": {
+          "type": "minecraft:attack_target",
+          "status": "value_present"
+        }
+      }
+    }
+  ]
+}

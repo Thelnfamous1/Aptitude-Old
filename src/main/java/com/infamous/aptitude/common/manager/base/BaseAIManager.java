@@ -50,6 +50,10 @@ public class BaseAIManager extends SimpleJsonResourceReloadListener {
         return this.getBaseAIContainer(location).getAttackedBy();
     }
 
+    public BiConsumer<LivingEntity, LivingEntity> attacked(ResourceLocation location) {
+        return this.getBaseAIContainer(location).getAttacked();
+    }
+
     private BaseAIContainer getBaseAIContainer(ResourceLocation location){
         return this.baseAIContainers.getOrDefault(location, BaseAIContainer.EMPTY);
     }
