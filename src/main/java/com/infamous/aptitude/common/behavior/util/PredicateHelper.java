@@ -3,13 +3,12 @@ package com.infamous.aptitude.common.behavior.util;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.infamous.aptitude.common.behavior.predicates.BiPredicateType;
-import com.infamous.aptitude.common.behavior.predicates.BiPredicateTypes;
-import com.infamous.aptitude.common.behavior.predicates.PredicateType;
-import com.infamous.aptitude.common.behavior.predicates.PredicateTypes;
+import com.infamous.aptitude.common.logic.predicates.BiPredicateType;
+import com.infamous.aptitude.common.logic.predicates.BiPredicateTypes;
+import com.infamous.aptitude.common.logic.predicates.PredicateType;
+import com.infamous.aptitude.common.logic.predicates.PredicateTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;

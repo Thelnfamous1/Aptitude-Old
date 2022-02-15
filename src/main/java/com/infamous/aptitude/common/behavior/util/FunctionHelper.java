@@ -3,12 +3,14 @@ package com.infamous.aptitude.common.behavior.util;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.infamous.aptitude.common.behavior.functions.BiFunctionType;
-import com.infamous.aptitude.common.behavior.functions.BiFunctionTypes;
-import com.infamous.aptitude.common.behavior.functions.FunctionType;
-import com.infamous.aptitude.common.behavior.functions.FunctionTypes;
+import com.infamous.aptitude.common.logic.functions.BiFunctionType;
+import com.infamous.aptitude.common.logic.functions.BiFunctionTypes;
+import com.infamous.aptitude.common.logic.functions.FunctionType;
+import com.infamous.aptitude.common.logic.functions.FunctionTypes;
+import com.infamous.aptitude.common.interaction.MobInteraction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.InteractionHand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,4 +79,5 @@ public class FunctionHelper {
         BiFunctionType<?> predicateType = parseBiFunctionType(jsonObject, typeMemberName);
         return (BiFunction<T, U, R>) predicateType.fromJson(jsonObject);
     }
+
 }

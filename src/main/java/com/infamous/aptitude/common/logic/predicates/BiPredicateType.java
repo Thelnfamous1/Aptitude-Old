@@ -1,16 +1,16 @@
-package com.infamous.aptitude.common.behavior.consumer;
+package com.infamous.aptitude.common.logic.predicates;
 
 import com.google.gson.JsonObject;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-import java.util.function.Consumer;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 
-public class ConsumerType<U extends Consumer<?>> extends ForgeRegistryEntry<ConsumerType<?>> {
+public class BiPredicateType<U extends BiPredicate<?, ?>> extends ForgeRegistryEntry<BiPredicateType<?>> {
 
     private final Function<JsonObject, U> jsonFactory;
 
-    public ConsumerType(Function<JsonObject, U> factoryIn) {
+    public BiPredicateType(Function<JsonObject, U> factoryIn) {
         this.jsonFactory = factoryIn;
     }
 
@@ -19,8 +19,8 @@ public class ConsumerType<U extends Consumer<?>> extends ForgeRegistryEntry<Cons
     }
 
     @SuppressWarnings("unchecked")
-    public <X extends Consumer<?>> ConsumerType<X> cast()
+    public <X extends BiPredicate<?, ?>> BiPredicateType<X> cast()
     {
-        return (ConsumerType<X>)this;
+        return (BiPredicateType<X>)this;
     }
 }

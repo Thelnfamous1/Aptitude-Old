@@ -2,7 +2,7 @@
   "type": "aptitude:memory_status_check",
   "addContext": [
     {
-      "type": "minecraft:admiring_disabled",
+      "type": "minecraft:admiring_item",
       "status": "value_present"
     }
   ]

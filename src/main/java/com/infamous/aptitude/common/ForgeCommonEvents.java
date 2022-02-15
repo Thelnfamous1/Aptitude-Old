@@ -12,6 +12,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
@@ -113,9 +114,11 @@ public class ForgeCommonEvents {
         Player player = event.getPlayer();
         InteractionHand hand = event.getHand();
         Entity entity = event.getTarget();
-        if(entity instanceof LivingEntity interactable){
-            if(BaseAIHelper.hasBaseAIFile(interactable)){
-                // TODO
+        if(entity instanceof Mob mob){
+            if(BaseAIHelper.hasBaseAIFile(mob)){
+                event.setCanceled(true);
+                InteractionResult interactResult = BaseAIHelper.interact(mob, player, hand);
+                event.setCancellationResult(interactResult);
             }
         }
     }

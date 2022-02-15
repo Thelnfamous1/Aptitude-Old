@@ -6,5 +6,20 @@
   "attacked": {
     "type": "aptitude:custom_biconsumer",
     "location": "minecraft:pig/on_hit_target"
+  },
+  "interact": {
+    "type": "aptitude:consumer_on_interaction",
+    "consumer": {
+      "type": "aptitude:entity_set_persistence_required"
+    },
+    "interaction": {
+      "type": "aptitude:animal_interaction",
+      "is_food": {
+        "type": "aptitude:item_is",
+        "is": {
+          "item": "minecraft:crimson_fungus"
+        }
+      }
+    }
   }
 }

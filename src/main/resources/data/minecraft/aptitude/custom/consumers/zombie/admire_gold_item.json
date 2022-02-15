@@ -1,0 +1,6 @@
+{
+  "type": "aptitude:set_boolean_memory",
+  "memory": "minecraft:admiring_item",
+  "value": true,
+  "expire_time": 120
+}

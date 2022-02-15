@@ -5,19 +5,24 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.infamous.aptitude.common.interaction.MobInteraction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
@@ -52,6 +57,10 @@ public class BaseAIManager extends SimpleJsonResourceReloadListener {
 
     public BiConsumer<LivingEntity, LivingEntity> attacked(ResourceLocation location) {
         return this.getBaseAIContainer(location).getAttacked();
+    }
+
+    public MobInteraction interact(ResourceLocation etLocation) {
+        return this.getBaseAIContainer(etLocation).getInteract();
     }
 
     private BaseAIContainer getBaseAIContainer(ResourceLocation location){

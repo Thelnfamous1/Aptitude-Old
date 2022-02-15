@@ -1,15 +1,16 @@
 package com.infamous.aptitude;
 
 import com.infamous.aptitude.common.behavior.BehaviorTypes;
+import com.infamous.aptitude.common.interaction.MobInteractionTypes;
 import com.infamous.aptitude.common.manager.brain.BrainManager;
-import com.infamous.aptitude.common.behavior.consumer.BiConsumerTypes;
-import com.infamous.aptitude.common.behavior.consumer.ConsumerTypes;
+import com.infamous.aptitude.common.logic.consumer.BiConsumerTypes;
+import com.infamous.aptitude.common.logic.consumer.ConsumerTypes;
 import com.infamous.aptitude.common.behavior.custom.memory.AptitudeMemoryModuleTypes;
 import com.infamous.aptitude.common.behavior.custom.sensor.AptitudeSensorTypes;
-import com.infamous.aptitude.common.behavior.functions.BiFunctionTypes;
-import com.infamous.aptitude.common.behavior.functions.FunctionTypes;
-import com.infamous.aptitude.common.behavior.predicates.BiPredicateTypes;
-import com.infamous.aptitude.common.behavior.predicates.PredicateTypes;
+import com.infamous.aptitude.common.logic.functions.BiFunctionTypes;
+import com.infamous.aptitude.common.logic.functions.FunctionTypes;
+import com.infamous.aptitude.common.logic.predicates.BiPredicateTypes;
+import com.infamous.aptitude.common.logic.predicates.PredicateTypes;
 import com.infamous.aptitude.common.manager.custom.CustomLogicManager;
 import com.infamous.aptitude.common.manager.selector.SelectorManager;
 import com.infamous.aptitude.common.manager.base.BaseAIManager;
@@ -46,6 +47,8 @@ public class Aptitude
 
         ConsumerTypes.register(modEventBus);
         BiConsumerTypes.register(modEventBus);
+
+        MobInteractionTypes.register(modEventBus);
 
         BehaviorTypes.register(modEventBus);
 

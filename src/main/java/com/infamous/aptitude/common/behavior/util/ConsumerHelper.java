@@ -3,11 +3,10 @@ package com.infamous.aptitude.common.behavior.util;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.infamous.aptitude.common.behavior.consumer.BiConsumerType;
-import com.infamous.aptitude.common.behavior.consumer.BiConsumerTypes;
-import com.infamous.aptitude.common.behavior.consumer.ConsumerType;
-import com.infamous.aptitude.common.behavior.consumer.ConsumerTypes;
-import com.infamous.aptitude.common.behavior.functions.FunctionType;
+import com.infamous.aptitude.common.logic.consumer.BiConsumerType;
+import com.infamous.aptitude.common.logic.consumer.BiConsumerTypes;
+import com.infamous.aptitude.common.logic.consumer.ConsumerType;
+import com.infamous.aptitude.common.logic.consumer.ConsumerTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class ConsumerHelper {
     public static <U> Consumer<U> parseConsumer(JsonObject jsonObject, String memberName, String typeMemberName){

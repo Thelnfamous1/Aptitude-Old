@@ -3,6 +3,7 @@ package com.infamous.aptitude.common.manager.base;
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.common.behavior.util.ConsumerHelper;
 import com.infamous.aptitude.common.behavior.util.PredicateHelper;
+import com.infamous.aptitude.common.interaction.MobInteraction;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -20,6 +21,7 @@ public class BaseAIContainer {
     private BiConsumer<LivingEntity, ItemEntity> pickUpItem = (le, ie) -> {};
     private BiConsumer<LivingEntity, LivingEntity> attackedBy = (victim, attacker) -> {};
     private BiConsumer<LivingEntity, LivingEntity> attacked = (attacker, target) -> {};
+    private MobInteraction interact = MobInteraction.DEFAULT;
 
     public Consumer<LivingEntity> getAddedToWorld() {
         return addedToWorld;
@@ -45,6 +47,10 @@ public class BaseAIContainer {
         return pickUpItem;
     }
 
+    public MobInteraction getInteract() {
+        return this.interact;
+    }
+
     private BaseAIContainer(){
 
     }
@@ -58,6 +64,7 @@ public class BaseAIContainer {
         baseAIContainer.attacked = ConsumerHelper.parseBiConsumerOrDefault(jsonObject, "attacked", "type", (attacker, target) -> {});
         baseAIContainer.wantsToPickUp = PredicateHelper.parseBiPredicateOrDefault(jsonObject, "wants_to_pick_up", "type", (le, is) -> false);
         baseAIContainer.pickUpItem = ConsumerHelper.parseBiConsumerOrDefault(jsonObject, "pick_up_item", "type", (le, ie) -> {});
+        baseAIContainer.interact = BaseAIHelper.parseMobInteractionOrDefaultWithWrapping(jsonObject, "interact", "type", MobInteraction.DEFAULT);
 
         return baseAIContainer;
     }

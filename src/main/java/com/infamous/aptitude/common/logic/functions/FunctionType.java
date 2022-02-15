@@ -1,4 +1,4 @@
-package com.infamous.aptitude.common.behavior.functions;
+package com.infamous.aptitude.common.logic.functions;
 
 import com.google.gson.JsonObject;
 import net.minecraftforge.registries.ForgeRegistryEntry;

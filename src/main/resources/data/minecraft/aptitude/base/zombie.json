@@ -50,6 +50,45 @@
     "type": "aptitude:custom_biconsumer",
     "location": "minecraft:zombie/was_hurt_by"
   },
+  "interact": {
+    "type": "aptitude:sided_interaction",
+    "server_side": {
+      "type": "aptitude:admire_interaction_server",
+      "can_admire": {
+        "type": "aptitude:custom_bipredicate",
+        "location": "minecraft:zombie/can_admire"
+      },
+      "admire": {
+        "type": "aptitude:custom_consumer",
+        "location": "minecraft:zombie/admire_gold_item"
+      }
+    },
+    "client_side": {
+      "type": "aptitude:admire_interaction_client",
+      "can_admire": {
+        "type": "aptitude:custom_bipredicate",
+        "location": "minecraft:zombie/can_admire"
+      },
+      "is_admiring": {
+        "type": "aptitude:all_of_predicate",
+        "predicates": [
+          {
+            "type": "aptitude:negate_predicate",
+            "predicate": {
+              "type": "aptitude:entity_is_celebrating"
+            }
+          },
+          {
+            "type": "aptitude:entity_item_in_slot_is",
+            "slot": "offhand",
+            "item_in_slot_is": {
+              "tag": "minecraft:piglin_loved"
+            }
+          }
+        ]
+      }
+    }
+  },
   "wants_to_pick_up": {
     "type": "aptitude:custom_bipredicate",
     "location": "minecraft:zombie/wants_to_pick_up"

@@ -1,4 +1,4 @@
-package com.infamous.aptitude.common.behavior.predicates;
+package com.infamous.aptitude.common.logic.predicates;
 
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
@@ -15,9 +15,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
-import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.npc.InventoryCarrier;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraftforge.eventbus.api.IEventBus;

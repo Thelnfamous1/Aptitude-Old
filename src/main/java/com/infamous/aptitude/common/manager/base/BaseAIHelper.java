@@ -1,10 +1,16 @@
 package com.infamous.aptitude.common.manager.base;
 
+import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
+import com.infamous.aptitude.common.interaction.MobInteraction;
+import com.infamous.aptitude.common.interaction.MobInteractionHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.function.BiConsumer;
@@ -52,5 +58,22 @@ public class BaseAIHelper {
         ResourceLocation etLocation = victim.getType().getRegistryName();
         BiConsumer<LivingEntity, LivingEntity> attacked = Aptitude.baseAIManager.attacked(etLocation);
         attacked.accept(victim, attacker);
+    }
+
+    public static InteractionResult interact(Mob mob, Player player, InteractionHand hand) {
+        ResourceLocation etLocation = mob.getType().getRegistryName();
+        MobInteraction mobInteraction = Aptitude.baseAIManager.interact(etLocation);
+        return mobInteraction.interact(mob, player, hand);
+    }
+
+    public static MobInteraction parseMobInteractionWithWrapping(JsonObject jsonObject, String memberName, String typeMemberName){
+        JsonObject mobInteractionObj = jsonObject.getAsJsonObject(memberName);
+        MobInteraction.WrapMode wrapMode = MobInteractionHelper.parseWrapMode(mobInteractionObj, "wrap_mode");
+        MobInteraction mobInteraction = MobInteractionHelper.parseMobInteraction(mobInteractionObj, typeMemberName);
+        return MobInteractionHelper.wrap(mobInteraction, wrapMode);
+    }
+
+    public static MobInteraction parseMobInteractionOrDefaultWithWrapping(JsonObject jsonObject, String memberName, String typeMemberName, MobInteraction defaultMobInteraction){
+        return jsonObject.has(memberName) ? parseMobInteractionWithWrapping(jsonObject, memberName, typeMemberName) : MobInteractionHelper.withAllWrapping(defaultMobInteraction);
     }
 }

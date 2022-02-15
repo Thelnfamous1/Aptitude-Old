@@ -1,4 +1,4 @@
-package com.infamous.aptitude.common.behavior.predicates;
+package com.infamous.aptitude.common.logic.predicates;
 
 import com.google.gson.JsonObject;
 import net.minecraftforge.registries.ForgeRegistryEntry;

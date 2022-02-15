@@ -1,4 +1,4 @@
-package com.infamous.aptitude.common.behavior.predicates;
+package com.infamous.aptitude.common.logic.predicates;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

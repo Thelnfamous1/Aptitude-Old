@@ -1,4 +1,4 @@
-package com.infamous.aptitude.common.behavior.consumer;
+package com.infamous.aptitude.common.logic.consumer;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -16,7 +16,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.GoalUtils;
@@ -321,6 +320,13 @@ public class ConsumerTypes {
                 String locationString = GsonHelper.getAsString(jsonObject, "location");
                 ResourceLocation location = new ResourceLocation(locationString);
                 return Aptitude.customLogicManager.getConsumer(location);
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_SET_PERSISTENCE_REQUIRED = register("entity_set_persistence_required",
+            jsonObject -> {
+                return le -> {
+                    if(le instanceof Mob mob) mob.setPersistenceRequired();
+                };
             });
 
     private static <U extends Consumer<?>> RegistryObject<ConsumerType<U>> register(String name, Function<JsonObject, U> jsonFactory) {

@@ -2,9 +2,13 @@ package com.infamous.aptitude.common.util;
 
 import com.google.common.collect.ImmutableMap;
 import com.infamous.aptitude.Aptitude;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -19,6 +23,25 @@ import java.util.Map;
 public class ReflectionHelper {
     private static final Map<String, Method> CACHED_METHODS = new HashMap<>();
     private static final Map<String, Field> CACHED_FIELDS = new HashMap<>();
+
+    public static void reflectAnimalUsePlayerItem(Animal animal, Player player, InteractionHand hand, ItemStack stack){
+        Method usePlayerItem = getMethod(Animal.class, "m_142075_", Player.class, InteractionHand.class, ItemStack.class);
+        try {
+            usePlayerItem.invoke(animal, player, hand, stack);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            Aptitude.LOGGER.error("Reflection error for Animal#usePlayerItem!", e);
+        }
+    }
+
+    public static InteractionResult reflectMobCheckAndHandleImportantInteractions(Mob mob, Player player, InteractionHand hand){
+        Method checkAndHandleImportantInteractions = getMethod(Mob.class, "m_21499_", Player.class, InteractionHand.class);
+        try {
+            return (InteractionResult) checkAndHandleImportantInteractions.invoke(mob, player, hand);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            Aptitude.LOGGER.error("Reflection error for Mob#checkAndHandleImportantInteractions! Defaulting to InteractionResult.PASS.", e);
+            return InteractionResult.PASS;
+        }
+    }
 
     public static boolean reflectPiglinCanHunt(AbstractPiglin piglin){
         Method canHunt = getMethod(AbstractPiglin.class, "m_7121_");

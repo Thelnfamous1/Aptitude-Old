@@ -1,0 +1,31 @@
+{
+  "type": "aptitude:bipredicate_of_predicates",
+  "predicate_for_first": {
+    "type": "aptitude:all_of_predicate",
+    "predicates": [
+      {
+        "type": "aptitude:negate_predicate",
+        "predicate": {
+          "type": "aptitude:custom_predicate",
+          "location": "minecraft:zombie/is_admiring_disabled"
+        }
+      },
+      {
+        "type": "aptitude:negate_predicate",
+        "predicate": {
+          "type": "aptitude:custom_predicate",
+          "location": "minecraft:zombie/is_admiring_item"
+        }
+      },
+      {
+        "type": "aptitude:is_adult"
+      }
+    ]
+  },
+  "predicate_for_second": {
+    "type": "aptitude:item_is",
+    "is": {
+      "item": "minecraft:gold_ingot"
+    }
+  }
+}

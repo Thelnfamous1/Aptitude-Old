@@ -1,10 +1,9 @@
-package com.infamous.aptitude.common.behavior.consumer;
+package com.infamous.aptitude.common.logic.consumer;
 
 import com.google.gson.JsonObject;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class BiConsumerType<U extends BiConsumer<?, ?>> extends ForgeRegistryEntry<BiConsumerType<?>> {

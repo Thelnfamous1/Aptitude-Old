@@ -1,18 +1,20 @@
-package com.infamous.aptitude.common.behavior.functions;
+package com.infamous.aptitude.common.logic.functions;
 
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.MeleeAttackHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -43,6 +45,11 @@ public class BiFunctionTypes {
                 String locationString = GsonHelper.getAsString(jsonObject, "location");
                 ResourceLocation location = new ResourceLocation(locationString);
                 return Aptitude.customLogicManager.getBiFunction(location);
+            });
+
+    public static final RegistryObject<BiFunctionType<BiFunction<Mob, Player, InteractionResult>>> INTERACT_WITH_BASE = register("interact_with_base",
+            jsonObject -> {
+                return (mob, player) -> InteractionResult.PASS;
             });
 
     private static <U extends BiFunction<?, ?, ?>> RegistryObject<BiFunctionType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
