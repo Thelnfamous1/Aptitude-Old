@@ -23,7 +23,12 @@
     "aptitude:nearest_items",
     "minecraft:nearest_adult",
     "minecraft:hurt_by",
-    "aptitude:temptations"
+    {
+      "type": "aptitude:temptations",
+      "temptations": {
+        "item": "minecraft:wheat"
+      }
+    }
   ],
   "core_activities": [
     "minecraft:core"
@@ -46,6 +51,31 @@
       "activity": "minecraft:core",
       "priority_start": 0,
       "behaviors": [
+        {
+          "type": "aptitude:swim",
+          "chance": 0.8
+        },
+        {
+          "type": "aptitude:animal_panic",
+          "speedModifier": 2.0
+        },
+        {
+          "type": "aptitude:look_at_target_sink",
+          "minDuration": 45,
+          "maxDuration": 90
+        },
+        {
+          "type": "aptitude:move_to_target_sink",
+          "cooldownTicks": "minecraft:temptation_cooldown_ticks"
+        },
+        {
+          "type": "aptitude:count_down_cooldown_ticks",
+          "cooldownTicks": "minecraft:long_jump_cooling_down"
+        },
+        {
+          "type": "aptitude:count_down_cooldown_ticks",
+          "cooldownTicks": "minecraft:ram_cooldown_ticks"
+        }
       ]
     },
     {
@@ -61,6 +91,65 @@
         }
       ],
       "behaviors": [
+        {
+          "priority": 0,
+          "type": "aptitude:run_sometimes",
+          "interval": {
+            "minInclusive": 30,
+            "maxInclusive": 60
+          },
+          "wrappedBehavior": {
+            "type": "aptitude:set_entity_look_target",
+            "predicate": {
+              "type": "aptitude:entity_is_type",
+              "entity_type_predicate": "minecraft:player"
+            },
+            "maxDistSqr": 6.0
+          }
+        },
+        {
+          "priority": 0,
+          "type": "aptitude:animal_make_love",
+          "partnerType": "minecraft:sheep",
+          "speedModifier": 1.0
+        },
+        {
+          "priority": 1,
+          "type": "aptitude:follow_temptation",
+          "speedModifier": 1.25
+        },
+        {
+          "priority": 2,
+          "type": "aptitude:baby_follow_adult",
+          "followRange": {
+            "minInclusive": 5,
+            "maxInclusive": 16
+          },
+          "speedModifier": 1.25
+        },
+        {
+          "priority": 3,
+          "type": "aptitude:run_one",
+          "behaviors": [
+            {
+              "weight": 2,
+              "type": "aptitude:random_stroll",
+              "speedModifier": 1.0
+            },
+            {
+              "weight": 2,
+              "type": "aptitude:set_walk_target_from_look_target",
+              "speedModifier": 1.0,
+              "closeEnoughDistance": 3
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:do_nothing",
+              "minDuration": 30,
+              "maxDuration": 60
+            }
+          ]
+        }
       ]
     },
     {
@@ -84,6 +173,30 @@
         }
       ],
       "behaviors": [
+        {
+          "priority": 0,
+          "type": "aptitude:long_jump_mid_jump",
+          "timeBetweenLongJumps": {
+            "minInclusive": 600,
+            "maxInclusive": 1200
+          },
+          "landingSound": "minecraft:entity.goat.step"
+        },
+        {
+          "priority": 1,
+          "type": "aptitude:long_jump_to_random_pos",
+          "timeBetweenLongJumps": {
+            "minInclusive": 600,
+            "maxInclusive": 1200
+          },
+          "maxLongJumpHeight": 5,
+          "maxLongJumpWidth": 5,
+          "maxJumpVelocity": 1.5,
+          "getJumpSound": {
+            "type": "aptitude:custom_function",
+            "location": "minecraft:sheep/get_jump_sound"
+          }
+        }
       ]
     },
     {
@@ -103,6 +216,53 @@
         }
       ],
       "behaviors": [
+        {
+          "priority": 0,
+          "type": "aptitude:ram_target",
+          "getTimeBetweenRams": {
+            "type": "aptitude:custom_function",
+            "location": "minecraft:sheep/get_time_between_rams"
+          },
+          "ramTargeting": {
+            "isCombat": true,
+            "selector": {
+              "type": "aptitude:custom_predicate",
+              "location": "minecraft:sheep/ram_targeting_selector"
+            }
+          },
+          "speed": 3.0,
+          "getKnockbackForce": {
+            "type": "aptitude:custom_function",
+            "location": "minecraft:sheep/get_knockback_force"
+          },
+          "getImpactSound": {
+            "type": "aptitude:custom_function",
+            "location": "minecraft:sheep/get_impact_sound"
+          }
+        },
+        {
+          "priority": 1,
+          "type": "aptitude:prepare_ram_nearest_target",
+          "getCooldownOnFail": {
+            "type": "aptitude:custom_function",
+            "location": "minecraft:sheep/get_cooldown_on_fail"
+          },
+          "minRamDistance": 4,
+          "maxRamDistance": 7,
+          "walkSpeed": 1.25,
+          "ramTargeting": {
+            "isCombat": true,
+            "selector": {
+              "type": "aptitude:custom_predicate",
+              "location": "minecraft:sheep/ram_targeting_selector"
+            }
+          },
+          "ramPrepareTime": 20,
+          "getPrepareRamSound": {
+            "type": "aptitude:custom_function",
+            "location": "minecraft:sheep/get_prepare_ram_sound"
+          }
+        }
       ]
     }
   ]

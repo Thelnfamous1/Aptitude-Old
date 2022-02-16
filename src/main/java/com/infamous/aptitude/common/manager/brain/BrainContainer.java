@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.infamous.aptitude.Aptitude;
+import com.infamous.aptitude.common.behavior.custom.sensor.CustomSensorType;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.infamous.aptitude.common.behavior.util.ConsumerHelper;
 import com.mojang.datafixers.util.Pair;
@@ -26,13 +28,14 @@ public class BrainContainer {
     private boolean replaceBrain = false;
     private Set<MemoryModuleType<?>> memoryTypes = ImmutableSet.of();
     private Set<SensorType<?>> sensorTypes = ImmutableSet.of();
+    private Map<CustomSensorType<?>, JsonObject> customSensorTypes = ImmutableMap.of();
     private Map<Activity, List<Pair<Integer, JsonObject>>> prioritizedBehaviorsByActivity = ImmutableMap.of();
     private Map<Activity, Set<MemoryModuleType<?>>> activityMemoriesToEraseWhenStopped = ImmutableMap.of();
     private Map<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>> activityRequirements = ImmutableMap.of();
     private Set<Activity> coreActivities = ImmutableSet.of();
     private List<Activity> rotatingActivities = ImmutableList.of();
     private Activity defaultActivity = Activity.IDLE;
-    private Consumer<LivingEntity> brainCreationCallback = livingEntity -> livingEntity.getBrain().useDefaultActivity();
+    private Consumer<LivingEntity> brainCreationCallback = livingEntity -> {};
     private Consumer<LivingEntity> updateActivityCallback = livingEntity -> {};
 
     private BrainContainer(){
@@ -48,6 +51,10 @@ public class BrainContainer {
 
     public Set<SensorType<?>> getSensorTypes() {
         return this.sensorTypes;
+    }
+
+    public Map<CustomSensorType<?>, JsonObject> getCustomSensorTypes() {
+        return this.customSensorTypes;
     }
 
     public Map<Activity, List<Pair<Integer, JsonObject>>> getPrioritizedBehaviorsByActivity() {
@@ -92,30 +99,26 @@ public class BrainContainer {
         brainContainer.memoryTypes = memoryTypesBuilder.build();
 
         ImmutableSet.Builder<SensorType<?>> sensorTypesBuilder = ImmutableSet.builder();
-        buildSensorTypes(sensorTypesBuilder, topElement);
+        ImmutableMap.Builder<CustomSensorType<?>, JsonObject> customSensorTypesBuilder = ImmutableMap.builder();
+
+        buildSensorTypes(sensorTypesBuilder, customSensorTypesBuilder, topElement);
         brainContainer.sensorTypes = sensorTypesBuilder.build();
+        brainContainer.customSensorTypes = customSensorTypesBuilder.build();
 
         ImmutableSet.Builder<Activity> coreActivitiesBuilder = ImmutableSet.builder();
         JsonArray coreActivitiesArr = GsonHelper.getAsJsonArray(topElement, "core_activities");
         buildCoreActivities(coreActivitiesBuilder, coreActivitiesArr);
         brainContainer.coreActivities = coreActivitiesBuilder.build();
 
-        if(topElement.has("default_activity")){
-            brainContainer.defaultActivity = BehaviorHelper.parseActivity(topElement, "default_activity");
-        }
-
-        if(topElement.has("brain_creation_callback")){
-            JsonObject brainCreationCallbackObj = GsonHelper.getAsJsonObject(topElement, "brain_creation_callback");
-            brainContainer.brainCreationCallback = ConsumerHelper.parseConsumer(brainCreationCallbackObj, "type");
-        }
+        brainContainer.defaultActivity = BehaviorHelper.parseActivityOrDefault(topElement, "default_activity", Activity.IDLE);
+        brainContainer.brainCreationCallback = ConsumerHelper.parseConsumerOrDefault(topElement, "brain_creation_callback", "type", livingEntity -> {});
 
         ImmutableList.Builder<Activity> rotatingActivitiesBuilder = ImmutableList.builder();
         JsonArray rotatingActivitiesObj = GsonHelper.getAsJsonArray(topElement, "rotating_activities");
         buildRotatingActivities(rotatingActivitiesBuilder, rotatingActivitiesObj);
         brainContainer.rotatingActivities = rotatingActivitiesBuilder.build();
 
-        JsonObject updateActivityCallbackObj = GsonHelper.getAsJsonObject(topElement, "update_activity_callback");
-        brainContainer.updateActivityCallback = ConsumerHelper.parseConsumer(updateActivityCallbackObj, "type");
+        brainContainer.updateActivityCallback = ConsumerHelper.parseConsumerOrDefault(topElement, "update_activity_callback", "type", livingEntity -> {});
 
         ImmutableMap.Builder<Activity, Set<Pair<MemoryModuleType<?>, MemoryStatus>>> activityRequirementsBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<Activity, Set<MemoryModuleType<?>>> activityMemoriesToEraseWhenStoppedBuilder = ImmutableMap.builder();
@@ -215,11 +218,22 @@ public class BrainContainer {
         });
     }
 
-    private static void buildSensorTypes(ImmutableSet.Builder<SensorType<?>> sensorTypesBuilder, JsonObject topElement) {
+    private static void buildSensorTypes(ImmutableSet.Builder<SensorType<?>> sensorTypesBuilder, ImmutableMap.Builder<CustomSensorType<?>, JsonObject> customSensorTypesBuilder, JsonObject topElement) {
         JsonArray sensorTypesArr = GsonHelper.getAsJsonArray(topElement, "sensor_types");
-        sensorTypesArr.forEach(je -> {
-            SensorType<?> sensorType = BehaviorHelper.parseSensorType(je);
-            sensorTypesBuilder.add(sensorType);
+        sensorTypesArr.forEach(element -> {
+            if(element.isJsonObject()){
+                JsonObject customSensorObj = element.getAsJsonObject();
+                SensorType<?> sensorType = BehaviorHelper.parseSensorType(customSensorObj, "type");
+                if(sensorType instanceof CustomSensorType<?> customSensorType){
+                    customSensorTypesBuilder.put(customSensorType, customSensorObj);
+                } else{
+                    Aptitude.LOGGER.error("Tried to use {} as a CustomSensorType, it will be used as a regular SensorType instead.", GsonHelper.getAsString(customSensorObj, "type"));
+                    sensorTypesBuilder.add(sensorType);
+                }
+            } else{
+                SensorType<?> sensorType = BehaviorHelper.parseSensorType(element);
+                sensorTypesBuilder.add(sensorType);
+            }
         });
     }
 }

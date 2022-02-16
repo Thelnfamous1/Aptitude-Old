@@ -1,0 +1,20 @@
+{
+  "type": "aptitude:predicated_function",
+  "predicate": {
+    "type": "aptitude:always_false"
+  },
+  "function": {
+    "type": "aptitude:get_uniform_int",
+    "uniform_int": {
+      "minInclusive": 100,
+      "maxInclusive": 300
+    }
+  },
+  "default": {
+    "type": "aptitude:get_uniform_int",
+    "uniform_int": {
+      "minInclusive": 600,
+      "maxInclusive": 6000
+    }
+  }
+}

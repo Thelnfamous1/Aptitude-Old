@@ -1,0 +1,15 @@
+{
+  "type": "aptitude:all_of_predicate",
+  "predicates": [
+    {
+      "type": "aptitude:negate_predicate",
+      "predicate": {
+        "type": "aptitude:entity_is_type",
+        "entity_type_predicate": "minecraft:sheep"
+      }
+    },
+    {
+      "type": "aptitude:entity_is_within_world_border_bounds"
+    }
+  ]
+}

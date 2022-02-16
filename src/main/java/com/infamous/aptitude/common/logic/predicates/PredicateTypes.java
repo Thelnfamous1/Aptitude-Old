@@ -298,6 +298,13 @@ public class PredicateTypes {
                 return Aptitude.customLogicManager.getPredicate(location);
             });
 
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_WITHIN_WORLD_BORDER_BOUNDS = register("entity_is_within_world_border_bounds",
+            jsonObject -> {
+                return le -> {
+                    return le.level.getWorldBorder().isWithinBounds(le.getBoundingBox());
+                };
+            });
+
     private static <U extends Predicate<?>> RegistryObject<PredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return PREDICATE_TYPES.register(name, () -> new PredicateType<>(jsonFactory));
     }

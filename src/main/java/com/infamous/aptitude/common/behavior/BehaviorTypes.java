@@ -1,13 +1,13 @@
 package com.infamous.aptitude.common.behavior;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.custom.behavior.*;
 import com.infamous.aptitude.common.behavior.util.*;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
@@ -15,6 +15,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.*;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.phys.Vec3;
@@ -277,7 +278,6 @@ public class BehaviorTypes {
                 return new AptitudeCrossbowAttack(isWithinProjectileAttackRange, setChargingCrossbow, performRangedAttack);
             });
 
-
     public static final RegistryObject<BehaviorType<GoToCelebrateLocation<?>>> GO_TO_CELEBRATE_LOCATION = register("go_to_celebrate_location",
             (jsonObject) -> {
                 int closeEnoughDist = GsonHelper.getAsInt(jsonObject, "closeEnoughDist", 0);
@@ -285,7 +285,6 @@ public class BehaviorTypes {
 
                 return new GoToCelebrateLocation<>(closeEnoughDist, speedModifier);
             });
-
 
     public static final RegistryObject<BehaviorType<AptitudeStopAdmiringIfItemTooFarAway<?>>> STOP_ADMIRING_IF_ITEM_TOO_FAR_AWAY = register("stop_admiring_if_item_too_far_away",
             (jsonObject) -> {
@@ -295,7 +294,6 @@ public class BehaviorTypes {
                 return new AptitudeStopAdmiringIfItemTooFarAway<>(canAdmire, maxDistanceToItem);
             });
 
-
     public static final RegistryObject<BehaviorType<AptitudeStopAdmiringIfTiredOfTryingToReachItem<?>>> STOP_ADMIRING_IF_TIRED_OF_TRYING_TO_REACH_ITEM = register("stop_admiring_if_tired_of_trying_to_reach_item",
             (jsonObject) -> {
                 Predicate<LivingEntity> canAdmire = PredicateHelper.parsePredicateOrDefault(jsonObject, "canAdmire", "type", livingEntity -> livingEntity.getOffhandItem().isEmpty());
@@ -304,7 +302,6 @@ public class BehaviorTypes {
 
                 return new AptitudeStopAdmiringIfTiredOfTryingToReachItem<>(canAdmire, maxTimeToReachItem, disableTime);
             });
-
 
     public static final RegistryObject<BehaviorType<GoToWantedItem<?>>> GO_TO_WANTED_ITEM = register("go_to_wanted_item",
             (jsonObject) -> {
@@ -316,7 +313,6 @@ public class BehaviorTypes {
                 return new GoToWantedItem<>(predicate, speedModifier, ignoreWalkTarget, maxDistToWalk);
             });
 
-
     public static final RegistryObject<BehaviorType<Mount<?>>> MOUNT = register("mount",
             (jsonObject) -> {
                 float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
@@ -324,13 +320,87 @@ public class BehaviorTypes {
                 return new Mount<>(speedModifier);
             });
 
-
     public static final RegistryObject<BehaviorType<DismountOrSkipMounting<?, ?>>> DISMOUNT_OR_SKIP_MOUNTING = register("dismount_or_skip_mounting",
             (jsonObject) -> {
                 int maxWalkDistToRideTarget = GsonHelper.getAsInt(jsonObject, "maxWalkDistToRideTarget", 0);
                 BiPredicate<LivingEntity, Entity> dontRideIf = PredicateHelper.parseBiPredicate(jsonObject, "dontRideIf", "type");
 
                 return new DismountOrSkipMounting<>(maxWalkDistToRideTarget, dontRideIf);
+            });
+
+    public static final RegistryObject<BehaviorType<Swim>> SWIM = register("swim",
+            (jsonObject) -> {
+                float chance = GsonHelper.getAsFloat(jsonObject, "chance");
+
+                return new Swim(chance);
+            });
+
+    public static final RegistryObject<BehaviorType<AnimalPanic>> ANIMAL_PANIC = register("animal_panic",
+            (jsonObject) -> {
+                float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
+
+                return new AnimalPanic(speedModifier);
+            });
+
+    public static final RegistryObject<BehaviorType<CountDownCooldownTicks>> COUNT_DOWN_COOLDOWN_TICKS = register("count_down_cooldown_ticks",
+            (jsonObject) -> {
+                MemoryModuleType<Integer> cooldownTicks = BehaviorHelper.parseMemoryType(jsonObject, "cooldownTicks");
+
+                return new CountDownCooldownTicks(cooldownTicks);
+            });
+
+    public static final RegistryObject<BehaviorType<FollowTemptation>> FOLLOW_TEMPTATION = register("follow_temptation",
+            (jsonObject) -> {
+                Function<LivingEntity, Float> speedModifier = BehaviorHelper.parseSpeedModifierFunction(jsonObject,"type");
+
+                return new FollowTemptation(speedModifier);
+            });
+
+    public static final RegistryObject<BehaviorType<LongJumpMidJump>> LONG_JUMP_MID_JUMP = register("long_jump_mid_jump",
+            (jsonObject) -> {
+                UniformInt timeBetweenLongJumps = BehaviorHelper.parseUniformInt(jsonObject, "timeBetweenLongJumps");
+                SoundEvent landingSound = BehaviorHelper.parseSoundEventString(jsonObject, "landingSound");
+
+                return new LongJumpMidJump(timeBetweenLongJumps, landingSound);
+            });
+
+    public static final RegistryObject<BehaviorType<LongJumpToRandomPos<?>>> LONG_JUMP_TO_RANDOM_POS = register("long_jump_to_random_pos",
+            (jsonObject) -> {
+                UniformInt timeBetweenLongJumps = BehaviorHelper.parseUniformInt(jsonObject, "timeBetweenLongJumps");
+                int maxLongJumpHeight = GsonHelper.getAsInt(jsonObject, "maxLongJumpHeight");
+                int maxLongJumpWidth = GsonHelper.getAsInt(jsonObject, "maxLongJumpWidth");
+                float maxJumpVelocity = GsonHelper.getAsFloat(jsonObject, "maxJumpVelocity");
+                Function<LivingEntity, SoundEvent> getJumpSound = FunctionHelper.parseFunction(jsonObject, "getJumpSound", "type");
+
+
+                return new LongJumpToRandomPos(timeBetweenLongJumps, maxLongJumpHeight, maxLongJumpWidth, maxJumpVelocity, getJumpSound);
+            });
+
+    public static final RegistryObject<BehaviorType<RamTarget<?>>> RAM_TARGET = register("ram_target",
+            (jsonObject) -> {
+                Function<LivingEntity, UniformInt> getTimeBetweenRams = FunctionHelper.parseFunction(jsonObject, "getTimeBetweenRams", "type");
+                TargetingConditions ramTargeting = BehaviorHelper.parseTargetingConditions(jsonObject, "ramTargeting");
+                float speed = GsonHelper.getAsFloat(jsonObject, "speed");
+                Function<LivingEntity, Double> getKnockbackForceFunc = FunctionHelper.parseFunction(jsonObject, "getKnockbackForce", "type");
+                Function<LivingEntity, SoundEvent> getImpactSound = FunctionHelper.parseFunction(jsonObject, "getImpactSound", "type");
+
+                ToDoubleFunction<LivingEntity> getKnockbackForce = getKnockbackForceFunc::apply;
+
+                return new RamTarget(getTimeBetweenRams, ramTargeting, speed, getKnockbackForce, getImpactSound);
+            });
+
+    public static final RegistryObject<BehaviorType<PrepareRamNearestTarget<?>>> PREPARE_RAM_NEAREST_TARGET = register("prepare_ram_nearest_target",
+            (jsonObject) -> {
+                Function<LivingEntity, Integer> getCooldownOnFailFunc = FunctionHelper.parseFunction(jsonObject, "getCooldownOnFail", "type");
+                int minRamDistance = GsonHelper.getAsInt(jsonObject, "minRamDistance");
+                int maxRamDistance = GsonHelper.getAsInt(jsonObject, "maxRamDistance");
+                float walkSpeed = GsonHelper.getAsFloat(jsonObject, "walkSpeed");
+                TargetingConditions ramTargeting = BehaviorHelper.parseTargetingConditions(jsonObject, "ramTargeting");
+                int ramPrepareTime = GsonHelper.getAsInt(jsonObject, "ramPrepareTime");
+                Function<LivingEntity, SoundEvent> getPrepareRamSound = FunctionHelper.parseFunction(jsonObject, "getPrepareRamSound", "type");
+
+                ToIntFunction<LivingEntity> getCooldownOnFail = getCooldownOnFailFunc::apply;
+                return new PrepareRamNearestTarget(getCooldownOnFail, minRamDistance, maxRamDistance, walkSpeed, ramTargeting, ramPrepareTime, getPrepareRamSound);
             });
 
     private static <U extends Behavior<?>> RegistryObject<BehaviorType<U>> register(String name, Function<JsonObject, U> jsonFactory) {

@@ -9,6 +9,7 @@ import com.infamous.aptitude.common.behavior.util.PredicateHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
@@ -116,7 +117,7 @@ public class FunctionTypes {
                 };
             });
 
-    public static final RegistryObject<FunctionType<Function<Object, Object>>> PREDICATED_FUNCTION = register("predicated_function",
+    public static final RegistryObject<FunctionType<Function<?, ?>>> PREDICATED_FUNCTION = register("predicated_function",
             jsonObject -> {
                 Predicate<Object> predicate = PredicateHelper.parsePredicate(jsonObject, "predicate", "type");
                 Function<Object, Object> function = FunctionHelper.parseFunction(jsonObject, "function", "type");
@@ -129,10 +130,10 @@ public class FunctionTypes {
                 };
             });
 
-    public static final RegistryObject<FunctionType<Function<LivingEntity, Float>>> GET_FLOAT = register("get_float",
+    public static final RegistryObject<FunctionType<Function<?, Float>>> GET_FLOAT = register("get_float",
             jsonObject -> {
                 float value = GsonHelper.getAsFloat(jsonObject, "value", 0);
-                return livingEntity -> {
+                return o -> {
                     return value;
                 };
             });
@@ -176,6 +177,34 @@ public class FunctionTypes {
                 UniformInt uniformInt = BehaviorHelper.parseUniformInt(jsonObject, "uniform_int");
                 return livingEntity -> {
                     return uniformInt.sample(livingEntity.level.random);
+                };
+            });
+
+    public static final RegistryObject<FunctionType<Function<LivingEntity, SoundEvent>>> ENTITY_GET_SOUND = register("entity_get_sound",
+            jsonObject -> {
+                SoundEvent soundEvent = BehaviorHelper.parseSoundEventString(jsonObject, "sound_event");
+                return livingEntity -> soundEvent;
+            });
+
+    public static final RegistryObject<FunctionType<Function<?, UniformInt>>> GET_UNIFORM_INT = register("get_uniform_int",
+            jsonObject -> {
+                UniformInt uniformInt = BehaviorHelper.parseUniformInt(jsonObject, "uniform_int");
+                return o -> uniformInt;
+            });
+
+    public static final RegistryObject<FunctionType<Function<?, Integer>>> GET_INTEGER = register("get_integer",
+            jsonObject -> {
+                int value = GsonHelper.getAsInt(jsonObject, "value", 0);
+                return o -> {
+                    return value;
+                };
+            });
+
+    public static final RegistryObject<FunctionType<Function<?, Double>>> GET_DOUBLE = register("get_double",
+            jsonObject -> {
+                double value = GsonHelper.getAsDouble(jsonObject, "value", 0);
+                return o -> {
+                    return value;
                 };
             });
 

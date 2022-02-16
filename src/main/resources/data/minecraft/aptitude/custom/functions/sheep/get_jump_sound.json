@@ -1,0 +1,14 @@
+{
+  "type": "aptitude:predicated_function",
+  "predicate": {
+    "type": "aptitude:always_false"
+  },
+  "function": {
+    "type": "aptitude:entity_get_sound",
+    "sound_event": "minecraft:entity.goat.screaming.long_jump"
+  },
+  "default": {
+    "type": "aptitude:entity_get_sound",
+    "sound_event": "minecraft:entity.goat.long_jump"
+  }
+}

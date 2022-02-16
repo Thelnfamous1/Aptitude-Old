@@ -1,6 +1,7 @@
 package com.infamous.aptitude.common.behavior.custom.sensor;
 
 import com.infamous.aptitude.Aptitude;
+import com.infamous.aptitude.common.behavior.custom.JsonFriendly;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -21,8 +22,14 @@ public class AptitudeSensorTypes {
 
     public static final RegistryObject<SensorType<AptitudeNearestItemSensor>> NEAREST_ITEMS = register("nearest_items", AptitudeNearestItemSensor::new);
 
+    public static final RegistryObject<CustomSensorType<AptitudeTemptingSensor>> TEMPTATIONS = registerCustom("temptations", AptitudeTemptingSensor::new);
+
     private static <U extends Sensor<?>> RegistryObject<SensorType<U>> register(String name, Supplier<U> constructor) {
         return SENSOR_TYPES.register(name, () -> new SensorType<>(constructor));
+    }
+
+    private static <U extends Sensor<?> & JsonFriendly<U>> RegistryObject<CustomSensorType<U>> registerCustom(String name, Supplier<U> constructor) {
+        return SENSOR_TYPES.register(name, () -> new CustomSensorType<>(constructor));
     }
 
     public static void register(IEventBus bus){

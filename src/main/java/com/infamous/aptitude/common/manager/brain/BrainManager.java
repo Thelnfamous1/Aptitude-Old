@@ -2,6 +2,7 @@ package com.infamous.aptitude.common.manager.brain;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.*;
+import com.infamous.aptitude.common.behavior.custom.sensor.CustomSensorType;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -43,6 +44,10 @@ public class BrainManager extends SimpleJsonResourceReloadListener {
 
     public Set<SensorType<? extends Sensor<?>>> getSensorTypes(ResourceLocation location) {
         return this.getBrainContainer(location).getSensorTypes();
+    }
+
+    public Map<CustomSensorType<? extends Sensor<?>>, JsonObject> getCustomSensorTypes(ResourceLocation location) {
+        return this.getBrainContainer(location).getCustomSensorTypes();
     }
 
     public Map<Activity, List<Pair<Integer, JsonObject>>> getPrioritizedBehaviorsByActivity(ResourceLocation location) {

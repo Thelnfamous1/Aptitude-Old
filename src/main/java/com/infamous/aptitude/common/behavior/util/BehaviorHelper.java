@@ -21,6 +21,7 @@ import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.InventoryCarrier;
@@ -35,9 +36,11 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class BehaviorHelper {
 
@@ -63,8 +66,17 @@ public class BehaviorHelper {
         return (MemoryModuleType<U>) memoryType;
     }
 
+    public static SensorType<?> parseSensorType(JsonObject jsonObject, String typeMemberName) {
+        String type = GsonHelper.getAsString(jsonObject, typeMemberName);
+        return parseSensorTypeString(type);
+    }
+
     public static SensorType<?> parseSensorType(JsonElement jsonElement) {
         String type = jsonElement.getAsString();
+        return parseSensorTypeString(type);
+    }
+
+    public static SensorType<?> parseSensorTypeString(String type) {
         ResourceLocation location = new ResourceLocation(type);
         if(!ForgeRegistries.SENSOR_TYPES.containsKey(location)) throw new JsonParseException("Invalid SensorType: " + type);
         SensorType<?> sensorType = ForgeRegistries.SENSOR_TYPES.getValue(location);
@@ -132,9 +144,19 @@ public class BehaviorHelper {
     public static UniformInt parseUniformInt(JsonObject jsonObject, String memberName) {
         JsonObject interval = GsonHelper.getAsJsonObject(jsonObject, memberName);
         int minInclusive = GsonHelper.getAsInt(interval, "minInclusive", 0);
-        int maxInclusive = GsonHelper.getAsInt(interval, "maxInclusive", 0);
+        int maxInclusive = GsonHelper.getAsInt(interval, "maxInclusive", minInclusive);
         if(minInclusive > maxInclusive) throw new JsonParseException("maxInclusive must not be less than minInclusive");
         return UniformInt.of(minInclusive, maxInclusive);
+    }
+
+    public static Function<LivingEntity, Float> parseSpeedModifierFunction(JsonObject jsonObject, String typeMemberName) {
+        JsonElement speedModifierElem = jsonObject.get("speedModifier");
+        if(speedModifierElem.isJsonObject()){
+            return FunctionHelper.parseFunction(speedModifierElem.getAsJsonObject(), typeMemberName);
+        } else {
+            float speedModifier = speedModifierElem.getAsFloat();
+            return livingEntity -> speedModifier;
+        }
     }
 
     public static float parseSpeedModifier(JsonObject jsonObject) {
@@ -171,6 +193,10 @@ public class BehaviorHelper {
     public static Activity parseActivity(JsonElement je) {
         String activityString = je.getAsString();
         return parseActivityString(activityString);
+    }
+
+    public static Activity parseActivityOrDefault(JsonObject jsonObject, String typeMemberName, Activity defaultActivity) {
+        return jsonObject.has(typeMemberName) ? parseActivity(jsonObject, typeMemberName) : defaultActivity;
     }
 
     public static Activity parseActivity(JsonObject jsonObject, String typeMemberName) {
@@ -317,5 +343,30 @@ public class BehaviorHelper {
 
     public static ItemStack parseItemStackOrDefault(JsonObject jsonObject, String memberName, ItemStack defaultStack) {
         return jsonObject.has(memberName) ? ShapedRecipe.itemStackFromJson(jsonObject.getAsJsonObject(memberName)) : defaultStack;
+    }
+
+    public static TargetingConditions parseTargetingConditionsOrDefault(JsonObject jsonObject, String memberName, TargetingConditions defaultTargetingConditions){
+        return jsonObject.has(memberName) ? parseTargetingConditions(jsonObject, memberName) : defaultTargetingConditions;
+    }
+
+    public static TargetingConditions parseTargetingConditions(JsonObject jsonObject, String memberName) {
+        JsonObject targetingConditionsObj = jsonObject.getAsJsonObject(memberName);
+
+        boolean isCombat = GsonHelper.getAsBoolean(targetingConditionsObj, "isCombat", false);
+        TargetingConditions targetingConditions = isCombat ? TargetingConditions.forCombat() : TargetingConditions.forNonCombat();
+
+        double range = GsonHelper.getAsDouble(targetingConditionsObj, "range", -1.0F);
+        if(range > 0.0D) targetingConditions = targetingConditions.range(range);
+
+        boolean checkLineOfSight = GsonHelper.getAsBoolean(targetingConditionsObj, "checkLineOfSight", true);
+        if(!checkLineOfSight) targetingConditions = targetingConditions.ignoreLineOfSight();
+
+        boolean testInvisible = GsonHelper.getAsBoolean(targetingConditionsObj, "testInvisible", true);
+        if(!testInvisible) targetingConditions = targetingConditions.ignoreInvisibilityTesting();
+
+        Predicate<LivingEntity> selector = PredicateHelper.parsePredicateOrDefault(jsonObject, "selector", "type", null);
+        if(selector != null) targetingConditions = targetingConditions.selector(selector);
+
+        return targetingConditions;
     }
 }
