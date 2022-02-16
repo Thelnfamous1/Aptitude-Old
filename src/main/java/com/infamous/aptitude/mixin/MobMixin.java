@@ -3,14 +3,18 @@ package com.infamous.aptitude.mixin;
 import com.infamous.aptitude.common.CustomServerAiStepEvent;
 import com.infamous.aptitude.common.MobPickUpLootEvent;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Mob.class)
 public abstract class MobMixin {
@@ -18,6 +22,11 @@ public abstract class MobMixin {
     @Shadow protected abstract void customServerAiStep();
 
     @Shadow public abstract boolean wantsToPickUp(ItemStack p_21546_);
+
+    @Inject(at = @At("RETURN"), method = "createMobAttributes")
+    private static void addAttackDamage(CallbackInfoReturnable<AttributeSupplier.Builder> cir){
+        cir.getReturnValue().add(Attributes.ATTACK_DAMAGE, 1.0D);
+    }
 
     @Redirect(at = @At(
             value = "INVOKE",
