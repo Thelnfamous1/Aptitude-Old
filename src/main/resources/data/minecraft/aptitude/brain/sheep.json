@@ -50,16 +50,58 @@
     },
     {
       "activity": "minecraft:idle",
+      "requirements": [
+        {
+          "type": "minecraft:ram_target",
+          "status": "value_absent"
+        },
+        {
+          "type": "minecraft:long_jump_mid_jump",
+          "status": "value_absent"
+        }
+      ],
       "behaviors": [
       ]
     },
     {
       "activity": "minecraft:long_jump",
+      "requirements": [
+        {
+          "type": "minecraft:tempting_player",
+          "status": "value_absent"
+        },
+        {
+          "type": "minecraft:breed_target",
+          "status": "value_absent"
+        },
+        {
+          "type": "minecraft:walk_target",
+          "status": "value_absent"
+        },
+        {
+          "type": "minecraft:long_jump_cooling_down",
+          "status": "value_absent"
+        }
+      ],
       "behaviors": [
       ]
     },
     {
       "activity": "minecraft:ram",
+      "requirements": [
+        {
+          "type": "minecraft:tempting_player",
+          "status": "value_absent"
+        },
+        {
+          "type": "minecraft:breed_target",
+          "status": "value_absent"
+        },
+        {
+          "type": "minecraft:ram_cooldown_ticks",
+          "status": "value_absent"
+        }
+      ],
       "behaviors": [
       ]
     }
