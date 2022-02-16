@@ -4,19 +4,16 @@ import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
 import com.infamous.aptitude.common.behavior.util.ConsumerHelper;
-import com.infamous.aptitude.common.behavior.util.FunctionHelper;
 import com.infamous.aptitude.common.behavior.util.PredicateHelper;
 import com.infamous.aptitude.common.util.ReflectionHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
-import net.minecraft.world.entity.monster.piglin.PiglinAi;
-import net.minecraft.world.entity.monster.piglin.PiglinArmPose;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -137,6 +134,28 @@ public class MobInteractionTypes {
                     }
 
                     return defaultMobInteraction.interact(mob, player, hand);
+                };
+            });
+
+
+    public static final RegistryObject<MobInteractionType> MILK_INTERACTION = register("milk_interaction",
+            jsonObject -> {
+                MobInteraction defaultMobInteraction = MobInteractionHelper.parseMobInteractionOrDefault(jsonObject, "default", "type", MobInteraction.DEFAULT);
+                SoundEvent soundEvent = BehaviorHelper.parseSoundEventString(jsonObject, "milking_sound");
+                Predicate<ItemStack> canBeFilled = PredicateHelper.parsePredicateOrDefault(jsonObject, "can_be_filled", "type", is -> is.is(Items.BUCKET));
+                Predicate<LivingEntity> canBeMilked = PredicateHelper.parsePredicateOrDefault(jsonObject, "can_be_milked", "type", le -> !le.isBaby());
+                ItemStack filled = BehaviorHelper.parseItemStackOrDefault(jsonObject, "filled", Items.MILK_BUCKET.getDefaultInstance());
+
+                return (mob, player, hand) -> {
+                    ItemStack itemInHand = player.getItemInHand(hand);
+                    if (canBeFilled.test(itemInHand) && canBeMilked.test(mob)) {
+                        player.playSound(soundEvent, 1.0F, 1.0F);
+                        ItemStack filledResult = ItemUtils.createFilledResult(itemInHand, player, filled);
+                        player.setItemInHand(hand, filledResult);
+                        return InteractionResult.sidedSuccess(mob.level.isClientSide);
+                    } else {
+                        return defaultMobInteraction.interact(mob, player, hand);
+                    }
                 };
             });
 

@@ -329,6 +329,28 @@ public class ConsumerTypes {
                 };
             });
 
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_SET_CAN_FLOAT = register("entity_set_can_float",
+            jsonObject -> {
+                boolean canFloat = GsonHelper.getAsBoolean(jsonObject, "can_float", true);
+                return le -> {
+                    if(le instanceof Mob mob) mob.getNavigation().setCanFloat(canFloat);
+                };
+            });
+
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> SET_INTEGER_MEMORY = register("set_integer_memory",
+            jsonObject -> {
+                MemoryModuleType<Integer> memoryType = BehaviorHelper.parseMemoryType(jsonObject, "memory");
+                Function<LivingEntity, Integer> integerValueFunction = BehaviorHelper.parseIntegerValueFunction(jsonObject, "value", "type");
+                Function<LivingEntity, Long> expireTimeFunction = BehaviorHelper.parseExpireTimeFunction(jsonObject, "expire_time", "type");
+
+                return livingEntity -> {
+                    int value = integerValueFunction.apply(livingEntity);
+                    long expireTime = expireTimeFunction.apply(livingEntity);
+                    livingEntity.getBrain().setMemoryWithExpiry(memoryType, value, expireTime);
+                };
+            });
+
     private static <U extends Consumer<?>> RegistryObject<ConsumerType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return CONSUMER_TYPES.register(name, () -> new ConsumerType<>(jsonFactory));
     }

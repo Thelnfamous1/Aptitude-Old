@@ -1,0 +1,27 @@
+{
+  "added_to_world": {
+    "type": "aptitude:all_of_consumer",
+    "consumers": [
+      {
+        "type": "aptitude:entity_set_can_float"
+      }
+    ]
+  },
+  "first_spawn": {
+    "type": "aptitude:custom_consumer",
+    "location": "minecraft:sheep/init_memories"
+  },
+  "interact": {
+    "type": "aptitude:milk_interaction",
+    "milking_sound": "minecraft:entity.goat.milk",
+    "default": {
+      "type": "aptitude:animal_interaction",
+      "is_food": {
+        "type": "aptitude:item_is",
+        "is": {
+          "item": "minecraft:wheat"
+        }
+      }
+    }
+  }
+}

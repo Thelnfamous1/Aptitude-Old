@@ -171,6 +171,14 @@ public class FunctionTypes {
                 return Aptitude.customLogicManager.getFunction(location);
             });
 
+    public static final RegistryObject<FunctionType<Function<LivingEntity, Integer>>> ENTITY_GET_INTEGER_FROM_UNIFORM_INT = register("entity_get_integer_from_uniform_int",
+            jsonObject -> {
+                UniformInt uniformInt = BehaviorHelper.parseUniformInt(jsonObject, "uniform_int");
+                return livingEntity -> {
+                    return uniformInt.sample(livingEntity.level.random);
+                };
+            });
+
     private static <U extends Function<?, ?>> RegistryObject<FunctionType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return FUNCTION_TYPES.register(name, () -> new FunctionType<>(jsonFactory));
     }

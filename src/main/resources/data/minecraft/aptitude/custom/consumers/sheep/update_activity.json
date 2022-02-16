@@ -1,0 +1,8 @@
+{
+  "type": "aptitude:update_activity",
+  "on_changed_callback": {
+    "type": "aptitude:nothing"
+  },
+  "additional_callbacks": [
+  ]
+}

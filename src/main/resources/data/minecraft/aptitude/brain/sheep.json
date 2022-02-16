@@ -1,0 +1,67 @@
+{
+  "replace_brain": true,
+  "memory_types": [
+    "minecraft:look_target",
+    "minecraft:visible_mobs",
+    "minecraft:walk_target",
+    "minecraft:cant_reach_walk_target_since",
+    "minecraft:path",
+    "minecraft:ate_recently",
+    "minecraft:breed_target",
+    "minecraft:long_jump_cooling_down",
+    "minecraft:long_jump_mid_jump",
+    "minecraft:tempting_player",
+    "minecraft:nearest_visible_adult",
+    "minecraft:temptation_cooldown_ticks",
+    "minecraft:is_tempted",
+    "minecraft:ram_cooldown_ticks",
+    "minecraft:ram_target"
+  ],
+  "sensor_types": [
+    "minecraft:nearest_living_entities",
+    "minecraft:nearest_players",
+    "aptitude:nearest_items",
+    "minecraft:nearest_adult",
+    "minecraft:hurt_by",
+    "aptitude:temptations"
+  ],
+  "core_activities": [
+    "minecraft:core"
+  ],
+  "default_activity": "minecraft:idle",
+  "brain_creation_callback": {
+    "type": "aptitude:entity_use_default_activity"
+  },
+  "rotating_activities": [
+    "minecraft:ram",
+    "minecraft:long_jump",
+    "minecraft:idle"
+  ],
+  "update_activity_callback": {
+    "type": "aptitude:custom_consumer",
+    "location": "minecraft:sheep/update_activity"
+  },
+  "activities_with_behaviors": [
+    {
+      "activity": "minecraft:core",
+      "priority_start": 0,
+      "behaviors": [
+      ]
+    },
+    {
+      "activity": "minecraft:idle",
+      "behaviors": [
+      ]
+    },
+    {
+      "activity": "minecraft:long_jump",
+      "behaviors": [
+      ]
+    },
+    {
+      "activity": "minecraft:ram",
+      "behaviors": [
+      ]
+    }
+  ]
+}

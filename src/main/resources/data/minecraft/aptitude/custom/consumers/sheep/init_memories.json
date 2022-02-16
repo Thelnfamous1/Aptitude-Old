@@ -1,0 +1,27 @@
+{
+  "type": "aptitude:all_of_consumer",
+  "consumers": [
+    {
+      "type": "aptitude:set_integer_memory",
+      "memory": "minecraft:long_jump_cooling_down",
+      "value": {
+        "type": "aptitude:entity_get_integer_from_uniform_int",
+        "uniform_int": {
+          "minInclusive": 600,
+          "maxInclusive": 1200
+        }
+      }
+    },
+    {
+      "type": "aptitude:set_integer_memory",
+      "memory": "minecraft:ram_cooldown_ticks",
+      "value": {
+        "type": "aptitude:entity_get_integer_from_uniform_int",
+        "uniform_int": {
+          "minInclusive": 600,
+          "maxInclusive": 6000
+        }
+      }
+    }
+  ]
+}

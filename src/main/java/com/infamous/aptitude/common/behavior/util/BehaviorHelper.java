@@ -1,6 +1,5 @@
 package com.infamous.aptitude.common.behavior.util;
 
-import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -17,22 +16,18 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
-import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -274,6 +269,15 @@ public class BehaviorHelper {
         return EquipmentSlot.byName(equipmentSlotString);
     }
 
+    public static Function<LivingEntity, Integer> parseIntegerValueFunction(JsonObject jsonObject, String memberName, String typeMemberName) {
+        if(jsonObject.has(memberName) && jsonObject.get(memberName).isJsonObject()){
+            return FunctionHelper.parseFunction(jsonObject, memberName, typeMemberName);
+        } else{
+            int integerValue = GsonHelper.getAsInt(jsonObject, memberName);
+            return livingEntity -> integerValue;
+        }
+    }
+
     public static Function<LivingEntity, Long> parseExpireTimeFunction(JsonObject jsonObject, String memberName, String typeMemberName) {
         if(jsonObject.has(memberName) && jsonObject.get(memberName).isJsonObject()){
             return FunctionHelper.parseFunction(jsonObject, memberName, typeMemberName);
@@ -309,5 +313,9 @@ public class BehaviorHelper {
             mob.setGuaranteedDrop(EquipmentSlot.OFFHAND);
             mob.setPersistenceRequired();
         }
+    }
+
+    public static ItemStack parseItemStackOrDefault(JsonObject jsonObject, String memberName, ItemStack defaultStack) {
+        return jsonObject.has(memberName) ? ShapedRecipe.itemStackFromJson(jsonObject.getAsJsonObject(memberName)) : defaultStack;
     }
 }
