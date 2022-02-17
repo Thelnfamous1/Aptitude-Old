@@ -1,5 +1,6 @@
 package com.infamous.aptitude.common.behavior;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.infamous.aptitude.Aptitude;
 import com.infamous.aptitude.common.behavior.custom.behavior.*;
@@ -15,6 +16,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.*;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -25,8 +27,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.*;
 
 public class BehaviorTypes {
@@ -111,13 +112,15 @@ public class BehaviorTypes {
 
     public static final RegistryObject<BehaviorType<BabyFollowAdult<?>>> BABY_FOLLOW_ADULT = register("baby_follow_adult", (jsonObject) -> {
         UniformInt followRange = BehaviorHelper.parseUniformInt(jsonObject, "followRange");
-        float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
+        Function<LivingEntity, Float> speedModifier = BehaviorHelper.parseSpeedModifierFunction(jsonObject, "type");
         return new BabyFollowAdult<>(followRange, speedModifier);
     });
 
     public static final RegistryObject<BehaviorType<RunOne<?>>> RUN_ONE = register("run_one", (jsonObject) -> {
+        Map<MemoryModuleType<?>, MemoryStatus> entryCondition = BehaviorHelper.parseMemoriesToStatusOrDefault(jsonObject, "entryCondition", ImmutableMap.of());
         List<Pair<Behavior<?>, Integer>> behaviors = BehaviorHelper.parseWeightedBehaviors(jsonObject, "behaviors");
-        return new RunOne(behaviors);
+
+        return new RunOne(entryCondition, behaviors);
     });
 
     public static final RegistryObject<BehaviorType<RandomStroll>> RANDOM_STROLL = register("random_stroll", (jsonObject) -> {
@@ -129,9 +132,10 @@ public class BehaviorTypes {
     });
 
     public static final RegistryObject<BehaviorType<SetWalkTargetFromLookTarget>> SET_WALK_TARGET_FROM_LOOK_TARGET = register("set_walk_target_from_look_target", (jsonObject) -> {
-        float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
+        Predicate<LivingEntity> canSetWalkTargetPredicate = PredicateHelper.parsePredicateOrDefault(jsonObject, "canSetWalkTargetPredicate", "type", le -> true);
+        Function<LivingEntity, Float> speedModifier = BehaviorHelper.parseSpeedModifierFunction(jsonObject, "type");
         int closeEnoughDistance = GsonHelper.getAsInt(jsonObject, "closeEnoughDistance", 0);
-        return new SetWalkTargetFromLookTarget(speedModifier, closeEnoughDistance);
+        return new SetWalkTargetFromLookTarget(canSetWalkTargetPredicate, speedModifier, closeEnoughDistance);
     });
 
     public static final RegistryObject<BehaviorType<AptitudeSetWalkTargetFromAttackTargetIfTargetOutOfReach>> SET_WALK_TARGET_FROM_ATTACK_TARGET_IF_TARGET_OUT_OF_REACH = register("set_walk_target_from_attack_target_if_target_out_of_reach", (jsonObject) -> {
@@ -401,6 +405,43 @@ public class BehaviorTypes {
 
                 ToIntFunction<LivingEntity> getCooldownOnFail = getCooldownOnFailFunc::apply;
                 return new PrepareRamNearestTarget(getCooldownOnFail, minRamDistance, maxRamDistance, walkSpeed, ramTargeting, ramPrepareTime, getPrepareRamSound);
+            });
+
+    public static final RegistryObject<BehaviorType<AptitudeValidatePlayDead>> VALIDATE_PLAY_DEAD = register("validate_play_dead",
+            (jsonObject) -> {
+                return new AptitudeValidatePlayDead();
+            });
+
+    public static final RegistryObject<BehaviorType<TryFindWater>> TRY_FIND_WATER = register("try_find_water",
+            (jsonObject) -> {
+                int range = GsonHelper.getAsInt(jsonObject, "range");
+                float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
+                return new TryFindWater(range, speedModifier);
+            });
+
+    public static final RegistryObject<BehaviorType<GateBehavior<?>>> GATE_BEHAVIOR = register("gate_behavior",
+            (jsonObject) -> {
+                Map<MemoryModuleType<?>, MemoryStatus> entryCondition = BehaviorHelper.parseMemoriesToStatus(jsonObject, "entryCondition");
+                Set<MemoryModuleType<?>> exitErasedMemories = BehaviorHelper.parseMemorySet(jsonObject, "exitErasedMemories");
+                GateBehavior.OrderPolicy orderPolicy = BehaviorHelper.parseOrderPolicy(jsonObject, "orderPolicy");
+                GateBehavior.RunningPolicy runningPolicy = BehaviorHelper.parseRunningPolicy(jsonObject, "runningPolicy");
+                List<Pair<Behavior<?>, Integer>> behaviors = BehaviorHelper.parseWeightedBehaviors(jsonObject, "behaviors");
+
+                return new GateBehavior(entryCondition, exitErasedMemories, orderPolicy, runningPolicy, behaviors);
+            });
+
+    public static final RegistryObject<BehaviorType<RandomSwim>> RANDOM_SWIM = register("random_swim",
+            (jsonObject) -> {
+                float speedModifier = BehaviorHelper.parseSpeedModifier(jsonObject);
+                return new RandomSwim(speedModifier);
+            });
+
+    public static final RegistryObject<BehaviorType<AptitudePlayDead>> PLAY_DEAD = register("play_dead",
+            (jsonObject) -> {
+                Predicate<LivingEntity> canPlayDead = PredicateHelper.parsePredicate(jsonObject, "canPlayDead", "type");
+                Consumer<LivingEntity> startPlayingDead = ConsumerHelper.parseConsumer(jsonObject, "startPlayingDead", "type");
+                int duration = GsonHelper.getAsInt(jsonObject, "duration");
+                return new AptitudePlayDead(canPlayDead, startPlayingDead, duration);
             });
 
     private static <U extends Behavior<?>> RegistryObject<BehaviorType<U>> register(String name, Function<JsonObject, U> jsonFactory) {

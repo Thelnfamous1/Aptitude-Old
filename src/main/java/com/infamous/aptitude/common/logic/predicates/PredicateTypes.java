@@ -313,6 +313,23 @@ public class PredicateTypes {
                 };
             });
 
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_IN_WATER = register("entity_is_in_water",
+            jsonObject -> {
+                boolean checkRain = GsonHelper.getAsBoolean(jsonObject, "check_rain", false);
+                boolean checkBubble = GsonHelper.getAsBoolean(jsonObject, "check_bubble", false);
+                return livingEntity -> {
+                    if(checkRain && checkBubble) return livingEntity.isInWaterRainOrBubble();
+                    else if(checkRain) return livingEntity.isInWaterOrRain();
+                    else if(checkBubble) return livingEntity.isInWaterOrBubble();
+                    else return livingEntity.isInWater();
+                };
+            });
+
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_ON_GROUND = register("entity_is_on_ground",
+            jsonObject -> {
+                return Entity::isOnGround;
+            });
+
     private static <U extends Predicate<?>> RegistryObject<PredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return PREDICATE_TYPES.register(name, () -> new PredicateType<>(jsonFactory));
     }

@@ -1,0 +1,7 @@
+{
+  "type": "aptitude:memory_status_check",
+  "addContext": {
+    "type": "minecraft:breed_target",
+    "status": "value_present"
+  }
+}

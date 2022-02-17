@@ -15,9 +15,12 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.ai.behavior.GateBehavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.SensorType;
@@ -37,6 +40,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
@@ -167,6 +171,14 @@ public class BehaviorHelper {
         int minDuration = GsonHelper.getAsInt(jsonObject, "minDuration", 150);
         int maxDuration = GsonHelper.getAsInt(jsonObject, "maxDuration", 250);
         return Pair.of(minDuration, maxDuration);
+    }
+
+    public static Map<MemoryModuleType<?>, MemoryStatus> parseMemoriesToStatusOrDefault(JsonObject jsonObject, String memberName, Map<MemoryModuleType<?>, MemoryStatus> defaultMap){
+        return jsonObject.has(memberName) ? parseMemoriesToStatus(jsonObject, memberName) : defaultMap;
+    }
+
+    public static Map<MemoryModuleType<?>, MemoryStatus> parseMemoriesToStatus(JsonObject jsonObject, String memberName) {
+        return parseMemoriesToStatus(jsonObject.get(memberName));
     }
 
     public static Map<MemoryModuleType<?>, MemoryStatus> parseMemoriesToStatus(JsonElement addContextElement) {
@@ -368,5 +380,42 @@ public class BehaviorHelper {
         if(selector != null) targetingConditions = targetingConditions.selector(selector);
 
         return targetingConditions;
+    }
+
+    public static Set<MemoryModuleType<?>> parseMemorySet(JsonObject jsonObject, String memberName) {
+        Set<MemoryModuleType<?>> exitErasedMemories = new HashSet<>();
+        JsonArray memoriesArr = GsonHelper.getAsJsonArray(jsonObject, memberName);
+        memoriesArr.forEach(jsonElement -> {
+            MemoryModuleType<?> memoryType = parseMemoryType(jsonElement);
+            exitErasedMemories.add(memoryType);
+        });
+        return exitErasedMemories;
+    }
+
+    public static GateBehavior.RunningPolicy parseRunningPolicy(JsonObject jsonObject, String memberName) {
+        return GateBehavior.RunningPolicy.valueOf(GsonHelper.getAsString(jsonObject, memberName).toUpperCase(Locale.ROOT));
+    }
+
+    public static GateBehavior.OrderPolicy parseOrderPolicy(JsonObject jsonObject, String memberName) {
+        return GateBehavior.OrderPolicy.valueOf(GsonHelper.getAsString(jsonObject, memberName).toUpperCase(Locale.ROOT));
+    }
+
+    public static MobEffectInstance parseEffectInstance(JsonObject jsonObject, String memberName, String typeMemberName) {
+        JsonObject effectObj = jsonObject.getAsJsonObject(memberName);
+        MobEffect mobEffect = parseEffect(effectObj, typeMemberName);
+        int duration = GsonHelper.getAsInt(jsonObject, "duration", 0);
+        int amplifier = GsonHelper.getAsInt(jsonObject, "amplifier", 0);
+        boolean ambient = GsonHelper.getAsBoolean(jsonObject, "ambient", false);
+        boolean visible = GsonHelper.getAsBoolean(jsonObject, "visible", true);
+        boolean showIcon = GsonHelper.getAsBoolean(jsonObject, "showIcon", true);
+
+        return new MobEffectInstance(mobEffect, duration, amplifier, ambient, visible, showIcon);
+    }
+
+    public static MobEffect parseEffect(JsonObject jsonObject, String typeMemberName) {
+        String type = GsonHelper.getAsString(jsonObject, typeMemberName);
+        ResourceLocation eLocation = new ResourceLocation(type);
+        if(!ForgeRegistries.MOB_EFFECTS.containsKey(eLocation)) throw new JsonParseException("Invalid MobEffect: " + type);
+        return ForgeRegistries.MOB_EFFECTS.getValue(eLocation);
     }
 }

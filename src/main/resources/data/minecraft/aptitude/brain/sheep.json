@@ -65,7 +65,10 @@
           "maxDuration": 90
         },
         {
-          "type": "aptitude:move_to_target_sink",
+          "type": "aptitude:move_to_target_sink"
+        },
+        {
+          "type": "aptitude:count_down_cooldown_ticks",
           "cooldownTicks": "minecraft:temptation_cooldown_ticks"
         },
         {

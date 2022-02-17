@@ -1,0 +1,15 @@
+{
+  "type": "aptitude:predicated_function",
+  "predicate": {
+    "type": "aptitude:entity_is_in_water",
+    "check_bubble": true
+  },
+  "function": {
+    "type": "aptitude:get_float",
+    "value": 0.6
+  },
+  "default": {
+    "type": "aptitude:get_float",
+    "value": 0.15
+  }
+}

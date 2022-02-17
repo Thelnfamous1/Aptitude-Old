@@ -12,6 +12,8 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -348,6 +350,22 @@ public class ConsumerTypes {
                     int value = integerValueFunction.apply(livingEntity);
                     long expireTime = expireTimeFunction.apply(livingEntity);
                     livingEntity.getBrain().setMemoryWithExpiry(memoryType, value, expireTime);
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_ADD_EFFECT = register("entity_add_effect",
+            jsonObject -> {
+                MobEffectInstance effect = BehaviorHelper.parseEffectInstance(jsonObject, "effect", "type");
+                return le -> {
+                    le.addEffect(effect);
+                };
+            });
+
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_REMOVE_EFFECT = register("entity_remove_effect",
+            jsonObject -> {
+                MobEffect effect = BehaviorHelper.parseEffect(jsonObject, "effect");
+                return le -> {
+                    le.removeEffect(effect);
                 };
             });
 

@@ -1,0 +1,9 @@
+{
+  "type": "aptitude:entity_is_within_melee_attack_range",
+  "get_melee_attack_range_sqr": {
+    "type": "entity_melee_attack_reach_squared",
+    "adjusted_attacker_width_scale": 0,
+    "adjusted_attacker_width_squared_addition": 1.5,
+    "target_width_scale": 2
+  }
+}

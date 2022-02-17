@@ -25,7 +25,7 @@
     "minecraft:nearest_adult",
     "minecraft:hurt_by",
     {
-      "type": "aptitude:attackables",
+      "type": "aptitude:temptations",
       "temptations": {
         "item": "minecraft:axolotl_tempt_items"
       }
@@ -55,6 +55,235 @@
     "location": "minecraft:turtle/update_activity"
   },
   "activities_with_behaviors": [
-    
+    {
+      "activity": "minecraft:core",
+      "priority_start": 0,
+      "behaviors": [
+        {
+          "type": "minecraft:look_at_target_sink",
+          "minDuration": 45,
+          "maxDuration": 90
+        },
+        {
+          "type": "minecraft:move_to_target_sink"
+        },
+        {
+          "type": "aptitude:validate_play_dead"
+        },
+        {
+          "type": "minecraft:count_down_cooldown_ticks",
+          "cooldownTicks": "minecraft:temptation_cooldown_ticks"
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:idle",
+      "behaviors": [
+        {
+          "priority": 0,
+          "type": "aptitude:run_sometimes",
+          "interval": {
+            "minInclusive": 30,
+            "maxInclusive": 60
+          },
+          "wrappedBehavior": {
+            "type": "aptitude:set_entity_look_target",
+            "predicate": {
+              "type": "aptitude:entity_is_type",
+              "entity_type_predicate": "minecraft:player"
+            },
+            "maxDistSqr": 6.0
+          }
+        },
+        {
+          "priority": 1,
+          "type": "aptitude:animal_make_love",
+          "partnerType": "minecraft:turtle",
+          "speedModifier": 0.2
+        },
+        {
+          "priority": 2,
+          "type": "aptitude:run_one",
+          "behaviors": [
+            {
+              "weight": 1,
+              "type": "aptitude:follow_temptation",
+              "speedModifier": {
+                "type": "aptitude:custom_function",
+                "location": "minecraft:turtle/get_speed_modifier"
+              }
+            },
+            {
+              "weight": 1,
+              "type": "aptitude:baby_follow_adult",
+              "followRange": {
+                "minInclusive": 5,
+                "maxInclusive": 16
+              },
+              "speedModifier": {
+                "type": "aptitude:custom_function",
+                "location": "minecraft:turtle/get_speed_modifier_following_adult"
+              }
+
+            }
+          ]
+        },
+        {
+          "priority": 3,
+          "type": "aptitude:start_attacking",
+          "targetFinderFunction": {
+            "type": "aptitude:custom_function",
+            "location": "minecraft:turtle/find_nearest_valid_attack_target"
+          }
+        },
+        {
+          "priority": 3,
+          "type": "aptitude:try_find_water",
+          "range": 6,
+          "speedModifier": 0.15
+        },
+        {
+          "priority": 4,
+          "type": "aptitude:gate_behavior",
+          "entryCondition": [
+            {
+              "type": "minecraft:walk_target",
+              "status": "value_absent"
+            }
+          ],
+          "exitErasedMemories": [],
+          "orderPolicy": "ordered",
+          "runningPolicy": "try_all",
+          "behaviors": [
+            {
+              "weight": 2,
+              "type": "aptitude:random_swim",
+              "speedModifier": 0.5
+            },
+            {
+              "weight": 2,
+              "type": "aptitude:random_stroll",
+              "speedModifier": 0.15,
+              "mayStrollFromWater": false
+            },
+            {
+              "weight": 3,
+              "type": "aptitude:set_walk_target_from_look_target",
+              "speedModifier": 0.4,
+              "closeEnoughDistance": 3
+            },
+            {
+              "weight": 5,
+              "type": "aptitude:run_if",
+              "predicate": {
+                "type": "aptitude:entity_is_in_water",
+                "check_bubble": true
+              },
+              "wrappedBehavior": {
+                "type": "aptitude:do_nothing",
+                "minDuration": 30,
+                "maxDuration": 60
+              }
+            },
+            {
+              "weight": 5,
+              "type": "aptitude:run_if",
+              "predicate": {
+                "type": "aptitude:entity_is_on_ground"
+              },
+              "wrappedBehavior": {
+                "type": "aptitude:do_nothing",
+                "minDuration": 200,
+                "maxDuration": 400
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:fight",
+      "priority_start": 0,
+      "requirements": [
+        {
+          "type": "minecraft:attack_target",
+          "status": "value_present"
+        }
+      ],
+      "remove_when_stopped": [
+        "minecraft:attack_target"
+      ],
+      "behaviors": [
+        {
+          "type": "aptitude:stop_attacking_if_target_invalid",
+          "onTargetErased": {
+            "type": "aptitude:nothing"
+          }
+        },
+        {
+          "type": "aptitude:set_walk_target_from_attack_target_if_target_out_of_reach",
+          "speedModifier": {
+            "type": "aptitude:custom_function",
+            "location": "minecraft:turtle/get_speed_modifier_chasing"
+          },
+          "isWithinAttackRange": {
+            "type": "aptitude:entity_is_within_attack_range"
+          }
+        },
+        {
+          "type": "aptitude:melee_attack",
+          "cooldownBetweenAttacks": 20
+        },
+        {
+          "type": "aptitude:erase_memory_if",
+          "predicate": {
+            "type": "aptitude:custom_predicate",
+            "location": "minecraft:turtle/is_breeding"
+
+          },
+          "memoryType": "minecraft:attack_target"
+        }
+      ]
+    },
+    {
+      "activity": "minecraft:play_dead",
+      "requirements": [
+        {
+          "type": "minecraft:play_dead_ticks",
+          "status": "value_present"
+        }
+      ],
+      "remove_when_stopped": [
+        "minecraft:play_dead_ticks"
+      ],
+      "behaviors": [
+        {
+          "priority": 0,
+          "type": "aptitude:play_dead",
+          "canPlayDead": {
+            "type": "aptitude:entity_is_in_water",
+            "check_bubble": true
+          },
+          "startPlayingDead": {
+            "type": "aptitude:entity_add_effect",
+            "effect": {
+              "type": "minecraft:regeneration",
+              "duration": 200
+            }
+          },
+          "duration": 200
+        },
+        {
+          "priority": 1,
+          "type": "aptitude:erase_memory_if",
+          "predicate": {
+            "type": "aptitude:custom_predicate",
+            "location": "minecraft:turtle/is_breeding"
+
+          },
+          "memoryType": "minecraft:play_dead_ticks"
+        }
+      ]
+    }
   ]
 }

@@ -6,6 +6,7 @@ import com.infamous.aptitude.common.behavior.util.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
@@ -212,6 +213,22 @@ public class BiConsumerTypes {
                 String locationString = GsonHelper.getAsString(jsonObject, "location");
                 ResourceLocation location = new ResourceLocation(locationString);
                 return Aptitude.customLogicManager.getBiConsumer(location);
+            });
+
+    public static final RegistryObject<BiConsumerType<BiConsumer<LivingEntity, LivingEntity>>> ENTITY_ADD_EFFECT_FROM_ENTITY = register("entity_add_effect_from_entity",
+            jsonObject -> {
+                MobEffectInstance effect = BehaviorHelper.parseEffectInstance(jsonObject, "effect", "type");
+                return (le, le1) -> {
+                    le.addEffect(effect, le1);
+                };
+            });
+
+    public static final RegistryObject<BiConsumerType<BiConsumer<?, ?>>> SWAP_BICONSUMER = register("swap_biconsumer",
+            jsonObject -> {
+                BiConsumer<Object, Object> biConsumer = ConsumerHelper.parseBiConsumer(jsonObject, "biconsumer", "type");
+                return (o, o1) -> {
+                    biConsumer.accept(o1, o);
+                };
             });
 
 
