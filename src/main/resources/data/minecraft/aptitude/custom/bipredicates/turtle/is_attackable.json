@@ -1,0 +1,13 @@
+{
+  "type": "aptitude:any_of_bipredicate",
+  "bipredicates": [
+    {
+      "type": "aptitude:custom_bipredicate",
+      "location": "minecraft:turtle/is_hostile_target"
+    },
+    {
+      "type": "aptitude:custom_bipredicate",
+      "location": "minecraft:turtle/is_hunt_target"
+    }
+  ]
+}

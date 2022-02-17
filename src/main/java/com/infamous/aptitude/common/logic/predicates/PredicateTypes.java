@@ -305,6 +305,14 @@ public class PredicateTypes {
                 };
             });
 
+    public static final RegistryObject<PredicateType<Predicate<Activity>>> ACTIVITY_IS = register("activity_is",
+            jsonObject -> {
+                Activity activity = BehaviorHelper.parseActivity(jsonObject, "activity");
+                return a -> {
+                    return a == activity;
+                };
+            });
+
     private static <U extends Predicate<?>> RegistryObject<PredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return PREDICATE_TYPES.register(name, () -> new PredicateType<>(jsonFactory));
     }

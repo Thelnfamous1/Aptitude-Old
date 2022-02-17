@@ -1,0 +1,17 @@
+{
+  "type": "aptitude:bipredicate_of_predicates",
+  "predicate_for_first": {
+    "type": "aptitude:negate_predicate",
+    "predicate": {
+      "type": "aptitude:memory_status_check",
+      "addContext": {
+        "type": "minecraft:has_hunting_cooldown",
+        "status": "value_present"
+      }
+    }
+  },
+  "predicate_for_second": {
+    "type": "aptitude:entity_is_type",
+    "entity_type_predicate": "#minecraft:axolotl_hunt_targets"
+  }
+}

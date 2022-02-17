@@ -16,6 +16,7 @@ import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.npc.InventoryCarrier;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -279,6 +280,13 @@ public class BiPredicateTypes {
     public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, LivingEntity>>> ENTITY_CAN_ATTACK = register("entity_can_attack",
             jsonObject -> {
                 return LivingEntity::canAttack;
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, Activity>>> ACTIVE_NON_CORE_ACTIVITY_MATCHES_ACTIVITY = register("active_non_core_activity_matches_activity",
+            jsonObject -> {
+                return (le, activity) -> {
+                    return activity == le.getBrain().getActiveNonCoreActivity().orElse((Activity) null);
+                };
             });
 
 

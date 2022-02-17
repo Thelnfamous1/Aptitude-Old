@@ -15,14 +15,15 @@ public class AptitudeSensorTypes {
 
     private static final DeferredRegister<SensorType<?>> SENSOR_TYPES = DeferredRegister.create(ForgeRegistries.SENSOR_TYPES, Aptitude.MOD_ID);
 
+    // TODO: Make generic
     public static final RegistryObject<SensorType<PigSpecificSensor>> PIG_SPECIFIC_SENSOR = register("pig_specific_sensor", PigSpecificSensor::new);
-
     public static final RegistryObject<SensorType<ZombieSpecificSensor>> ZOMBIE_SPECIFIC_SENSOR = register("zombie_specific_sensor", ZombieSpecificSensor::new);
     public static final RegistryObject<SensorType<HuskSpecificSensor>> HUSK_SPECIFIC_SENSOR = register("husk_specific_sensor", HuskSpecificSensor::new);
 
     public static final RegistryObject<SensorType<AptitudeNearestItemSensor>> NEAREST_ITEMS = register("nearest_items", AptitudeNearestItemSensor::new);
 
     public static final RegistryObject<CustomSensorType<AptitudeTemptingSensor>> TEMPTATIONS = registerCustom("temptations", AptitudeTemptingSensor::new);
+    public static final RegistryObject<CustomSensorType<AptitudeAttackableSensor>> ATTACKABLES = registerCustom("attackables", AptitudeAttackableSensor::new);
 
     private static <U extends Sensor<?>> RegistryObject<SensorType<U>> register(String name, Supplier<U> constructor) {
         return SENSOR_TYPES.register(name, () -> new SensorType<>(constructor));

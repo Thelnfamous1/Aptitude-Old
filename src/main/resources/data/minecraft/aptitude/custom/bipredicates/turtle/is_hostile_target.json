@@ -1,0 +1,7 @@
+{
+  "type": "aptitude:bipredicate_of_predicates",
+  "predicate_for_second": {
+    "type": "aptitude:entity_is_type",
+    "entity_type_predicate": "#minecraft:axolotl_always_hostiles"
+  }
+}

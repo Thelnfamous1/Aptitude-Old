@@ -1,0 +1,36 @@
+{
+  "type": "aptitude:update_activity",
+  "update_predicate": {
+    "type": "aptitude:negate_predicate",
+    "predicate": {
+      "type": "aptitude:active_non_core_activity_check",
+      "activity": "minecraft:play_dead"
+    }
+  },
+  "handle_activity_change": {
+    "type": "aptitude:bipredicated_biconsumer",
+    "bipredicate": {
+      "type": "aptitude:bipredicate_of_predicates",
+      "predicate_for_first": {
+        "type": "aptitude:negate_predicate",
+        "predicate": {
+          "type": "aptitude:active_non_core_activity_check",
+          "activity": "minecraft:fight"
+        }
+      },
+      "predicate_for_second": {
+        "type": "aptitude:activity_is",
+        "activity": "minecraft:fight"
+      }
+    },
+    "biconsumer": {
+      "type": "aptitude:biconsumer_of_consumers",
+      "consumer_for_first": {
+        "type": "aptitude:set_boolean_memory",
+        "memory": "minecraft:has_hunting_cooldown",
+        "value": true,
+        "expire_time": 2400
+      }
+    }
+  }
+}

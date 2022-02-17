@@ -1,32 +1,39 @@
 package com.infamous.aptitude.common.behavior.custom.sensor;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.infamous.aptitude.common.behavior.custom.JsonFriendly;
+import com.infamous.aptitude.common.behavior.util.BehaviorHelper;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.NearestVisibleLivingEntitySensor;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public class AptitudeHostilesSensor extends NearestVisibleLivingEntitySensor {
-   private static final ImmutableMap<EntityType<?>, Float> ACCEPTABLE_DISTANCE_FROM_HOSTILES =
-           ImmutableMap.<EntityType<?>, Float>builder()
-                   .put(EntityType.DROWNED, 8.0F)
-                   .put(EntityType.EVOKER, 12.0F)
-                   .put(EntityType.HUSK, 8.0F)
-                   .put(EntityType.ILLUSIONER, 12.0F)
-                   .put(EntityType.PILLAGER, 15.0F)
-                   .put(EntityType.RAVAGER, 12.0F)
-                   .put(EntityType.VEX, 8.0F)
-                   .put(EntityType.VINDICATOR, 10.0F)
-                   .put(EntityType.ZOGLIN, 10.0F)
-                   .put(EntityType.ZOMBIE, 8.0F)
-                   .put(EntityType.ZOMBIE_VILLAGER, 8.0F).build();
+public class AptitudeHostilesSensor extends NearestVisibleLivingEntitySensor implements JsonFriendly<AptitudeHostilesSensor> {
 
-   private final Map<EntityType<?>, Float> acceptableDistanceFromHostiles;
+   private Map<EntityType<?>, Float> acceptableDistanceFromHostiles;
 
-   public AptitudeHostilesSensor(Map<EntityType<?>, Float> acceptableDistanceFromHostiles){
-      this.acceptableDistanceFromHostiles = acceptableDistanceFromHostiles;
+   public AptitudeHostilesSensor(){
+      this.acceptableDistanceFromHostiles = ImmutableMap.of();
+   }
+
+   @Override
+   public AptitudeHostilesSensor fromJson(JsonObject jsonObject) {
+      ImmutableMap.Builder<EntityType<?>, Float> acceptableDistanceFromHostilesBuilder = ImmutableMap.builder();
+      JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "acceptableDistanceFromHostiles");
+      jsonArray.forEach(jsonElement -> {
+         JsonObject elemObj = jsonElement.getAsJsonObject();
+         EntityType<?> entityType = BehaviorHelper.parseEntityType(elemObj, "hostile");
+         Float acceptableDistance = GsonHelper.getAsFloat(elemObj, "acceptable_distance");
+         acceptableDistanceFromHostilesBuilder.put(entityType, acceptableDistance);
+      });
+      this.acceptableDistanceFromHostiles = acceptableDistanceFromHostilesBuilder.build();
+      return this;
    }
 
    @Override

@@ -1,41 +1,42 @@
 package com.infamous.aptitude.common.behavior.custom.sensor;
 
-import net.minecraft.tags.Tag;
-import net.minecraft.world.entity.EntityType;
+import com.google.gson.JsonObject;
+import com.infamous.aptitude.common.behavior.custom.JsonFriendly;
+import com.infamous.aptitude.common.behavior.util.PredicateHelper;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.NearestVisibleLivingEntitySensor;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 
-// TODO
-public class AptitudeAttackableSensor extends NearestVisibleLivingEntitySensor {
-   public static final float TARGET_DETECTION_DISTANCE = 8.0F;
-   private final float targetDetectionDistance;
-   private final Tag<EntityType<?>> huntTargets;
-   private final Tag<EntityType<?>> alwaysHostiles;
-   private final boolean aquatic;
+import java.util.function.BiPredicate;
 
-   public AptitudeAttackableSensor(boolean aquatic, float targetDetectionDistance, Tag<EntityType<?>> huntTargets, Tag<EntityType<?>> alwaysHostiles){
-      this.aquatic = aquatic;
-      this.targetDetectionDistance = targetDetectionDistance;
-      this.huntTargets = huntTargets;
-      this.alwaysHostiles = alwaysHostiles;
+public class AptitudeAttackableSensor extends NearestVisibleLivingEntitySensor implements JsonFriendly<AptitudeAttackableSensor> {
+   private static final float TARGET_DETECTION_DISTANCE_DEFAULT = 8.0F;
+   private float targetDetectionDistance;
+   private BiPredicate<LivingEntity, LivingEntity> isAttackable;
+
+   public AptitudeAttackableSensor(){
+      this.targetDetectionDistance = TARGET_DETECTION_DISTANCE_DEFAULT;
+      this.isAttackable = (le, le1) -> false;
+   }
+
+   @Override
+   public AptitudeAttackableSensor fromJson(JsonObject jsonObject) {
+      this.targetDetectionDistance = GsonHelper.getAsFloat(jsonObject, "targetDetectionDistance", TARGET_DETECTION_DISTANCE_DEFAULT);
+      this.isAttackable = PredicateHelper.parseBiPredicate(jsonObject, "isAttackable", "type");
+      return this;
    }
 
    @Override
    protected boolean isMatchingEntity(LivingEntity attacker, LivingEntity target) {
       return this.isClose(attacker, target)
-              && (!this.aquatic || target.isInWaterOrBubble())
-              && (this.isHostileTarget(target) || this.isHuntTarget(attacker, target))
+              && this.isAttackable(attacker, target)
               && Sensor.isEntityAttackable(attacker, target);
    }
 
-   private boolean isHuntTarget(LivingEntity attacker, LivingEntity target) {
-      return !attacker.getBrain().hasMemoryValue(MemoryModuleType.HAS_HUNTING_COOLDOWN) && this.huntTargets.contains(target.getType());
-   }
-
-   private boolean isHostileTarget(LivingEntity target) {
-      return this.alwaysHostiles.contains(target.getType());
+   private boolean isAttackable(LivingEntity attacker, LivingEntity target) {
+      return this.isAttackable.test(attacker, target);
    }
 
    private boolean isClose(LivingEntity attacker, LivingEntity target) {

@@ -1,0 +1,60 @@
+{
+  "replace_brain": true,
+  "memory_types": [
+    "minecraft:mobs",
+    "minecraft:visible_mobs",
+    "minecraft:nearest_visible_player",
+    "minecraft:nearest_visible_targetable_player",
+    "minecraft:look_target",
+    "minecraft:walk_target",
+    "minecraft:cant_reach_walk_target_since",
+    "minecraft:path",
+    "minecraft:attack_target",
+    "minecraft:attack_cooling_down",
+    "minecraft:nearest_visible_adult",
+    "minecraft:hurt_by_entity",
+    "minecraft:play_dead_ticks",
+    "minecraft:nearest_attackable",
+    "minecraft:tempting_player",
+    "minecraft:temptation_cooldown_ticks",
+    "minecraft:is_tempted",
+    "minecraft:has_hunting_cooldown"
+  ],
+  "sensor_types": [
+    "minecraft:nearest_living_entities",
+    "minecraft:nearest_adult",
+    "minecraft:hurt_by",
+    {
+      "type": "aptitude:attackables",
+      "temptations": {
+        "item": "minecraft:axolotl_tempt_items"
+      }
+    },
+    {
+      "type": "aptitude:attackables",
+      "isAttackable": {
+        "type": "aptitude:custom_bipredicate",
+        "location": "minecraft:turtle/is_attackable"
+      }
+    }
+  ],
+  "core_activities": [
+    "minecraft:core"
+  ],
+  "default_activity": "minecraft:idle",
+  "brain_creation_callback": {
+    "type": "aptitude:entity_use_default_activity"
+  },
+  "rotating_activities": [
+    "minecraft:play_dead",
+    "minecraft:fight",
+    "minecraft:idle"
+  ],
+  "update_activity_callback": {
+    "type": "aptitude:custom_consumer",
+    "location": "minecraft:turtle/update_activity"
+  },
+  "activities_with_behaviors": [
+    
+  ]
+}
