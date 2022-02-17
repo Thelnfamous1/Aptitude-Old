@@ -10,6 +10,13 @@
       "value": 200
     }
   },
+  "attacked": {
+    "type": "aptitude:biconsumer_of_consumers",
+    "consumer_for_first": {
+      "type": "aptitude:entity_play_sound",
+      "sound": "minecraft:entity.axolotl.attack"
+    }
+  },
   "interact": {
     "type": "aptitude:animal_interaction",
     "is_food": {

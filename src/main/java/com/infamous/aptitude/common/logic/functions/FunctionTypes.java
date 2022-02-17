@@ -12,13 +12,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -205,6 +208,27 @@ public class FunctionTypes {
                 double value = GsonHelper.getAsDouble(jsonObject, "value", 0);
                 return o -> {
                     return value;
+                };
+            });
+
+    public static final RegistryObject<FunctionType<Function<LivingEntity, List<LivingEntity>>>> ENTITY_GET_ENTITIES_NEAR_SELF = register("entity_get_entities_near_self",
+            jsonObject -> {
+                double inflation = GsonHelper.getAsDouble(jsonObject, "inflation", 0.0D);
+                Predicate<LivingEntity> predicate = PredicateHelper.parsePredicateOrDefault(jsonObject, "predicate", "type", le -> true);
+                boolean allowSpectators = GsonHelper.getAsBoolean(jsonObject, "allow_spectators", false);
+                Predicate<Entity> noSpectators = allowSpectators ? e -> true : EntitySelector.NO_SPECTATORS;
+                return le -> {
+                    return le.level.getEntitiesOfClass(LivingEntity.class, le.getBoundingBox().inflate(inflation), predicate.and(noSpectators));
+                };
+            });
+
+    public static final RegistryObject<FunctionType<Function<LivingEntity, Optional<? extends LivingEntity>>>> ENTITY_GET_LAST_DAMAGE_SOURCE_ENTITY = register("entity_get_last_damage_source_entity",
+            jsonObject -> {
+                return le -> {
+                    return Optional.ofNullable(le.getLastDamageSource())
+                            .map(DamageSource::getEntity)
+                            .filter(LivingEntity.class::isInstance)
+                            .map(LivingEntity.class::cast);
                 };
             });
 

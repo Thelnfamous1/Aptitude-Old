@@ -289,6 +289,15 @@ public class BiPredicateTypes {
                 };
             });
 
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, LivingEntity>>> ENTITY_OTHER_ENTITY_CONTAINED_IN_LIST_MEMORY = register("entity_other_entity_contained_in_list_memory",
+            jsonObject -> {
+                Function<LivingEntity, List<LivingEntity>> retrievalFunction = FunctionHelper.parseFunction(jsonObject, "retrieval_function", "type");
+                return (le, other) -> {
+                    List<LivingEntity> result = retrievalFunction.apply(le);
+                    return result.contains(other);
+                };
+            });
+
 
     private static <U extends BiPredicate<?, ?>> RegistryObject<BiPredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return BIPREDICATE_TYPES.register(name, () -> new BiPredicateType<>(jsonFactory));

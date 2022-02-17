@@ -369,6 +369,14 @@ public class ConsumerTypes {
                 };
             });
 
+    public static final RegistryObject<ConsumerType<Consumer<LivingEntity>>> ENTITY_PLAY_SOUND = register("entity_play_sound",
+            jsonObject -> {
+                SoundEvent sound = BehaviorHelper.parseSoundEventString(jsonObject, "sound");
+                return le -> {
+                    le.playSound(sound, ((LivingEntityAccessor)le).callGetSoundVolume(), le.getVoicePitch());
+                };
+            });
+
     private static <U extends Consumer<?>> RegistryObject<ConsumerType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return CONSUMER_TYPES.register(name, () -> new ConsumerType<>(jsonFactory));
     }

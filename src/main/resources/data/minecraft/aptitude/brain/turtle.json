@@ -217,7 +217,8 @@
         {
           "type": "aptitude:stop_attacking_if_target_invalid",
           "onTargetErased": {
-            "type": "aptitude:nothing"
+            "type": "aptitude:custom_consumer",
+            "location": "minecraft:turtle/on_stop_attacking"
           }
         },
         {

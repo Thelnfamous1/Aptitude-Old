@@ -215,11 +215,11 @@ public class BiConsumerTypes {
                 return Aptitude.customLogicManager.getBiConsumer(location);
             });
 
-    public static final RegistryObject<BiConsumerType<BiConsumer<LivingEntity, LivingEntity>>> ENTITY_ADD_EFFECT_FROM_ENTITY = register("entity_add_effect_from_entity",
+    public static final RegistryObject<BiConsumerType<BiConsumer<LivingEntity, LivingEntity>>> ENTITY_ADD_EFFECT_TO_ENTITY = register("entity_add_effect_to_entity",
             jsonObject -> {
                 MobEffectInstance effect = BehaviorHelper.parseEffectInstance(jsonObject, "effect", "type");
                 return (le, le1) -> {
-                    le.addEffect(effect, le1);
+                    le1.addEffect(effect, le);
                 };
             });
 
@@ -228,6 +228,16 @@ public class BiConsumerTypes {
                 BiConsumer<Object, Object> biConsumer = ConsumerHelper.parseBiConsumer(jsonObject, "biconsumer", "type");
                 return (o, o1) -> {
                     biConsumer.accept(o1, o);
+                };
+            });
+
+    public static final RegistryObject<BiConsumerType<BiConsumer<LivingEntity, LivingEntity>>> ENTITY_APPLY_BICONSUMER_TO_OTHER_ENTITY_RETRIEVED_ENTITY = register("entity_apply_biconsumer_to_other_entity_retrieved_entity",
+            jsonObject -> {
+                Function<LivingEntity, Optional<LivingEntity>> retrievalFunction = FunctionHelper.parseFunction(jsonObject, "retrieval_function", "type");
+                BiConsumer<LivingEntity, LivingEntity> consumer = ConsumerHelper.parseBiConsumer(jsonObject, "biconsumer", "type");
+                return (le, other) -> {
+                    Optional<LivingEntity> retrievedEntity = retrievalFunction.apply(other);
+                    retrievedEntity.ifPresent(e -> consumer.accept(le, e));
                 };
             });
 

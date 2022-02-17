@@ -330,6 +330,11 @@ public class PredicateTypes {
                 return Entity::isOnGround;
             });
 
+    public static final RegistryObject<PredicateType<Predicate<LivingEntity>>> ENTITY_IS_DEAD_OR_DYING = register("entity_is_dead_or_dying",
+            jsonObject -> {
+                return LivingEntity::isDeadOrDying;
+            });
+
     private static <U extends Predicate<?>> RegistryObject<PredicateType<U>> register(String name, Function<JsonObject, U> jsonFactory) {
         return PREDICATE_TYPES.register(name, () -> new PredicateType<>(jsonFactory));
     }

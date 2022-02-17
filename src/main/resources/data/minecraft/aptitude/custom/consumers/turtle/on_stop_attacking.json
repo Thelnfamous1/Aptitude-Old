@@ -1,0 +1,60 @@
+{
+  "type": "aptitude:entity_apply_biconsumer_to_retrieved_entity",
+  "retrieval_function": {
+    "type": "aptitude:retrieve_entity_from_memory",
+    "addContext": {
+      "memory_type": "minecraft:attack_target"
+    }
+  },
+  "biconsumer": {
+    "type": "bipredicated_biconsumer",
+    "bipredicate": {
+      "type": "bipredicates_of_predicates",
+      "predicate_for_second": {
+        "type": "aptitude:entity_is_dead_or_dying"
+      }
+    },
+    "biconsumer": {
+      "type": "aptitude:entity_apply_biconsumer_to_other_entity_retrieved_entity",
+      "retrieval_function": {
+        "type": "aptitude:entity_get_last_damage_source_entity"
+      },
+      "biconsumer": {
+        "type": "aptitude:bipredicated_biconsumer",
+        "bipredicate": {
+          "type": "aptitude:entity_other_entity_contained_in_list_memory",
+          "retrieval_function": {
+            "type": "aptitude:entity_get_entities_near_self",
+            "inflation": 20.0,
+            "predicate": {
+              "type": "aptitude:entity_is_type",
+              "entity_type_predicate": "minecraft:player"
+            }
+          }
+        },
+        "biconsumer": {
+          "type": "aptitude:all_of_biconsumer",
+          "biconsumers": [
+            {
+              "type": "aptitude:swap_biconsumer",
+              "biconsumer": {
+                "type": "aptitude:entity_apply_effect_to_entity",
+                "effect": {
+                  "type": "minecraft:regeneration",
+                  "duration": 100
+                }
+              }
+            },
+            {
+              "type": "aptitude:biconsumer_of_consumers",
+              "consumer_for_second": {
+                "type": "aptitude:entity_remove_effect",
+                "effect": "minecraft:mining_fatigue"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
