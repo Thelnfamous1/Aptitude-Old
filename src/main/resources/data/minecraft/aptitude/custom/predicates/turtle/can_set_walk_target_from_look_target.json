@@ -1,0 +1,37 @@
+{
+  "type": "aptitude:any_of_predicate",
+  "predicates": [
+    {
+      "type": "aptitude:all_of_predicate",
+      "predicates": [
+        {
+          "type": "aptitude:custom_predicate",
+          "location": "minecraft:turtle/is_look_target_in_water"
+        },
+        {
+          "type": "aptitude:entity_is_in_water",
+          "check_bubble": true
+        }
+      ]
+    },
+    {
+      "type": "aptitude:all_of_predicate",
+      "predicates": [
+        {
+          "type": "aptitude:negate_predicate",
+          "predicate": {
+            "type": "aptitude:custom_predicate",
+            "location": "minecraft:turtle/is_look_target_in_water"
+          }
+        },
+        {
+          "type": "aptitude:negate_predicate",
+          "predicate": {
+            "type": "aptitude:entity_is_in_water",
+            "check_bubble": true
+          }
+        }
+      ]
+    }
+  ]
+}

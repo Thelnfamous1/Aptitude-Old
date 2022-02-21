@@ -8,16 +8,24 @@ import com.infamous.aptitude.common.behavior.util.BrainHelper;
 import com.infamous.aptitude.common.manager.custom.CustomLogicManager;
 import com.infamous.aptitude.common.manager.selector.SelectorManager;
 import com.infamous.aptitude.common.manager.base.BaseAIManager;
+import com.infamous.aptitude.common.util.ReflectionHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
+import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
+import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
+import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.pathfinder.AmphibiousNodeEvaluator;
+import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -75,6 +83,7 @@ public class ForgeCommonEvents {
             if(BaseAIHelper.hasBaseAIFile(le)){
                 server.tell(new TickTask(server.getTickCount() + 1, () -> {
                     BaseAIHelper.addedToWorld(le);
+                    mobSpecificSpawnStuff(le);
                 }));
                 if(!event.loadedFromDisk()){
                     server.tell(new TickTask(server.getTickCount() + 1, () -> {
@@ -82,6 +91,31 @@ public class ForgeCommonEvents {
                     }));
                 }
             }
+        }
+    }
+
+    // TODO: Make data-driven
+    private static void mobSpecificSpawnStuff(LivingEntity le) {
+        if(le instanceof Turtle turtle){
+            ReflectionHelper.setMobLookControl(turtle, new SmoothSwimmingLookControl(turtle, 20));
+            ReflectionHelper.setMobMoveControl(turtle, new SmoothSwimmingMoveControl(turtle, 85, 10, 0.1F, 0.5F, false));
+            ReflectionHelper.setMobNavigation(turtle, new WaterBoundPathNavigation(turtle, turtle.level){
+                @Override
+                protected boolean canUpdatePath() {
+                    return true;
+                }
+
+                @Override
+                protected PathFinder createPathFinder(int maxVisitedNodes) {
+                    this.nodeEvaluator = new AmphibiousNodeEvaluator(false);
+                    return new PathFinder(this.nodeEvaluator, maxVisitedNodes);
+                }
+
+                @Override
+                public boolean isStableDestination(BlockPos blockPos) {
+                    return !this.level.getBlockState(blockPos.below()).isAir();
+                }
+            });
         }
     }
 

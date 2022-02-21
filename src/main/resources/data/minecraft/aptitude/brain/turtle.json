@@ -1,6 +1,7 @@
 {
   "replace_brain": true,
   "memory_types": [
+    "minecraft:breed_target",
     "minecraft:mobs",
     "minecraft:visible_mobs",
     "minecraft:nearest_visible_player",
@@ -25,16 +26,16 @@
     "minecraft:nearest_adult",
     "minecraft:hurt_by",
     {
-      "type": "aptitude:temptations",
-      "temptations": {
-        "item": "minecraft:axolotl_tempt_items"
-      }
-    },
-    {
       "type": "aptitude:attackables",
       "isAttackable": {
         "type": "aptitude:custom_bipredicate",
         "location": "minecraft:turtle/is_attackable"
+      }
+    },
+    {
+      "type": "aptitude:temptations",
+      "temptations": {
+        "tag": "minecraft:axolotl_tempt_items"
       }
     }
   ],
@@ -60,18 +61,18 @@
       "priority_start": 0,
       "behaviors": [
         {
-          "type": "minecraft:look_at_target_sink",
+          "type": "aptitude:look_at_target_sink",
           "minDuration": 45,
           "maxDuration": 90
         },
         {
-          "type": "minecraft:move_to_target_sink"
+          "type": "aptitude:move_to_target_sink"
         },
         {
           "type": "aptitude:validate_play_dead"
         },
         {
-          "type": "minecraft:count_down_cooldown_ticks",
+          "type": "aptitude:count_down_cooldown_ticks",
           "cooldownTicks": "minecraft:temptation_cooldown_ticks"
         }
       ]
@@ -169,7 +170,14 @@
             {
               "weight": 3,
               "type": "aptitude:set_walk_target_from_look_target",
-              "speedModifier": 0.4,
+              "canSetWalkTargetPredicate": {
+                "type": "aptitude:custom_predicate",
+                "location": "minecraft:turtle/can_set_walk_target_from_look_target"
+              },
+              "speedModifier": {
+                "type": "aptitude:custom_function",
+                "location": "minecraft:turtle/get_speed_modifer"
+              },
               "closeEnoughDistance": 3
             },
             {

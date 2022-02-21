@@ -5,9 +5,12 @@
       "type": "aptitude:always_false"
     },
     "biconsumer": {
-      "type": "aptitude:set_integer_memory",
-      "memory": "minecraft:play_dead_ticks",
-      "value": 200
+      "type": "aptitude:biconsumer_of_consumers",
+      "consumer_for_first": {
+        "type": "aptitude:set_integer_memory",
+        "memory": "minecraft:play_dead_ticks",
+        "value": 200
+      }
     }
   },
   "attacked": {
@@ -22,7 +25,7 @@
     "is_food": {
       "type": "aptitude:item_is",
       "is": {
-        "item": "minecraft:axolotl_tempt_items"
+        "tag": "minecraft:axolotl_tempt_items"
       }
     }
   }

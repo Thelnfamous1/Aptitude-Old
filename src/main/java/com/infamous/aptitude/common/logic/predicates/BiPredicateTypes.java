@@ -13,12 +13,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -296,6 +298,20 @@ public class BiPredicateTypes {
                     List<LivingEntity> result = retrievalFunction.apply(le);
                     return result.contains(other);
                 };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, PositionTracker>>> ENTITY_POSITION_TRACKER_CURRENT_BLOCK_POSITION_CHECK = register("entity_position_tracker_current_block_position_check",
+            jsonObject -> {
+                BiPredicate<LivingEntity, BlockPos> entityBlockPosBiPredicate = PredicateHelper.parseBiPredicate(jsonObject, "entity_block_position_bipredicate", "type");
+                return (le, positionTracker) -> {
+                    BlockPos blockPos = positionTracker.currentBlockPosition();
+                    return entityBlockPosBiPredicate.test(le, blockPos);
+                };
+            });
+
+    public static final RegistryObject<BiPredicateType<BiPredicate<LivingEntity, BlockPos>>> ENTITY_IS_WATER_AT_BLOCK_POSITION = register("entity_is_water_at_block_position",
+            jsonObject -> {
+                return (le, blockPos) -> le.level.isWaterAt(blockPos);
             });
 
 

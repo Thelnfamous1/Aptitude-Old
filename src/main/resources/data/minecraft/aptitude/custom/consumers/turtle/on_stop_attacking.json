@@ -7,9 +7,9 @@
     }
   },
   "biconsumer": {
-    "type": "bipredicated_biconsumer",
+    "type": "aptitude:bipredicated_biconsumer",
     "bipredicate": {
-      "type": "bipredicates_of_predicates",
+      "type": "aptitude:bipredicate_of_predicates",
       "predicate_for_second": {
         "type": "aptitude:entity_is_dead_or_dying"
       }
@@ -36,13 +36,10 @@
           "type": "aptitude:all_of_biconsumer",
           "biconsumers": [
             {
-              "type": "aptitude:swap_biconsumer",
-              "biconsumer": {
-                "type": "aptitude:entity_apply_effect_to_entity",
-                "effect": {
-                  "type": "minecraft:regeneration",
-                  "duration": 100
-                }
+              "type": "aptitude:entity_add_effect_to_entity",
+              "effect": {
+                "type": "minecraft:regeneration",
+                "duration": 100
               }
             },
             {

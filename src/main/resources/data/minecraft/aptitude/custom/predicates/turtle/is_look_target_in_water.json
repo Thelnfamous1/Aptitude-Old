@@ -1,0 +1,12 @@
+{
+  "type": "aptitude:memory_value_check",
+  "addContext": {
+    "memory_type": "minecraft:look_target",
+    "filter_bipredicate": {
+      "type": "entity_position_tracker_current_block_position_check",
+      "entity_block_position_bipredicate": {
+        "type": "aptitude:entity_is_water_at_block_position"
+      }
+    }
+  }
+}

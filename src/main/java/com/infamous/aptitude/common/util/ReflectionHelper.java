@@ -6,6 +6,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.control.LookControl;
+import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.player.Player;
@@ -85,6 +88,34 @@ public class ReflectionHelper {
         } catch (IllegalAccessException e) {
             Aptitude.LOGGER.error("Reflection error for GameRules#rules!", e);
             return ImmutableMap.of();
+        }
+    }
+
+
+    public static void setMobLookControl(Mob mob, LookControl lookControl) {
+        Field rules = getField(Mob.class, "f_21365_");
+        try {
+            rules.set(mob, lookControl);
+        } catch (IllegalAccessException e) {
+            Aptitude.LOGGER.error("Reflection error for Mob#lookControl!", e);
+        }
+    }
+
+    public static void setMobMoveControl(Mob mob, MoveControl moveControl) {
+        Field rules = getField(Mob.class, "f_21342_");
+        try {
+            rules.set(mob, moveControl);
+        } catch (IllegalAccessException e) {
+            Aptitude.LOGGER.error("Reflection error for Mob#moveControl!", e);
+        }
+    }
+
+    public static void setMobNavigation(Mob mob, PathNavigation navigation) {
+        Field rules = getField(Mob.class, "f_21344_");
+        try {
+            rules.set(mob, navigation);
+        } catch (IllegalAccessException e) {
+            Aptitude.LOGGER.error("Reflection error for Mob#navigation!", e);
         }
     }
 }
